@@ -1,0 +1,40 @@
+.fieldName {
+    font-size: var(--xs-text-size);
+}
+
+.errorText {
+    color: red;
+    font-size: var(--xs-text-size);
+}
+
+.textbox,
+.textarea {
+    height: 4rem;
+    width: 100%;
+    font-size: var(--sm-text-size);
+    padding-left: 1rem;
+    border-radius: 1rem;
+    background-color: white;
+    border: 1px solid var(--secondary);
+}
+
+.textarea {
+    height: 15rem;
+    resize: none;
+    padding: 1rem;
+}
+
+.textarea:focus,
+.textbox:focus {
+    border: 1px solid var(--primary);
+    outline: none;
+}
+
+@media (max-width: 760px) {
+
+    .textbox,
+    .textarea {
+        border-width: 0.5px;
+    }
+
+}
