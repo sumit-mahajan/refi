@@ -3,14 +3,15 @@ import { ethers } from 'ethers';
 
 import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json';
 
-const defaultChainID = 80001;
+const defaultChainId = 80001;
 
-const supportedNetworks = {
+export const supportedNetworks = {
     // npx hardhat node
     // npx hardhat run scripts/deploy.js --network localhost
     // Copy console address to greeterAddress
     31337: {
         name: 'Hardhat',
+        tokenSymbol: 'ETH',
         rpcURL: 'http://localhost:8545',
         greeterAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     },
@@ -19,6 +20,7 @@ const supportedNetworks = {
     // Copy address from polygonscan to greeterAddress
     80001: {
         name: 'Mumbai',
+        tokenSymbol: 'MATIC',
         rpcURL: 'https://rpc-mumbai.maticvigil.com',
         greeterAddress: '0x8B1913B4cD6cb731e53F25031786A42dCB195F4b',
     }
@@ -33,7 +35,7 @@ export function useConnection() {
 export function ConnectionProvider(props) {
     const [connectionState, setConnectionState] = useState({
         ethers: ethers,
-        networkName: supportedNetworks[defaultChainID].name,
+        chainId: defaultChainId,
         accounts: [],
         greeterContract: null,
         error: null,
@@ -41,9 +43,9 @@ export function ConnectionProvider(props) {
 
     const initiate = async () => {
         try {
-            const provider = new ethers.providers.JsonRpcProvider(supportedNetworks[defaultChainID].rpcURL);
+            const provider = new ethers.providers.JsonRpcProvider(supportedNetworks[defaultChainId].rpcURL);
             const greeterContract = new ethers.Contract(
-                supportedNetworks[defaultChainID].greeterAddress,
+                supportedNetworks[defaultChainId].greeterAddress,
                 Greeter.abi,
                 provider
             );
@@ -56,22 +58,21 @@ export function ConnectionProvider(props) {
     };
 
     const connectWallet = async () => {
-        if (!window.ethereum) {
-            setConnectionState({ ...connectionState, error: 'Browser Wallet Not Found' });
-            return;
-        }
-
         try {
+            if (!window.ethereum) {
+                throw 'Browser Wallet Not Found';
+            }
+
             const provider = new ethers.providers.Web3Provider(window.ethereum);
 
             const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
             const signer = provider.getSigner();
 
             const { chainId } = await provider.getNetwork()
+
             if (!supportedNetworks[chainId]) {
                 throw "Use Correct Network";
             }
-            const networkName = supportedNetworks[chainId].name;
 
             const greeterContract = new ethers.Contract(
                 supportedNetworks[chainId].greeterAddress,
@@ -79,10 +80,14 @@ export function ConnectionProvider(props) {
                 signer
             );;
 
-            setConnectionState({ ...connectionState, accounts, networkName, greeterContract });
+            setConnectionState({ ...connectionState, accounts, chainId, greeterContract });
         } catch (e) {
-            setConnectionState({ ...connectionState, error: "useConnection : connectWallet failed -> " + e.toString() });
-            console.log(connectionState.error);
+            if (e.code === 4001) {
+                // User rejected request
+                e = 'Denied Browser Wallet Access';
+            }
+            setConnectionState({ ...connectionState, error: e.toString() });
+            console.log("useConnection : connectWallet failed -> " + connectionState.error);
         }
     }
 

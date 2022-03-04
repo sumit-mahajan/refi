@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
-import { useConnection } from '../../connection_provider';
+import { supportedNetworks, useConnection } from '../../connection_provider';
 import Box from '../Box';
 import Chip from '../chip/Chip';
 import './navbar.scss'
 
 function Navbar() {
     const { connectionState, connectWallet } = useConnection();
-    const { accounts, networkName } = connectionState;
+    const { chainId, accounts } = connectionState;
 
     const navigate = useNavigate();
 
@@ -18,7 +18,7 @@ function Navbar() {
                 <div className="logo">ReFi</div>
 
                 <div className="nav-btn-flex">
-                    <Chip bgColor="var(--accent)" textColor="white" content={networkName} />
+                    <Chip bgColor="var(--accent)" textColor="white" content={supportedNetworks[chainId].name} />
 
                     <Box width="20" />
 
