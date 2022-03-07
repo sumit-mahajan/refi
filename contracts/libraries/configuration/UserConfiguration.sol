@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
 
-import {Errors} from "../Errors.sol";
-import {DataTypes} from "../DataTypes.sol";
+import {Errors} from "../utils/Errors.sol";
+import {DataTypes} from "../utils/DataTypes.sol";
 
 /**
  * @title UserConfiguration library

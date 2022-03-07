@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 // pragma experimental ABIEncoderV2;
 
-// import {SafeMath} from "../../../dependencies/openzeppelin/contracts/SafeMath.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 import {IPriceOracle} from "../../interfaces/IPriceOracle.sol";
@@ -11,7 +11,7 @@ import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
 import {UserConfiguration} from "../configuration/UserConfiguration.sol";
 import {WadRayMath} from "../math/WadRayMath.sol";
 import {PercentageMath} from "../math/PercentageMath.sol";
-import {DataTypes} from "../DataTypes.sol";
+import {DataTypes} from "../utils/DataTypes.sol";
 
 /**
  * @title GenericLogic library
@@ -20,7 +20,7 @@ import {DataTypes} from "../DataTypes.sol";
  */
 library GenericLogic {
     using ReserveLogic for DataTypes.ReserveData;
-    // using SafeMath for uint256;
+    using SafeMath for uint256;
     using WadRayMath for uint256;
     using PercentageMath for uint256;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -234,14 +234,7 @@ library GenericLogic {
             }
 
             if (userConfig.isBorrowing(vars.i)) {
-                vars.compoundedBorrowBalance = IERC20(
-                    currentReserve.stableDebtTokenAddress
-                ).balanceOf(user);
-                vars.compoundedBorrowBalance = vars.compoundedBorrowBalance.add(
-                    IERC20(currentReserve.variableDebtTokenAddress).balanceOf(
-                        user
-                    )
-                );
+                vars.compoundedBorrowBalance = IERC20(currentReserve.variableDebtTokenAddress).balanceOf(user);
 
                 vars.totalDebtInETH = vars.totalDebtInETH.add(
                     vars.reserveUnitPrice.mul(vars.compoundedBorrowBalance).div(
