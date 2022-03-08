@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
 
+import {SafeMath} from '@openzeppelin/contracts/utils/math/SafeMath.sol'; 
 import {ILendingPool} from '../../interfaces/ILendingPool.sol';
 import {IncentivizedERC20} from '../base/IncentivizedERC20.sol';
 import {Errors} from '../../libraries/utils/Errors.sol';
@@ -14,6 +15,8 @@ import {Errors} from '../../libraries/utils/Errors.sol';
 abstract contract DebtTokenBase is
   IncentivizedERC20('DEBTTOKEN_IMPL', 'DEBTTOKEN_IMPL', 0)
 {
+  using SafeMath for uint256;
+
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
 
   /**
@@ -24,6 +27,13 @@ abstract contract DebtTokenBase is
     _;
   }
 
+  event BorrowAllowanceDelegated(
+    address indexed fromUser,
+    address indexed toUser,
+    address asset,
+    uint256 amount
+  );
+
   /**
    * @dev delegates borrowing power to a user on the specific debt token
    * @param delegatee the address receiving the delegated borrowing power
@@ -31,7 +41,7 @@ abstract contract DebtTokenBase is
    * respect the liquidation constraints (even if delegated, a delegatee cannot
    * force a delegator HF to go below 1)
    **/
-  function approveDelegation(address delegatee, uint256 amount) external override {
+  function approveDelegation(address delegatee, uint256 amount) external {
     _borrowAllowances[_msgSender()][delegatee] = amount;
     emit BorrowAllowanceDelegated(_msgSender(), delegatee, _getUnderlyingAssetAddress(), amount);
   }
@@ -45,7 +55,6 @@ abstract contract DebtTokenBase is
   function borrowAllowance(address fromUser, address toUser)
     external
     view
-    override
     returns (uint256)
   {
     return _borrowAllowances[fromUser][toUser];

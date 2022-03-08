@@ -8,10 +8,10 @@ pragma solidity ^0.8.0;
  **/
 interface IAddressesProvider {
     /**
-     * @dev Returns the address of the deployed InterestRateStrategy contract
-     * @return The address of the InterestRateStrategy contract
+     * @dev Returns the address of the deployed PriceOracle contract
+     * @return The address of the PriceOracle contract
      **/
-    function getInterestRateStrategy() external view returns (address);
+    function getPriceOracle() external view returns (address);
 
     /**
      * @dev Returns the address of the deployed LendingPool contract
@@ -24,10 +24,4 @@ interface IAddressesProvider {
      * @return The address of the WETHGateway contract
      **/
     function getWETHGateway() external view returns (address);
-
-    /**
-     * @dev Returns the address of the deployed PriceOracle contract
-     * @return The address of the PriceOracle contract
-     **/
-    function getPriceOracle() external view returns (address);
 }

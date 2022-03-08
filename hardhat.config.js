@@ -38,6 +38,10 @@ module.exports = {
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [config.mumbaiPrivateKey]
+    },
+    rinkeby: {
+      url: "https://rinkeby-light.eth.linkpool.io/",
+      accounts: [config.rinkebyPrivateKey]
     }
   },
   paths: {

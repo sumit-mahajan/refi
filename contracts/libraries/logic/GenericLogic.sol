@@ -72,7 +72,7 @@ library GenericLogic {
 
         balanceDecreaseAllowedLocalVars memory vars;
 
-        (, vars.liquidationThreshold, , vars.decimals, ) = reservesData[asset]
+        (, vars.liquidationThreshold, , vars.decimals) = reservesData[asset]
             .configuration
             .getParams();
 
@@ -183,7 +183,7 @@ library GenericLogic {
         CalculateUserAccountDataVars memory vars;
 
         if (userConfig.isEmpty()) {
-            return (0, 0, 0, 0, uint256(-1));
+            return (0, 0, 0, 0, type(uint).max);
         }
         for (vars.i = 0; vars.i < reservesCount; vars.i++) {
             if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
@@ -199,8 +199,7 @@ library GenericLogic {
                 vars.ltv,
                 vars.liquidationThreshold,
                 ,
-                vars.decimals,
-
+                vars.decimals
             ) = currentReserve.configuration.getParams();
 
             vars.tokenUnit = 10**vars.decimals;
@@ -277,7 +276,7 @@ library GenericLogic {
         uint256 totalDebtInETH,
         uint256 liquidationThreshold
     ) internal pure returns (uint256) {
-        if (totalDebtInETH == 0) return uint256(-1);
+        if (totalDebtInETH == 0) return type(uint).max;
 
         return
             (totalCollateralInETH.percentMul(liquidationThreshold)).wadDiv(

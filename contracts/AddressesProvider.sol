@@ -2,7 +2,14 @@
 pragma solidity ^0.8.0;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
 import {IAddressesProvider} from "./interfaces/IAddressesProvider.sol";
+import {LendingPool} from "./lendingpool/LendingPool.sol";
+import {WETHGateway} from "./utils/WETHGateway.sol";
+import {PriceOracle} from "./utils/PriceOracle.sol";
+import {ReserveInterestRateStrategy} from "./lendingpool/ReserveInterestRateStrategy.sol";
+import {AToken} from "./tokenization/AToken.sol";
+import {VariableDebtToken} from "./tokenization/VariableDebtToken.sol";
 
 /**
  * @title AddressesProvider contract
@@ -10,46 +17,125 @@ import {IAddressesProvider} from "./interfaces/IAddressesProvider.sol";
  * @author Aave
  **/
 contract AddressesProvider is Ownable, IAddressesProvider {
-    mapping(bytes32 => address) private _addresses;
+    address private immutable LENDING_POOL;
+    address private immutable WETH_GATEWAY;
+    address private immutable PRICE_ORACLE;
 
-    bytes32 private constant INTEREST_RATE_STRATEGY = 'INTEREST_RATE_STRATEGY';
-    bytes32 private constant LENDING_POOL = 'LENDING_POOL';
-    bytes32 private constant WETH_GATEWAY = 'WETH_GATEWAY';
-    bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
+    // Rinkeby Addresses
+    address private constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
+    address private constant DAI = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
+    address private constant LINK = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+
+    address private constant DAI_TO_ETH =
+        0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D;
+    address private constant LINK_TO_ETH =
+        0xFABe80711F3ea886C3AC102c81ffC9825E16162E;
 
     constructor() {
+        // Deploy LendingPool
+        LendingPool lendingPool = new LendingPool(this);
+        LENDING_POOL = address(lendingPool);
 
+        // Deploy WETHGateway
+        address wethGateway = address(new WETHGateway(WETH));
+        WETH_GATEWAY = wethGateway;
+
+        address[] memory assets = new address[](2);
+        address[] memory sources = new address[](2);
+        (assets, sources) = getAssetsAndPriceSources();
+
+        // Deploy PriceOracle
+        address priceOracle = address(
+            new PriceOracle(assets, sources, WETH, 1)
+        );
+        PRICE_ORACLE = priceOracle;
+
+        // Initialize WETH Reserve
+        initializeWETHReserve(lendingPool);
+
+        // Initialize DAI Reserve
+        initializeDAIReserve(lendingPool);
+
+        // Initialize LINK Reserve
+        initializeLINKReserve(lendingPool);
     }
 
-    /**
-    * @dev Sets an address for an id replacing the address saved in the addresses map
-    * IMPORTANT Use this function carefully, as it will do a hard replacement
-    * @param id The id
-    * @param newAddress The address to set
-    */
-    function setAddress(bytes32 id, address newAddress) internal onlyOwner {
-        _addresses[id] = newAddress;
-        // emit AddressSet(id, newAddress, false);
+    function getAssetsAndPriceSources()
+        public
+        pure
+        returns (address[] memory, address[] memory)
+    {
+        address[] memory assets = new address[](2);
+        address[] memory sources = new address[](2);
+        assets[0] = DAI;
+        assets[1] = LINK;
+        sources[0] = DAI_TO_ETH;
+        sources[1] = LINK_TO_ETH;
+
+        return (assets, sources);
     }
 
-    /**
-    * @dev Returns an address by id
-    * @return The address
-    */
-    function getAddress(bytes32 id) public view returns (address) {
-        return _addresses[id];
+    function initializeWETHReserve(LendingPool lendingPool) private {
+        address aToken = address(
+            new AToken(lendingPool, WETH, 18, "aETH Token", "aETH")
+        );
+
+        address variableDebtToken = address(
+            new VariableDebtToken(lendingPool, WETH, 18, "dETH Token", "dETH")
+        );
+
+        address interestRateStrategy = address(
+            new ReserveInterestRateStrategy(this, 65, 0, 8, 100)
+        );
+
+        lendingPool.initReserve(
+            WETH,
+            aToken,
+            variableDebtToken,
+            interestRateStrategy
+        );
     }
 
-    /**
-     * @dev Returns the address of the deployed InterestRateStrategy contract
-     * @return The address of the InterestRateStrategy contract
-     **/
-    function getInterestRateStrategy() external view override returns (address) {
-        return getAddress(INTEREST_RATE_STRATEGY);
+    function initializeDAIReserve(LendingPool lendingPool) private {
+        address aToken = address(
+            new AToken(lendingPool, DAI, 18, "aDAI Token", "aDAI")
+        );
+
+        address variableDebtToken = address(
+            new VariableDebtToken(lendingPool, DAI, 18, "dDAI Token", "dDAI")
+        );
+
+        address interestRateStrategy = address(
+            new ReserveInterestRateStrategy(this, 80, 0, 4, 75)
+        );
+
+        lendingPool.initReserve(
+            DAI,
+            aToken,
+            variableDebtToken,
+            interestRateStrategy
+        );
     }
 
-    function setInterestRateStrategy(address interestRateStrategy) external onlyOwner {
-        setAddress(INTEREST_RATE_STRATEGY, interestRateStrategy);
+    function initializeLINKReserve(LendingPool lendingPool) private {
+        address aToken = address(
+            new AToken(lendingPool, LINK, 18, "aLINK Token", "aLINK")
+        );
+
+        address variableDebtToken = address(
+            new VariableDebtToken(lendingPool, LINK, 18, "dLINK Token", "dLINK")
+        );
+
+        address interestRateStrategy = address(
+            new ReserveInterestRateStrategy(this, 45, 0, 7, 300)
+        );
+
+        lendingPool.initReserve(
+            LINK,
+            aToken,
+            variableDebtToken,
+            interestRateStrategy
+        );
     }
 
     /**
@@ -57,17 +143,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
      * @return The address of the LendingPool contract
      **/
     function getLendingPool() external view override returns (address) {
-        return getAddress(LENDING_POOL);
-    }
-
-    /**
-   * @dev Updates the implementation of the LendingPool, or creates the proxy
-   * setting the new `pool` implementation on the first time calling it
-   * @param pool The new LendingPool implementation
-   **/
-    function setLendingPool(address pool) external onlyOwner {
-        setAddress(LENDING_POOL, pool);
-        // emit LendingPoolUpdated(pool);
+        return LENDING_POOL;
     }
 
     /**
@@ -75,11 +151,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
      * @return The address of the WETHGateway contract
      **/
     function getWETHGateway() external view override returns (address) {
-        return getAddress(WETH_GATEWAY);
-    }
-
-    function setWETHGateway(address weth_gateway) external onlyOwner {
-        setAddress(WETH_GATEWAY, weth_gateway);
+        return WETH_GATEWAY;
     }
 
     /**
@@ -87,10 +159,6 @@ contract AddressesProvider is Ownable, IAddressesProvider {
      * @return The address of the PriceOracle contract
      **/
     function getPriceOracle() external view override returns (address) {
-        return getAddress(PRICE_ORACLE);
-    }
-    function setPriceOracle(address priceOracle) external onlyOwner {
-        setAddress(PRICE_ORACLE, priceOracle);
-        // emit PriceOracleUpdated(priceOracle);
+        return PRICE_ORACLE;
     }
 }

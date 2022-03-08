@@ -8,14 +8,14 @@ import {IPriceOracle} from "../interfaces/IPriceOracle.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-/// @title AaveOracle
+/// @title PriceOracle
 /// @author Aave
 /// @notice Proxy smart contract to get the price of an asset from a price source, with Chainlink Aggregator
 ///         smart contracts as primary option
 /// - If the returned price by a Chainlink aggregator is <= 0, the call is forwarded to a fallbackOracle
 /// - Owned by the Aave governance system, allowed to add sources for assets, replace them
 ///   and change the fallbackOracle
-contract AaveOracle is IPriceOracle, Ownable {
+contract PriceOracle is IPriceOracle, Ownable {
     using SafeERC20 for IERC20;
 
     event BaseCurrencySet(
@@ -38,7 +38,7 @@ contract AaveOracle is IPriceOracle, Ownable {
         address[] memory sources,
         address baseCurrency,
         uint256 baseCurrencyUnit
-    ) public {
+    ) {
         _setAssetsSources(assets, sources);
         BASE_CURRENCY = baseCurrency;
         BASE_CURRENCY_UNIT = baseCurrencyUnit;

@@ -7,7 +7,7 @@ pragma solidity ^0.8.0;
  * @author Aave
  */
 interface IReserveInterestRateStrategy {
-    function baseVariableBorrowRate() external view returns (uint256);
+    function getBaseVariableBorrowRate() external view returns (uint256);
 
     function getMaxVariableBorrowRate() external view returns (uint256);
 
@@ -17,11 +17,5 @@ interface IReserveInterestRateStrategy {
         uint256 liquidityAdded,
         uint256 liquidityTaken,
         uint256 totalVariableDebt
-    )
-        external
-        view
-        returns (
-            uint256 liquidityRate,
-            uint256 variableBorrowRate
-        );
+    ) external view returns (uint256 liquidityRate, uint256 variableBorrowRate);
 }

@@ -13,13 +13,36 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat! from ./scripts/deploy.js");
+  // Deploy ReserveLogic Library for linking purpose
+  const ReserveLogic = await hre.ethers.getContractFactory("ReserveLogic");
+  const reserveLogic = await ReserveLogic.deploy();
+  await reserveLogic.deployed();
 
-  await greeter.deployed();
+  // Deploy GenericLogic Library for linking purpose
+  const GenericLogic = await hre.ethers.getContractFactory("GenericLogic");
+  const genericLogic = await GenericLogic.deploy();
+  await genericLogic.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  // Deploy ValidationLogic Library for linking purpose
+  const ValidationLogic = await hre.ethers.getContractFactory("ValidationLogic", {
+    libraries: {
+      GenericLogic: genericLogic.address,
+    }
+  });
+  const validationLogic = await ValidationLogic.deploy();
+  await validationLogic.deployed();
+
+  // Deploy AddressesProvider Library for linking purpose
+  const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
+    libraries: {
+      ReserveLogic: reserveLogic.address,
+      ValidationLogic: validationLogic.address,
+    }
+  });
+  const addressesProvider = await AddressesProvider.deploy();
+  await addressesProvider.deployed();
+
+  console.log("AddressesProvider deployed to:", addressesProvider.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

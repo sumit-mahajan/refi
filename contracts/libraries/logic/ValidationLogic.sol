@@ -35,14 +35,9 @@ library ValidationLogic {
 
     /**
      * @dev Validates a deposit action
-     * @param reserve The reserve object on which the user is depositing
      * @param amount The amount to be deposited
      */
-    function validateDeposit(
-        DataTypes.ReserveData storage reserve,
-        uint256 amount
-    ) external view {
-
+    function validateDeposit(uint256 amount) external pure {
         require(amount != 0, Errors.VL_INVALID_AMOUNT);
     }
 
@@ -100,8 +95,6 @@ library ValidationLogic {
 
     /**
      * @dev Validates a borrow action
-     * @param asset The address of the asset to borrow
-     * @param reserve The reserve state from which the user is borrowing
      * @param userAddress The address of the user
      * @param amount The amount to be borrowed
      * @param amountInETH The amount to be borrowed, in ETH
@@ -112,8 +105,6 @@ library ValidationLogic {
      */
 
     function validateBorrow(
-        address asset,
-        DataTypes.ReserveData storage reserve,
         address userAddress,
         uint256 amount,
         uint256 amountInETH,
@@ -167,21 +158,21 @@ library ValidationLogic {
 
     /**
      * @dev Validates a repay action
-     * @param reserve The reserve state from which the user is repaying
      * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
      * @param onBehalfOf The address of the user msg.sender is repaying for
      * @param variableDebt The borrow balance of the user
      */
     function validateRepay(
-        DataTypes.ReserveData storage reserve,
         uint256 amountSent,
         address onBehalfOf,
         uint256 variableDebt
     ) external view {
         require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
+        require(variableDebt > 0, Errors.VL_NO_DEBT_OF_SELECTED_TYPE);
+
         require(
-            amountSent != type(uint).max || msg.sender == onBehalfOf,
+            amountSent != type(uint256).max || msg.sender == onBehalfOf,
             Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
         );
     }
@@ -233,23 +224,20 @@ library ValidationLogic {
     /**
      * @dev Validates the liquidation action
      * @param collateralReserve The reserve data of the collateral
-     * @param principalReserve The reserve data of the principal
      * @param userConfig The user configuration
      * @param userHealthFactor The user's health factor
      * @param userVariableDebt Total variable debt balance of the user
      **/
     function validateLiquidationCall(
         DataTypes.ReserveData storage collateralReserve,
-        DataTypes.ReserveData storage principalReserve,
         DataTypes.UserConfigurationMap storage userConfig,
         uint256 userHealthFactor,
         uint256 userVariableDebt
     ) internal view {
-
-        require (
-            userHealthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD, 
-                Errors.LP_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
-            );
+        require(
+            userHealthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+            Errors.LP_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
+        );
 
         bool isCollateralEnabled = collateralReserve
             .configuration
@@ -258,11 +246,12 @@ library ValidationLogic {
             userConfig.isUsingAsCollateral(collateralReserve.id);
 
         //if collateral isn't enabled as collateral by user, it cannot be liquidated
-        require(isCollateralEnabled, 
-                Errors.LP_COLLATERAL_CANNOT_BE_LIQUIDATED
-            );
+        require(isCollateralEnabled, Errors.LP_COLLATERAL_CANNOT_BE_LIQUIDATED);
 
-        require(userVariableDebt != 0, Errors.LP_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+        require(
+            userVariableDebt != 0,
+            Errors.LP_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
+        );
     }
 
     /**

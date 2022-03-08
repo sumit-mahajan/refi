@@ -1,28 +1,36 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 
-import Greeter from './artifacts/contracts/Greeter.sol/Greeter.json';
+import AddressesProvider from './artifacts/contracts/AddressesProvider.sol/AddressesProvider.json';
 
 const defaultChainId = 80001;
 
 export const supportedNetworks = {
     // npx hardhat node
     // npx hardhat run scripts/deploy.js --network localhost
-    // Copy console address to greeterAddress
+    // Copy console address
     31337: {
         name: 'Hardhat',
         tokenSymbol: 'ETH',
         rpcURL: 'http://localhost:8545',
-        greeterAddress: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+        address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
     },
     // npx hardhat run scripts/deploy.js --network mumbai
     // Returned address is wrong. https://github.com/nomiclabs/hardhat/issues/2162. 
-    // Copy address from polygonscan to greeterAddress
+    // Copy address from polygonscan
     80001: {
         name: 'Mumbai',
         tokenSymbol: 'MATIC',
         rpcURL: 'https://rpc-mumbai.maticvigil.com',
-        greeterAddress: '0x8B1913B4cD6cb731e53F25031786A42dCB195F4b',
+        address: '0x8B1913B4cD6cb731e53F25031786A42dCB195F4b',
+    },
+    // npx hardhat run scripts/deploy.js --network rinkeby
+    // Copy console address
+    80001: {
+        name: 'Rinkeby',
+        tokenSymbol: 'ETH',
+        rpcURL: 'https://rinkeby-light.eth.linkpool.io/',
+        address: '0x8B1913B4cD6cb731e53F25031786A42dCB195F4b',
     }
 }
 
@@ -37,20 +45,20 @@ export function ConnectionProvider(props) {
         ethers: ethers,
         chainId: defaultChainId,
         accounts: [],
-        greeterContract: null,
+        contract: null,
         error: null,
     });
 
     const initiate = async () => {
         try {
             const provider = new ethers.providers.JsonRpcProvider(supportedNetworks[defaultChainId].rpcURL);
-            const greeterContract = new ethers.Contract(
+            const contract = new ethers.Contract(
                 supportedNetworks[defaultChainId].greeterAddress,
-                Greeter.abi,
+                AddressesProvider.abi,
                 provider
             );
 
-            setConnectionState({ ...connectionState, greeterContract });
+            setConnectionState({ ...connectionState, contract });
         } catch (err) {
             setConnectionState({ ...connectionState, error: "useConnection : Initiate Error -> " + err.toString() });
             console.log(connectionState.error);
@@ -74,13 +82,13 @@ export function ConnectionProvider(props) {
                 throw "Use Correct Network";
             }
 
-            const greeterContract = new ethers.Contract(
+            const contract = new ethers.Contract(
                 supportedNetworks[chainId].greeterAddress,
-                Greeter.abi,
+                AddressesProvider.abi,
                 signer
             );;
 
-            setConnectionState({ ...connectionState, accounts, chainId, greeterContract });
+            setConnectionState({ ...connectionState, accounts, chainId, contract });
         } catch (e) {
             if (e.code === 4001) {
                 // User rejected request
