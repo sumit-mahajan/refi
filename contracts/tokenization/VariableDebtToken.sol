@@ -48,13 +48,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
      * @dev Calculates the accumulated debt balance of the user
      * @return The debt balance of the user
      **/
-    function balanceOf(address user)
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function balanceOf(address user) public view override returns (uint256) {
         uint256 scaledBalance = super.balanceOf(user);
 
         if (scaledBalance == 0) {
@@ -127,7 +121,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     function scaledBalanceOf(address user)
         public
         view
-        virtual
         override
         returns (uint256)
     {
@@ -138,7 +131,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
      * @dev Returns the total supply of the variable debt token. Represents the total debt accrued by the users
      * @return The total supply
      **/
-    function totalSupply() public view virtual override returns (uint256) {
+    function totalSupply() public view override returns (uint256) {
         return
             super.totalSupply().rayMul(
                 _pool.getReserveNormalizedVariableDebt(_underlyingAsset)
@@ -149,13 +142,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
      * @dev Returns the scaled total supply of the variable debt token. Represents sum(debt/index)
      * @return the scaled total supply
      **/
-    function scaledTotalSupply()
-        public
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function scaledTotalSupply() public view override returns (uint256) {
         return super.totalSupply();
     }
 

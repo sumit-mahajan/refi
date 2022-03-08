@@ -26,7 +26,7 @@ export const supportedNetworks = {
     },
     // npx hardhat run scripts/deploy.js --network rinkeby
     // Copy console address
-    80001: {
+    4: {
         name: 'Rinkeby',
         tokenSymbol: 'ETH',
         rpcURL: 'https://rinkeby-light.eth.linkpool.io/',
