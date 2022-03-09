@@ -32,7 +32,7 @@ async function main() {
   const validationLogic = await ValidationLogic.deploy();
   await validationLogic.deployed();
 
-  // Deploy AddressesProvider Library for linking purpose
+  // Deploy AddressesProvider contract
   const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
     libraries: {
       ReserveLogic: reserveLogic.address,

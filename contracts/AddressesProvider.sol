@@ -11,25 +11,35 @@ import {ReserveInterestRateStrategy} from "./lendingpool/ReserveInterestRateStra
 import {AToken} from "./tokenization/AToken.sol";
 import {VariableDebtToken} from "./tokenization/VariableDebtToken.sol";
 
+import {MockWETH} from "./mocks/MockWETH.sol";
+import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockAggregatorV3} from "./mocks/MockAggregatorV3.sol";
+
+import {ProtocolDataProvider} from "./data_provider/ProtocolDataProvider.sol";
+import {WalletBalanceProvider} from "./data_provider/WalletBalanceProvider.sol";
+
 /**
  * @title AddressesProvider contract
  * @dev Main registry of addresses part of or connected to the protocol
  * @author Aave
  **/
 contract AddressesProvider is Ownable, IAddressesProvider {
+    bool public constant isProduction = false;
+
     address private immutable LENDING_POOL;
     address private immutable WETH_GATEWAY;
     address private immutable PRICE_ORACLE;
 
-    // Rinkeby Addresses
-    address private constant WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
-    address private constant DAI = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
-    address private constant LINK = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+    address public immutable protocolDataProvider;
+    address public immutable walletBalanceProvider;
 
-    address private constant DAI_TO_ETH =
-        0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D;
-    address private constant LINK_TO_ETH =
-        0xFABe80711F3ea886C3AC102c81ffC9825E16162E;
+    // Rinkeby Addresses
+    address public WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
+    address public DAI = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
+    address public LINK = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
+
+    address public DAI_TO_ETH = 0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D;
+    address public LINK_TO_ETH = 0xFABe80711F3ea886C3AC102c81ffC9825E16162E;
 
     constructor() {
         // Deploy LendingPool
@@ -39,6 +49,16 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         // Deploy WETHGateway
         address wethGateway = address(new WETHGateway(WETH));
         WETH_GATEWAY = wethGateway;
+
+        if (!isProduction) {
+            // Deploy mock tokens and source for tests
+            WETH = address(new MockWETH());
+            DAI = address(new MockERC20("DAI Token", "DAI"));
+            LINK = address(new MockERC20("LINK Token", "LINK"));
+
+            DAI_TO_ETH = address(new MockAggregatorV3());
+            LINK_TO_ETH = DAI_TO_ETH;
+        }
 
         address[] memory assets = new address[](2);
         address[] memory sources = new address[](2);
@@ -58,11 +78,15 @@ contract AddressesProvider is Ownable, IAddressesProvider {
 
         // Initialize LINK Reserve
         initializeLINKReserve(lendingPool);
+
+        // Deploy data providers for frontend
+        protocolDataProvider = address(new ProtocolDataProvider(this));
+        walletBalanceProvider = address(new WalletBalanceProvider());
     }
 
     function getAssetsAndPriceSources()
         public
-        pure
+        view
         returns (address[] memory, address[] memory)
     {
         address[] memory assets = new address[](2);
@@ -77,7 +101,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
 
     function initializeWETHReserve(LendingPool lendingPool) private {
         address aToken = address(
-            new AToken(lendingPool, WETH, 18, "aETH Token", "aETH")
+            new AToken(lendingPool, WETH, 18, "aWETH Token", "aWETH")
         );
 
         address variableDebtToken = address(

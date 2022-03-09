@@ -45,16 +45,6 @@ contract PriceOracle is IPriceOracle, Ownable {
         emit BaseCurrencySet(baseCurrency, baseCurrencyUnit);
     }
 
-    /// @notice External function called by the Aave governance to set or replace sources of assets
-    /// @param assets The addresses of the assets
-    /// @param sources The address of the source of each asset
-    function setAssetSources(
-        address[] calldata assets,
-        address[] calldata sources
-    ) external onlyOwner {
-        _setAssetsSources(assets, sources);
-    }
-
     /// @notice Internal function to set the sources for each asset
     /// @param assets The addresses of the assets
     /// @param sources The address of the source of each asset

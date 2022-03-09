@@ -92,17 +92,4 @@ library Errors {
     string public constant RC_INVALID_RESERVE_FACTOR = "71";
 
     string public constant UC_INVALID_INDEX = "77"; // *
-
-    enum CollateralManagerErrors {
-        NO_ERROR,
-        NO_COLLATERAL_AVAILABLE,
-        COLLATERAL_CANNOT_BE_LIQUIDATED,
-        CURRRENCY_NOT_BORROWED,
-        HEALTH_FACTOR_ABOVE_THRESHOLD,
-        NOT_ENOUGH_LIQUIDITY,
-        NO_ACTIVE_RESERVE,
-        HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
-        INVALID_EQUAL_ASSETS_TO_SWAP,
-        FROZEN_RESERVE
-    }
 }
