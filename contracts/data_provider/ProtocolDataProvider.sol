@@ -125,7 +125,8 @@ contract ProtocolDataProvider {
             uint256 currentVariableDebt,
             uint256 scaledVariableDebt,
             uint256 liquidityRate,
-            bool usageAsCollateralEnabled
+            bool usageAsCollateralEnabled,
+            bool isBorrowed
         )
     {
         DataTypes.ReserveData memory reserve = ILendingPool(
@@ -146,6 +147,7 @@ contract ProtocolDataProvider {
         ).scaledBalanceOf(user);
         liquidityRate = reserve.currentLiquidityRate;
         usageAsCollateralEnabled = userConfig.isUsingAsCollateral(reserve.id);
+        isBorrowed = userConfig.isBorrowing(reserve.id);
     }
 
     function getReserveTokensAddresses(address asset)

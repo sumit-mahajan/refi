@@ -53,8 +53,8 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         if (!isProduction) {
             // Deploy mock tokens and source for tests
             WETH = address(new MockWETH());
-            DAI = address(new MockERC20("DAI Token", "DAI", msg.sender));
-            LINK = address(new MockERC20("LINK Token", "LINK", msg.sender));
+            DAI = address(new MockERC20("DAI Token", "DAI"));
+            LINK = address(new MockERC20("LINK Token", "LINK"));
 
             DAI_TO_ETH = address(new MockAggregatorV3());
             LINK_TO_ETH = DAI_TO_ETH;
@@ -66,7 +66,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
 
         // Deploy PriceOracle
         address priceOracle = address(
-            new PriceOracle(assets, sources, WETH, 1)
+            new PriceOracle(assets, sources, WETH, 1 ether)
         );
         PRICE_ORACLE = priceOracle;
 
@@ -116,7 +116,11 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             WETH,
             aToken,
             variableDebtToken,
-            interestRateStrategy
+            interestRateStrategy,
+            7500,
+            8000,
+            1000,
+            18
         );
     }
 
@@ -137,7 +141,11 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             DAI,
             aToken,
             variableDebtToken,
-            interestRateStrategy
+            interestRateStrategy,
+            7500,
+            8000,
+            1000,
+            18
         );
     }
 
@@ -158,7 +166,11 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             LINK,
             aToken,
             variableDebtToken,
-            interestRateStrategy
+            interestRateStrategy,
+            7500,
+            8000,
+            1000,
+            18
         );
     }
 

@@ -25,25 +25,41 @@ library ReserveLogic {
     using WadRayMath for uint256;
     using PercentageMath for uint256;
     using SafeERC20 for IERC20;
-
-    /**
-     * @dev Emitted when the state of a reserve is updated
-     * @param asset The address of the underlying asset of the reserve
-     * @param liquidityRate The new liquidity rate
-     * @param variableBorrowRate The new variable borrow rate
-     * @param liquidityIndex The new liquidity index
-     * @param variableBorrowIndex The new variable borrow index
-     **/
-    event ReserveDataUpdated(
-        address indexed asset,
-        uint256 liquidityRate,
-        uint256 variableBorrowRate,
-        uint256 liquidityIndex,
-        uint256 variableBorrowIndex
-    );
-
     using ReserveLogic for DataTypes.ReserveData;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
+    /**
+     * @dev Initializes a reserve
+     * @param reserve The reserve object
+     * @param aTokenAddress The address of the overlying atoken contract
+     * @param interestRateStrategyAddress The address of the interest rate strategy contract
+     **/
+    function init(
+        DataTypes.ReserveData storage reserve,
+        address aTokenAddress,
+        address variableDebtTokenAddress,
+        address interestRateStrategyAddress,
+        uint256 ltv,
+        uint256 liquidationThreshold,
+        uint256 liquidationBonus,
+        uint8 decimals
+    ) external {
+        require(
+            reserve.aTokenAddress == address(0),
+            Errors.RL_RESERVE_ALREADY_INITIALIZED
+        );
+
+        reserve.liquidityIndex = uint128(WadRayMath.ray());
+        reserve.variableBorrowIndex = uint128(WadRayMath.ray());
+        reserve.aTokenAddress = aTokenAddress;
+        reserve.variableDebtTokenAddress = variableDebtTokenAddress;
+        reserve.interestRateStrategyAddress = interestRateStrategyAddress;
+
+        reserve.configuration.setLtv(ltv);
+        reserve.configuration.setLiquidationThreshold(liquidationThreshold);
+        reserve.configuration.setLiquidationBonus(liquidationBonus);
+        reserve.configuration.setDecimals(decimals);
+    }
 
     /**
      * @dev Returns the ongoing normalized income for the reserve
@@ -151,28 +167,20 @@ library ReserveLogic {
     }
 
     /**
-     * @dev Initializes a reserve
-     * @param reserve The reserve object
-     * @param aTokenAddress The address of the overlying atoken contract
-     * @param interestRateStrategyAddress The address of the interest rate strategy contract
+     * @dev Emitted when the state of a reserve is updated
+     * @param asset The address of the underlying asset of the reserve
+     * @param liquidityRate The new liquidity rate
+     * @param variableBorrowRate The new variable borrow rate
+     * @param liquidityIndex The new liquidity index
+     * @param variableBorrowIndex The new variable borrow index
      **/
-    function init(
-        DataTypes.ReserveData storage reserve,
-        address aTokenAddress,
-        address variableDebtTokenAddress,
-        address interestRateStrategyAddress
-    ) external {
-        require(
-            reserve.aTokenAddress == address(0),
-            Errors.RL_RESERVE_ALREADY_INITIALIZED
-        );
-
-        reserve.liquidityIndex = uint128(WadRayMath.ray());
-        reserve.variableBorrowIndex = uint128(WadRayMath.ray());
-        reserve.aTokenAddress = aTokenAddress;
-        reserve.variableDebtTokenAddress = variableDebtTokenAddress;
-        reserve.interestRateStrategyAddress = interestRateStrategyAddress;
-    }
+    event ReserveDataUpdated(
+        address indexed asset,
+        uint256 liquidityRate,
+        uint256 variableBorrowRate,
+        uint256 liquidityIndex,
+        uint256 variableBorrowIndex
+    );
 
     struct UpdateInterestRatesLocalVars {
         uint256 availableLiquidity;

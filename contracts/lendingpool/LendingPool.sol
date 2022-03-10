@@ -185,6 +185,10 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         uint256 amount,
         address onBehalfOf
     ) external override {
+        require(
+            _reserves[asset].aTokenAddress != address(0),
+            Errors.VL_INVALID_ASSET
+        );
         DataTypes.ReserveData storage reserve = _reserves[asset];
         DataTypes.UserConfigurationMap storage userConfig = _usersConfig[
             onBehalfOf
@@ -804,7 +808,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         address asset,
         address aTokenAddress,
         address variableDebtAddress,
-        address interestRateStrategyAddress
+        address interestRateStrategyAddress,
+        uint256 ltv,
+        uint256 liquidationThreshold,
+        uint256 liquidationBonus,
+        uint8 decimals
     ) external override {
         require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
         require(
@@ -815,7 +823,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         _reserves[asset].init(
             aTokenAddress,
             variableDebtAddress,
-            interestRateStrategyAddress
+            interestRateStrategyAddress,
+            ltv,
+            liquidationThreshold,
+            liquidationBonus,
+            decimals
         );
         _addReserveToList(asset);
     }

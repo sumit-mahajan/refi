@@ -30,9 +30,8 @@ library ReserveConfiguration {
      * @param self The reserve configuration
      * @param ltv the new ltv
      **/
-    function setLtv(DataTypes.ReserveConfigurationMap memory self, uint256 ltv)
+    function setLtv(DataTypes.ReserveConfigurationMap storage self, uint256 ltv)
         internal
-        pure
     {
         require(ltv <= MAX_VALID_LTV, Errors.RC_INVALID_LTV);
 
@@ -58,9 +57,9 @@ library ReserveConfiguration {
      * @param threshold The new liquidation threshold
      **/
     function setLiquidationThreshold(
-        DataTypes.ReserveConfigurationMap memory self,
+        DataTypes.ReserveConfigurationMap storage self,
         uint256 threshold
-    ) internal pure {
+    ) internal {
         require(
             threshold <= MAX_VALID_LIQUIDATION_THRESHOLD,
             Errors.RC_INVALID_LIQ_THRESHOLD
@@ -90,9 +89,9 @@ library ReserveConfiguration {
      * @param bonus The new liquidation bonus
      **/
     function setLiquidationBonus(
-        DataTypes.ReserveConfigurationMap memory self,
+        DataTypes.ReserveConfigurationMap storage self,
         uint256 bonus
-    ) internal pure {
+    ) internal {
         require(
             bonus <= MAX_VALID_LIQUIDATION_BONUS,
             Errors.RC_INVALID_LIQ_BONUS
@@ -124,9 +123,9 @@ library ReserveConfiguration {
      * @param decimals The decimals
      **/
     function setDecimals(
-        DataTypes.ReserveConfigurationMap memory self,
+        DataTypes.ReserveConfigurationMap storage self,
         uint256 decimals
-    ) internal pure {
+    ) internal {
         require(decimals <= MAX_VALID_DECIMALS, Errors.RC_INVALID_DECIMALS);
 
         self.data =
@@ -199,5 +198,4 @@ library ReserveConfiguration {
             (self.data & ~DECIMALS_MASK) >> RESERVE_DECIMALS_START_BIT_POSITION
         );
     }
-
 }

@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 contract MockAggregatorV3 is AggregatorV3Interface, Ownable {
-    uint256 private priceInETH = 2;
+    uint256 private priceInETH = 0.5 ether;
 
     // Change price for testing liquidation
     function setPrice(uint256 _price) external {

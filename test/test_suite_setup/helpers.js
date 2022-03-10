@@ -1,4 +1,12 @@
-const { BigNumber } = require("ethers")
+const { BigNumber, ethers } = require("ethers")
+
+const toWei = (num) => {
+    return ethers.utils.parseEther(num.toString());
+}
+
+const toEther = (num) => {
+    return ethers.utils.formatEther(num.toString());
+}
 
 const rayToNum = (num) => {
     const x = BigNumber.from(num.toString());
@@ -9,5 +17,7 @@ const rayToNum = (num) => {
 }
 
 module.exports = {
+    toWei,
+    toEther,
     rayToNum
 }

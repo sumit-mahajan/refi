@@ -16,6 +16,8 @@ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
 import {Errors} from "../utils/Errors.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ValidationLogic library
  * @author Aave
@@ -70,6 +72,10 @@ library ValidationLogic {
         uint256 reservesCount,
         address oracle
     ) external view {
+        require(
+            reservesData[reserveAddress].aTokenAddress != address(0),
+            Errors.VL_INVALID_ASSET
+        );
         require(amount != 0, Errors.VL_INVALID_AMOUNT);
         require(
             amount <= userBalance,

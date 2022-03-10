@@ -11,10 +11,13 @@ const testEnv = {
     walletBalanceProvider: {},
     weth: {},
     aWeth: {},
+    dWeth: {},
     dai: {},
     aDai: {},
+    dDai: {},
     link: {},
     aLink: {},
+    dLink: {},
 }
 
 async function deployProtocol() {
@@ -93,6 +96,14 @@ async function initializeSuite() {
     testEnv.aWeth = await ethers.getContractAt("AToken", aWEthAddress);
     testEnv.aDai = await ethers.getContractAt("AToken", aDaiAddress);
     testEnv.aLink = await ethers.getContractAt("AToken", aLinkAddress);
+
+    const dWethAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.weth.address)).variableDebtTokenAddress;
+    const dDaiAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.dai.address)).variableDebtTokenAddress;
+    const dLinkAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.link.address)).variableDebtTokenAddress;
+
+    testEnv.dWeth = await ethers.getContractAt("VariableDebtToken", dWethAddress);
+    testEnv.dDai = await ethers.getContractAt("VariableDebtToken", dDaiAddress);
+    testEnv.dLink = await ethers.getContractAt("VariableDebtToken", dLinkAddress);
 }
 
 module.exports = {

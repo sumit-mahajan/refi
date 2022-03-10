@@ -25,7 +25,10 @@ contract MockWETH is IWETH {
     }
 
     function withdraw(uint256 wad) public override {
-        require(balanceOf[msg.sender] >= wad);
+        require(
+            balanceOf[msg.sender] >= wad,
+            "ERC20: transfer amount exceeds balance"
+        );
         balanceOf[msg.sender] -= wad;
         payable(msg.sender).transfer(wad);
         emit Withdrawal(msg.sender, wad);

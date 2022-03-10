@@ -1,5 +1,5 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { toEther, toWei } = require("./test_suite_setup/helpers");
 const { testEnv, initializeSuite } = require('./test_suite_setup/setup');
 
 describe("Test Environment Check", function () {
@@ -86,11 +86,21 @@ describe("Test Environment Check", function () {
     expect(await testEnv.aLink.UNDERLYING_ASSET_ADDRESS()).to.equal(linkAddress, "AToken doesn't exist");
   });
 
-  it("Checks if deployer holds 1000 DAI and 1000 LINK", async function () {
-    const { deployer, dai, link } = testEnv;
+  it("Checks if users hold 1000 DAI and 1000 LINK each", async function () {
+    const { deployer, users, dai, link } = testEnv;
 
-    const daiBalance = parseInt(ethers.utils.formatEther(await dai.balanceOf(deployer.address)));
-    const linkBalance = parseInt(ethers.utils.formatEther(await link.balanceOf(deployer.address)));
+    // deployer == users[0]
+    await dai.mint(deployer.address, toWei(1000));
+    await link.mint(deployer.address, toWei(1000));
+
+    await dai.connect(users[1].signer).mint(users[1].address, toWei(1000));
+    await link.connect(users[1].signer).mint(users[1].address, toWei(1000));
+
+    await dai.connect(users[2].signer).mint(users[2].address, toWei(1000));
+    await link.connect(users[2].signer).mint(users[2].address, toWei(1000));
+
+    const daiBalance = parseInt(toEther(await dai.balanceOf(deployer.address)));
+    const linkBalance = parseInt(toEther(await link.balanceOf(deployer.address)));
 
     expect(daiBalance).to.equal(1000);
     expect(linkBalance).to.equal(1000);

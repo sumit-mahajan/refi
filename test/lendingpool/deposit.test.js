@@ -1,9 +1,9 @@
 const { expect } = require("chai");
-const { ethers } = require("hardhat");
 const { testEnv } = require('../test_suite_setup/setup');
 const { ProtocolErrors } = require("../test_suite_setup/errors");
-const { rayToNum } = require("../test_suite_setup/helpers");
+const { rayToNum, toWei, toEther } = require("../test_suite_setup/helpers");
 const { MAX_UINT } = require("../test_suite_setup/constants");
+require('../price_oracle.test')
 
 describe("Lending Pool :: Deposit", function () {
 
@@ -14,7 +14,7 @@ describe("Lending Pool :: Deposit", function () {
         // Invalid asset
         await expect(lendingPool.deposit(
             await addressesProvider.DAI_TO_ETH(),
-            ethers.utils.parseEther("1.0"),
+            toWei(1),
             deployer.address
         )).to.be.revertedWith(
             VL_INVALID_ASSET
@@ -23,7 +23,7 @@ describe("Lending Pool :: Deposit", function () {
         // Invalid amount
         await expect(lendingPool.deposit(
             dai.address,
-            ethers.utils.parseEther("0"),
+            toWei(0),
             deployer.address
         )).to.be.revertedWith(
             VL_INVALID_AMOUNT
@@ -31,7 +31,7 @@ describe("Lending Pool :: Deposit", function () {
     });
 
     // User 0 infinite approves the lendingPool for DAI reserve
-    it("User 0 tries to deposit more than wallet balance", async function () {
+    it("Infinite approve and Tries to deposit more than wallet balance", async function () {
         const { deployer, lendingPool, dai } = testEnv;
         const { ET_AMOUNT_EXCEEDS_BALANCE } = ProtocolErrors;
 
@@ -41,35 +41,37 @@ describe("Lending Pool :: Deposit", function () {
 
         await expect(lendingPool.deposit(
             dai.address,
-            ethers.utils.parseEther("10000"),
+            toWei(10000),
             deployer.address
         )).to.be.revertedWith(
             ET_AMOUNT_EXCEEDS_BALANCE
         );
     });
 
-    // Checks if reserve lastUpdateTimestamp updated, collateral set to true and equal aTokens minted after a valid 1st deposit
+    // User 0 deposits 100 DAI
     // State and interest rates are not updated in first deposit
-    it("User 0 deposits 10 DAI as a first deposit to protocol", async function () {
+    it("Checks if collateral set to true and equal aTokens minted after a valid 1st deposit", async function () {
         const { deployer, lendingPool, protocolDataProvider, dai, aDai } = testEnv;
 
         const reserveBefore = await lendingPool.getReserveData(dai.address)
 
         const Tx = await lendingPool.deposit(
             dai.address,
-            ethers.utils.parseEther("10"),
+            toWei(100),
             deployer.address
         )
         await Tx.wait()
 
         const reserveAfter = await lendingPool.getReserveData(dai.address)
+        const userData = await lendingPool.getUserAccountData(deployer.address)
         const userConfig = await protocolDataProvider.getUserReserveData(dai.address, deployer.address);
-        const aDaiBalance = parseInt(ethers.utils.formatEther(await aDai.balanceOf(deployer.address)))
+        const aDaiBalance = parseFloat(toEther(await aDai.balanceOf(deployer.address)))
 
         expect(reserveBefore.lastUpdateTimestamp)
             .to.not.equal(reserveAfter.lastUpdateTimestamp, "Timestamp not updated")
         expect(userConfig.usageAsCollateralEnabled).to.equal(true, "Collateral not set true");
-        expect(aDaiBalance).to.equal(10, "ATokens not minted to user")
+        expect(parseFloat(toEther(userData.totalCollateralETH))).to.equal(50, "Invalid collateral amount")
+        expect(aDaiBalance).to.equal(100, "ATokens not minted to user")
     });
 
     // it("Checks if state, interest rates updated in next deposit", async function () {
@@ -82,13 +84,15 @@ describe("Lending Pool :: Deposit", function () {
 
     //     const Tx = await lendingPool.deposit(
     //         dai.address,
-    //         ethers.utils.parseEther("10"),
+    //         toWei(10),
     //         deployer.address
     //     )
     //     await Tx.wait()
 
     //     const reserveAfter = await lendingPool.getReserveData(dai.address)
 
+    // expect(reserveBefore.lastUpdateTimestamp)
+    // .to.not.equal(reserveAfter.lastUpdateTimestamp, "Timestamp not updated")
     //     expect(rayToNum(reserveBefore.liquidityIndex))
     //         .to.be.below(rayToNum(reserveAfter.liquidityIndex), "Liquidity index not updated")
     //     expect(rayToNum(reserveBefore.variableBorrowIndex))

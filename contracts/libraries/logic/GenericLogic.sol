@@ -13,6 +13,8 @@ import {WadRayMath} from "../math/WadRayMath.sol";
 import {PercentageMath} from "../math/PercentageMath.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title GenericLogic library
  * @author Aave
@@ -183,7 +185,7 @@ library GenericLogic {
         CalculateUserAccountDataVars memory vars;
 
         if (userConfig.isEmpty()) {
-            return (0, 0, 0, 0, type(uint).max);
+            return (0, 0, 0, 0, type(uint256).max);
         }
         for (vars.i = 0; vars.i < reservesCount; vars.i++) {
             if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
@@ -233,7 +235,9 @@ library GenericLogic {
             }
 
             if (userConfig.isBorrowing(vars.i)) {
-                vars.compoundedBorrowBalance = IERC20(currentReserve.variableDebtTokenAddress).balanceOf(user);
+                vars.compoundedBorrowBalance = IERC20(
+                    currentReserve.variableDebtTokenAddress
+                ).balanceOf(user);
 
                 vars.totalDebtInETH = vars.totalDebtInETH.add(
                     vars.reserveUnitPrice.mul(vars.compoundedBorrowBalance).div(
@@ -276,7 +280,7 @@ library GenericLogic {
         uint256 totalDebtInETH,
         uint256 liquidationThreshold
     ) internal pure returns (uint256) {
-        if (totalDebtInETH == 0) return type(uint).max;
+        if (totalDebtInETH == 0) return type(uint256).max;
 
         return
             (totalCollateralInETH.percentMul(liquidationThreshold)).wadDiv(
