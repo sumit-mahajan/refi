@@ -4,6 +4,7 @@ const ProtocolErrors = {
 
     //contract specific errors
     VL_INVALID_AMOUNT: "1", //* 'Amount must be greater than 0'
+    VL_INVALID_ASSET: "79", //* 'Asset reserve does not exist'
     VL_NO_ACTIVE_RESERVE: "2", // 'Action requires an active reserve'
     VL_RESERVE_FROZEN: "3", // 'Action cannot be performed because the reserve is frozen'
     VL_CURRENT_AVAILABLE_LIQUIDITY_NOT_ENOUGH: "4", // 'The current liquidity is not enough'
@@ -75,6 +76,7 @@ const ProtocolErrors = {
     RC_INVALID_RESERVE_FACTOR: "71",
 
     UC_INVALID_INDEX: "77", // *
+    ET_AMOUNT_EXCEEDS_BALANCE: "ERC20: transfer amount exceeds balance",
 }
 
 module.exports = { ProtocolErrors };

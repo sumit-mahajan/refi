@@ -85,4 +85,14 @@ describe("Test Environment Check", function () {
     // Check AToken exists
     expect(await testEnv.aLink.UNDERLYING_ASSET_ADDRESS()).to.equal(linkAddress, "AToken doesn't exist");
   });
+
+  it("Checks if deployer holds 1000 DAI and 1000 LINK", async function () {
+    const { deployer, dai, link } = testEnv;
+
+    const daiBalance = parseInt(ethers.utils.formatEther(await dai.balanceOf(deployer.address)));
+    const linkBalance = parseInt(ethers.utils.formatEther(await link.balanceOf(deployer.address)));
+
+    expect(daiBalance).to.equal(1000);
+    expect(linkBalance).to.equal(1000);
+  });
 });

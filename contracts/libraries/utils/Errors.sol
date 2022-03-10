@@ -20,6 +20,7 @@ library Errors {
 
     //contract specific errors
     string public constant VL_INVALID_AMOUNT = "1"; //* 'Amount must be greater than 0'
+    string public constant VL_INVALID_ASSET = "79"; //* 'Asset reserve does not exist'
     string public constant VL_NO_ACTIVE_RESERVE = "2"; // 'Action requires an active reserve'
     string public constant VL_RESERVE_FROZEN = "3"; // 'Action cannot be performed because the reserve is frozen'
     string public constant VL_CURRENT_AVAILABLE_LIQUIDITY_NOT_ENOUGH = "4"; // 'The current liquidity is not enough'

@@ -53,8 +53,8 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         if (!isProduction) {
             // Deploy mock tokens and source for tests
             WETH = address(new MockWETH());
-            DAI = address(new MockERC20("DAI Token", "DAI"));
-            LINK = address(new MockERC20("LINK Token", "LINK"));
+            DAI = address(new MockERC20("DAI Token", "DAI", msg.sender));
+            LINK = address(new MockERC20("LINK Token", "LINK", msg.sender));
 
             DAI_TO_ETH = address(new MockAggregatorV3());
             LINK_TO_ETH = DAI_TO_ETH;

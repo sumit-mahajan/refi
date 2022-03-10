@@ -30,10 +30,10 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      mining: {
-        auto: false,
-        interval: 1000
-      }
+      // mining: {
+      //   auto: false,
+      //   interval: 1000
+      // }
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
