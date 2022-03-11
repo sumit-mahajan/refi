@@ -47,6 +47,10 @@ library WadRayMath {
         return halfWAD;
     }
 
+    function toWad(uint256 num) external pure returns (uint256) {
+        return (num * WAD);
+    }
+
     /**
      * @dev Multiplies two wad, rounding half up to the nearest wad
      * @param a Wad

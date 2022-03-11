@@ -8,6 +8,8 @@ import {PercentageMath} from "../libraries/math/PercentageMath.sol";
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title DefaultReserveInterestRateStrategy contract
  * @notice Implements the calculation of the interest rates depending on the reserve state
@@ -108,8 +110,9 @@ contract ReserveInterestRateStrategy is IReserveInterestRateStrategy {
     ) external view override returns (uint256, uint256) {
         uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
         //avoid stack too deep
-        availableLiquidity = availableLiquidity.add(liquidityAdded).sub(
-            liquidityTaken
+
+        availableLiquidity = availableLiquidity.sub(liquidityTaken).add(
+            liquidityAdded
         );
 
         CalcInterestRatesLocalVars memory vars;
@@ -138,6 +141,7 @@ contract ReserveInterestRateStrategy is IReserveInterestRateStrategy {
                 )
             );
         }
+        // console.log("VariableBorrowRate", vars.currentVariableBorrowRate);
 
         vars.currentLiquidityRate = totalVariableDebt
             .rayMul(vars.utilizationRate)

@@ -1,17 +1,20 @@
 const { expect } = require("chai");
 const { testEnv } = require('../test_suite_setup/setup');
 const { ProtocolErrors } = require("../test_suite_setup/errors");
-const { rayToNum, toWei, toEther } = require("../test_suite_setup/helpers");
+const { toWei, toEther, customPrint } = require("../test_suite_setup/helpers");
 const { MAX_UINT } = require("../test_suite_setup/constants");
+// Run after deposit
 require('./deposit.test')
 
 describe("Lending Pool :: Borrow", function () {
     before("User 1 deposits 100 LINK", async function () {
-        const { deployer, users, lendingPool, dai, link } = testEnv;
+        const { users, lendingPool, dai, link } = testEnv;
 
         // One time infinite approve
         const approveLinkTx = await link.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
         await approveLinkTx.wait();
+
+        customPrint("User 1 infinite approves the lendingPool for LINK reserve");
 
         const linkTx = await lendingPool.connect(users[1].signer).deposit(
             link.address,
@@ -19,6 +22,8 @@ describe("Lending Pool :: Borrow", function () {
             users[1].address
         )
         await linkTx.wait()
+
+        customPrint("User 1 deposits 100 LINK");
     })
 
     it("Tries to borrow invalid asset and amount", async function () {
@@ -75,6 +80,8 @@ describe("Lending Pool :: Borrow", function () {
         )
         await Tx.wait()
 
+        customPrint("User 0 borrows 10 LINK against DAI as collateral");
+
         const userConfig = await protocolDataProvider.getUserReserveData(link.address, deployer.address);
         const dLinkBalance = parseFloat(toEther(await dLink.balanceOf(deployer.address)))
         const linkBalanceAfter = parseFloat(toEther(await link.balanceOf(deployer.address)))
@@ -82,6 +89,46 @@ describe("Lending Pool :: Borrow", function () {
         expect(userConfig.isBorrowed).to.equal(true, "Borrowing not set true");
         expect(dLinkBalance).to.equal(10, "Incorrect Debt Tokens minted")
         expect(linkBalanceAfter).to.equal(linkBalanceBefore + 10, "Incorrect funds borrowed")
+    });
+
+    it("Checks if state, interest rates updated in a valid borrow", async function () {
+        const { deployer, lendingPool, link } = testEnv;
+
+        const reserveBefore = await lendingPool.getReserveData(link.address)
+
+        const Tx = await lendingPool.borrow(
+            link.address,
+            toWei(10),
+            deployer.address
+        )
+        await Tx.wait()
+
+        customPrint("User 0 borrows 10 LINK against DAI as collateral");
+
+        const reserveAfter = await lendingPool.getReserveData(link.address)
+
+        expect(reserveBefore.lastUpdateTimestamp)
+            .to.be.below(reserveAfter.lastUpdateTimestamp, "Timestamp not updated")
+        expect(reserveBefore.liquidityIndex)
+            .to.be.below(reserveAfter.liquidityIndex, "Liquidity index not updated")
+        expect(reserveBefore.variableBorrowIndex)
+            .to.be.below(reserveAfter.variableBorrowIndex, "Variable Borrow index not updated")
+        expect(reserveBefore.currentLiquidityRate)
+            .to.be.below(reserveAfter.currentLiquidityRate, "Liquidity Rate not updated")
+        expect(reserveBefore.currentVariableBorrowRate)
+            .to.be.below(reserveAfter.currentVariableBorrowRate, "Variable Borrow Rate not updated")
+
+    });
+
+    it("Tries to withdraw while used as collateral", async function () {
+        const { deployer, lendingPool, protocolDataProvider, dai, aDai } = testEnv;
+        const { VL_TRANSFER_NOT_ALLOWED } = ProtocolErrors;
+
+        await expect(lendingPool.withdraw(
+            dai.address,
+            MAX_UINT,
+            deployer.address
+        )).to.be.revertedWith(VL_TRANSFER_NOT_ALLOWED)
     });
 
 });

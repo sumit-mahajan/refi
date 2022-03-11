@@ -17,45 +17,70 @@ contract WETHGateway is IWETHGateway, Ownable {
     using UserConfiguration for DataTypes.UserConfigurationMap;
 
     IWETH internal immutable WETH;
+    address internal immutable lendingPool;
 
     /**
      * @dev Sets the WETH address and the LendingPoolAddressesProvider address. Infinite approves lending pool.
      * @param weth Address of the Wrapped Ether contract
      **/
-    constructor(address weth) {
+    constructor(address weth, address _lendingPool) {
         WETH = IWETH(weth);
-    }
+        lendingPool = _lendingPool;
 
-    function authorizeLendingPool(address lendingPool) external onlyOwner {
-        WETH.approve(lendingPool, type(uint256).max);
+        // Infinite approve lendingPool for WETH transfer from wEthGateway
+        IWETH(weth).approve(_lendingPool, type(uint256).max);
     }
 
     /**
      * @dev deposits WETH into the reserve, using native ETH. A corresponding amount of the overlying asset (aTokens)
      * is minted.
-     * @param lendingPool address of the targeted underlying lending pool
-     * @param onBehalfOf address of the user who will receive the aTokens representing the deposit
      **/
-    function depositETH(address lendingPool, address onBehalfOf)
-        external
-        payable
-        override
-    {
+    function depositETH() external payable override {
         WETH.deposit{value: msg.value}();
-        ILendingPool(lendingPool).deposit(address(WETH), msg.value, onBehalfOf);
+        ILendingPool(lendingPool).deposit(address(WETH), msg.value, msg.sender);
+    }
+
+    /**
+     * @dev borrow WETH, unwraps to ETH and send both the ETH and DebtTokens to msg.sender, via `approveDelegation` and onBehalf argument in `LendingPool.borrow`.
+     * @param amount the amount of ETH to borrow
+     */
+    function borrowETH(uint256 amount) external override {
+        ILendingPool(lendingPool).borrow(address(WETH), amount, msg.sender);
+        WETH.withdraw(amount);
+        _safeTransferETH(msg.sender, amount);
+    }
+
+    /**
+     * @dev repays a borrow on the WETH reserve, for the specified amount (or for the whole amount, if uint256(-1) is specified).
+     * @param amount the amount to repay, or uint256(-1) if the user wants to repay everything
+     */
+    function repayETH(uint256 amount) external payable override {
+        uint256 paybackAmount = IERC20(
+            ILendingPool(lendingPool)
+                .getReserveData(address(WETH))
+                .variableDebtTokenAddress
+        ).balanceOf(msg.sender);
+
+        if (amount < paybackAmount) {
+            paybackAmount = amount;
+        }
+        require(
+            msg.value >= paybackAmount,
+            "msg.value is less than repayment amount"
+        );
+        WETH.deposit{value: paybackAmount}();
+        ILendingPool(lendingPool).repay(address(WETH), msg.value, msg.sender);
+
+        // refund remaining dust eth
+        if (msg.value > paybackAmount)
+            _safeTransferETH(msg.sender, msg.value - paybackAmount);
     }
 
     /**
      * @dev withdraws the WETH _reserves of msg.sender.
-     * @param lendingPool address of the targeted underlying lending pool
      * @param amount amount of aWETH to withdraw and receive native ETH
-     * @param to address of the user who will receive native ETH
      */
-    function withdrawETH(
-        address lendingPool,
-        uint256 amount,
-        address to
-    ) external override {
+    function withdrawETH(uint256 amount) external override {
         IAToken aWETH = IAToken(
             ILendingPool(lendingPool)
                 .getReserveData(address(WETH))
@@ -68,57 +93,16 @@ contract WETHGateway is IWETHGateway, Ownable {
         if (amount == type(uint256).max) {
             amountToWithdraw = userBalance;
         }
+
         aWETH.transferFrom(msg.sender, address(this), amountToWithdraw);
         ILendingPool(lendingPool).withdraw(
             address(WETH),
             amountToWithdraw,
             address(this)
         );
+
         WETH.withdraw(amountToWithdraw);
-        _safeTransferETH(to, amountToWithdraw);
-    }
-
-    /**
-     * @dev repays a borrow on the WETH reserve, for the specified amount (or for the whole amount, if uint256(-1) is specified).
-     * @param lendingPool address of the targeted underlying lending pool
-     * @param amount the amount to repay, or uint256(-1) if the user wants to repay everything
-     * @param onBehalfOf the address for which msg.sender is repaying
-     */
-    function repayETH(
-        address lendingPool,
-        uint256 amount,
-        address onBehalfOf
-    ) external payable override {
-        uint256 paybackAmount = IERC20(
-            ILendingPool(lendingPool)
-                .getReserveData(address(WETH))
-                .variableDebtTokenAddress
-        ).balanceOf(onBehalfOf);
-
-        if (amount < paybackAmount) {
-            paybackAmount = amount;
-        }
-        require(
-            msg.value >= paybackAmount,
-            "msg.value is less than repayment amount"
-        );
-        WETH.deposit{value: paybackAmount}();
-        ILendingPool(lendingPool).repay(address(WETH), msg.value, onBehalfOf);
-
-        // refund remaining dust eth
-        if (msg.value > paybackAmount)
-            _safeTransferETH(msg.sender, msg.value - paybackAmount);
-    }
-
-    /**
-     * @dev borrow WETH, unwraps to ETH and send both the ETH and DebtTokens to msg.sender, via `approveDelegation` and onBehalf argument in `LendingPool.borrow`.
-     * @param lendingPool address of the targeted underlying lending pool
-     * @param amount the amount of ETH to borrow
-     */
-    function borrowETH(address lendingPool, uint256 amount) external override {
-        ILendingPool(lendingPool).borrow(address(WETH), amount, msg.sender);
-        WETH.withdraw(amount);
-        _safeTransferETH(msg.sender, amount);
+        _safeTransferETH(msg.sender, amountToWithdraw);
     }
 
     /**

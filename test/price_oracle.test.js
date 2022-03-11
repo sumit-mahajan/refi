@@ -2,7 +2,8 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const { testEnv } = require('./test_suite_setup/setup');
 const { toWei, toEther } = require("./test_suite_setup/helpers");
-require('./addresses_provider.test')
+// Run after variable_debt_token
+require('./variable_debt_token.test')
 
 describe("Price Oracle", function () {
 

@@ -222,6 +222,7 @@ library ReserveLogic {
                 liquidityTaken,
                 vars.totalVariableDebt
             );
+
         require(
             vars.newLiquidityRate <= type(uint128).max,
             Errors.RL_LIQUIDITY_RATE_OVERFLOW
@@ -255,7 +256,7 @@ library ReserveLogic {
         uint256 scaledVariableDebt,
         uint256 liquidityIndex,
         uint256 variableBorrowIndex,
-        uint40 timestamp
+        uint40 lastUpdateTimestamp
     ) internal returns (uint256, uint256) {
         uint256 currentLiquidityRate = reserve.currentLiquidityRate;
 
@@ -265,7 +266,11 @@ library ReserveLogic {
         //only cumulating if there is any income being produced
         if (currentLiquidityRate > 0) {
             uint256 cumulatedLiquidityInterest = MathUtils
-                .calculateLinearInterest(currentLiquidityRate, timestamp);
+                .calculateLinearInterest(
+                    currentLiquidityRate,
+                    lastUpdateTimestamp
+                );
+
             newLiquidityIndex = cumulatedLiquidityInterest.rayMul(
                 liquidityIndex
             );
@@ -282,8 +287,9 @@ library ReserveLogic {
                 uint256 cumulatedVariableBorrowInterest = MathUtils
                     .calculateCompoundedInterest(
                         reserve.currentVariableBorrowRate,
-                        timestamp
+                        lastUpdateTimestamp
                     );
+
                 newVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
                         variableBorrowIndex
                     );

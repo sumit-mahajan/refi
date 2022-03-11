@@ -10,6 +10,7 @@ import {PriceOracle} from "./utils/PriceOracle.sol";
 import {ReserveInterestRateStrategy} from "./lendingpool/ReserveInterestRateStrategy.sol";
 import {AToken} from "./tokenization/AToken.sol";
 import {VariableDebtToken} from "./tokenization/VariableDebtToken.sol";
+import {WadRayMath} from "./libraries/math/WadRayMath.sol";
 
 import {MockWETH} from "./mocks/MockWETH.sol";
 import {MockERC20} from "./mocks/MockERC20.sol";
@@ -46,10 +47,6 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         LendingPool lendingPool = new LendingPool(this);
         LENDING_POOL = address(lendingPool);
 
-        // Deploy WETHGateway
-        address wethGateway = address(new WETHGateway(WETH));
-        WETH_GATEWAY = wethGateway;
-
         if (!isProduction) {
             // Deploy mock tokens and source for tests
             WETH = address(new MockWETH());
@@ -59,6 +56,12 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             DAI_TO_ETH = address(new MockAggregatorV3());
             LINK_TO_ETH = DAI_TO_ETH;
         }
+
+        // Deploy WETHGateway
+        address wethGateway = address(
+            new WETHGateway(WETH, address(lendingPool))
+        );
+        WETH_GATEWAY = wethGateway;
 
         address[] memory assets = new address[](2);
         address[] memory sources = new address[](2);
@@ -109,7 +112,13 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         );
 
         address interestRateStrategy = address(
-            new ReserveInterestRateStrategy(this, 65, 0, 8, 100)
+            new ReserveInterestRateStrategy(
+                this,
+                WadRayMath.toWad(65),
+                WadRayMath.toWad(0),
+                WadRayMath.toWad(8),
+                WadRayMath.toWad(100)
+            )
         );
 
         lendingPool.initReserve(
@@ -134,7 +143,13 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         );
 
         address interestRateStrategy = address(
-            new ReserveInterestRateStrategy(this, 80, 0, 4, 75)
+            new ReserveInterestRateStrategy(
+                this,
+                WadRayMath.toWad(80),
+                WadRayMath.toWad(0),
+                WadRayMath.toWad(4),
+                WadRayMath.toWad(75)
+            )
         );
 
         lendingPool.initReserve(
@@ -159,7 +174,13 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         );
 
         address interestRateStrategy = address(
-            new ReserveInterestRateStrategy(this, 45, 0, 7, 300)
+            new ReserveInterestRateStrategy(
+                this,
+                WadRayMath.toWad(45),
+                WadRayMath.toWad(0),
+                WadRayMath.toWad(7),
+                WadRayMath.toWad(300)
+            )
         );
 
         lendingPool.initReserve(

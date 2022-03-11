@@ -21,6 +21,11 @@ const testEnv = {
 }
 
 async function deployProtocol() {
+    // Deploy WadRayMath Library for linking purpose
+    const WadRayMath = await hre.ethers.getContractFactory("WadRayMath");
+    const wadRayMath = await WadRayMath.deploy();
+    await wadRayMath.deployed();
+
     // Deploy ReserveLogic Library for linking purpose
     const ReserveLogic = await hre.ethers.getContractFactory("ReserveLogic");
     const reserveLogic = await ReserveLogic.deploy();
@@ -45,6 +50,7 @@ async function deployProtocol() {
         libraries: {
             ReserveLogic: reserveLogic.address,
             ValidationLogic: validationLogic.address,
+            WadRayMath: wadRayMath.address
         }
     });
     const addressesProvider = await AddressesProvider.deploy();

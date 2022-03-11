@@ -255,6 +255,10 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         uint256 amount,
         address onBehalfOf
     ) external override returns (uint256) {
+        require(
+            _reserves[asset].aTokenAddress != address(0),
+            Errors.VL_INVALID_ASSET
+        );
         DataTypes.ReserveData storage reserve = _reserves[asset];
 
         uint256 variableDebt = IERC20(reserve.variableDebtTokenAddress)
