@@ -148,6 +148,20 @@ library ReserveConfiguration {
     }
 
     /**
+     * @dev Gets the decimals of the underlying asset of the reserve
+     * @param self The reserve configuration
+     * @return The decimals of the asset
+     **/
+    function getDecimalsMemory(DataTypes.ReserveConfigurationMap memory self)
+        internal
+        pure
+        returns (uint256)
+    {
+        return
+            (self.data & ~DECIMALS_MASK) >> RESERVE_DECIMALS_START_BIT_POSITION;
+    }
+
+    /**
      * @dev Gets the configuration paramters of the reserve
      * @param self The reserve configuration
      * @return The state params representing ltv, liquidation threshold, liquidation bonus, the reserve decimals

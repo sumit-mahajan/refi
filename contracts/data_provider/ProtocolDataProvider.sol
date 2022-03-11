@@ -2,15 +2,19 @@
 pragma solidity ^0.8.0;
 
 import {IERC20Detailed} from "../interfaces/base/IERC20Detailed.sol";
-
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
+import {IPriceOracle} from "../interfaces/IPriceOracle.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {IVariableDebtToken} from "../interfaces/IVariableDebtToken.sol";
 import {ReserveConfiguration} from "../libraries/configuration/ReserveConfiguration.sol";
 import {UserConfiguration} from "../libraries/configuration/UserConfiguration.sol";
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
+import {WadRayMath} from "../libraries/math/WadRayMath.sol";
+import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract ProtocolDataProvider {
+    using WadRayMath for uint256;
+    using SafeMath for uint256;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
     using UserConfiguration for DataTypes.UserConfigurationMap;
 
@@ -99,12 +103,17 @@ contract ProtocolDataProvider {
             uint256 variableBorrowRate,
             uint256 liquidityIndex,
             uint256 variableBorrowIndex,
+            uint256 utilizationRate,
             uint40 lastUpdateTimestamp
         )
     {
         DataTypes.ReserveData memory reserve = ILendingPool(
             ADDRESSES_PROVIDER.getLendingPool()
         ).getReserveData(asset);
+
+        utilizationRate = totalVariableDebt == 0
+            ? 0
+            : totalVariableDebt.rayDiv(availableLiquidity.add(totalVariableDebt));
 
         return (
             IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
@@ -113,6 +122,7 @@ contract ProtocolDataProvider {
             reserve.currentVariableBorrowRate,
             reserve.liquidityIndex,
             reserve.variableBorrowIndex,
+            utilizationRate,
             reserve.lastUpdateTimestamp
         );
     }
@@ -125,6 +135,8 @@ contract ProtocolDataProvider {
             uint256 currentVariableDebt,
             uint256 scaledVariableDebt,
             uint256 liquidityRate,
+            uint256 healthFactor,
+            uint256 availableToBorrow,
             bool usageAsCollateralEnabled,
             bool isBorrowed
         )
@@ -146,6 +158,21 @@ contract ProtocolDataProvider {
             reserve.variableDebtTokenAddress
         ).scaledBalanceOf(user);
         liquidityRate = reserve.currentLiquidityRate;
+
+        // health Factor and availbletoborrow calculation
+        // First I need to create reservesData object
+        uint256 availableBorrowsETH;
+        (
+            ,
+            ,
+            availableBorrowsETH,
+            ,
+            ,
+            healthFactor
+        ) = ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getUserAccountData(user);
+
+        availableToBorrow = availableBorrowsETH.mul(10**reserve.configuration.getDecimalsMemory()).div(IPriceOracle(ADDRESSES_PROVIDER.getPriceOracle()).getAssetPrice(asset));
+
         usageAsCollateralEnabled = userConfig.isUsingAsCollateral(reserve.id);
         isBorrowed = userConfig.isBorrowing(reserve.id);
     }
