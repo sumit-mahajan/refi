@@ -1,8 +1,6 @@
 //SPDX-License-Identifier: agpl-3.0
 pragma solidity ^0.8.0;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
 import {IAddressesProvider} from "./interfaces/IAddressesProvider.sol";
 import {LendingPool} from "./lendingpool/LendingPool.sol";
 import {WETHGateway} from "./utils/WETHGateway.sol";
@@ -24,7 +22,7 @@ import {WalletBalanceProvider} from "./data_provider/WalletBalanceProvider.sol";
  * @dev Main registry of addresses part of or connected to the protocol
  * @author Aave
  **/
-contract AddressesProvider is Ownable, IAddressesProvider {
+contract AddressesProvider is IAddressesProvider {
     bool public constant isProduction = false;
 
     address private immutable LENDING_POOL;
@@ -42,19 +40,40 @@ contract AddressesProvider is Ownable, IAddressesProvider {
     address public DAI_TO_ETH = 0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D;
     address public LINK_TO_ETH = 0xFABe80711F3ea886C3AC102c81ffC9825E16162E;
 
+    address public ETH_TO_USD = 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e;
+    address public DAI_TO_USD = 0x2bA49Aaa16E6afD2a993473cfB70Fa8559B523cF;
+    address public LINK_TO_USD = 0xd8bD0a1cB028a31AA859A21A3758685a95dE4623;
+
+    // // Mumbai Addresses
+    // address public WETH = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // WMATIC
+    // address public DAI = 0xcB1e72786A6eb3b44C2a2429e317c8a2462CFeb1;
+    // address public LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+
+    // TODO : handle DAI_TO_ETH and LINK_TO_USD for mumbai chain
+    // address public DAI_TO_ETH = 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada; // ** MATIC_TO_USD
+    // address public LINK_TO_ETH = 0x12162c3E810393dEC01362aBf156D7ecf6159528; // LINK_TO_MATIC
+
+    // address public ETH_TO_USD = 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada; // MATIC_TO_USD
+    // address public DAI_TO_USD = 0x0FCAa9c899EC5A91eBc3D5Dd869De833b06fB046;
+    // address public LINK_TO_USD = 0x12162c3E810393dEC01362aBf156D7ecf6159528; // ** LINK_TO_MATIC
+
     constructor() {
         // Deploy LendingPool
         LendingPool lendingPool = new LendingPool(this);
         LENDING_POOL = address(lendingPool);
 
         if (!isProduction) {
-            // Deploy mock tokens and source for tests
+            // Deploy mock tokens and sources for tests
             WETH = address(new MockWETH());
             DAI = address(new MockERC20("DAI Token", "DAI"));
             LINK = address(new MockERC20("LINK Token", "LINK"));
 
-            DAI_TO_ETH = address(new MockAggregatorV3());
-            LINK_TO_ETH = DAI_TO_ETH;
+            DAI_TO_ETH = address(new MockAggregatorV3(0.5 ether)); // 1 DAI = 0.5 ether
+            LINK_TO_ETH = address(new MockAggregatorV3(0.5 ether));
+
+            ETH_TO_USD = address(new MockAggregatorV3(300000000000)); // 3000 USD + 8 decimals
+            DAI_TO_USD = address(new MockAggregatorV3(99000000)); // 0.99 USD
+            LINK_TO_USD = address(new MockAggregatorV3(2000000000)); // 20 USD
         }
 
         // Deploy WETHGateway
@@ -65,7 +84,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
 
         address[] memory assets = new address[](2);
         address[] memory sources = new address[](2);
-        (assets, sources) = getAssetsAndPriceSources();
+        (assets, sources) = getAssetsAndETHPriceSources();
 
         // Deploy PriceOracle
         address priceOracle = address(
@@ -84,10 +103,16 @@ contract AddressesProvider is Ownable, IAddressesProvider {
 
         // Deploy data providers for frontend
         protocolDataProvider = address(new ProtocolDataProvider(this));
-        walletBalanceProvider = address(new WalletBalanceProvider());
+
+        bytes32[] memory _assets = new bytes32[](3);
+        address[] memory _sources = new address[](3);
+        (_assets, _sources) = getAssetsAndUSDPriceSources();
+        walletBalanceProvider = address(
+            new WalletBalanceProvider(_assets, _sources)
+        );
     }
 
-    function getAssetsAndPriceSources()
+    function getAssetsAndETHPriceSources()
         public
         view
         returns (address[] memory, address[] memory)
@@ -98,6 +123,23 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         assets[1] = LINK;
         sources[0] = DAI_TO_ETH;
         sources[1] = LINK_TO_ETH;
+
+        return (assets, sources);
+    }
+
+    function getAssetsAndUSDPriceSources()
+        public
+        view
+        returns (bytes32[] memory, address[] memory)
+    {
+        bytes32[] memory assets = new bytes32[](3);
+        address[] memory sources = new address[](3);
+        assets[0] = "DAI";
+        assets[1] = "LINK";
+        assets[2] = "ETH";
+        sources[0] = DAI_TO_USD;
+        sources[1] = LINK_TO_USD;
+        sources[2] = ETH_TO_USD;
 
         return (assets, sources);
     }
@@ -114,10 +156,10 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         address interestRateStrategy = address(
             new ReserveInterestRateStrategy(
                 this,
-                WadRayMath.toWad(65),
-                WadRayMath.toWad(0),
-                WadRayMath.toWad(8),
-                WadRayMath.toWad(100)
+                WadRayMath.toRay(65),
+                WadRayMath.toRay(0),
+                WadRayMath.toRay(8),
+                WadRayMath.toRay(100)
             )
         );
 
@@ -128,7 +170,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             interestRateStrategy,
             7500,
             8000,
-            1000,
+            11000,
             18
         );
     }
@@ -145,10 +187,10 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         address interestRateStrategy = address(
             new ReserveInterestRateStrategy(
                 this,
-                WadRayMath.toWad(80),
-                WadRayMath.toWad(0),
-                WadRayMath.toWad(4),
-                WadRayMath.toWad(75)
+                WadRayMath.toRay(80),
+                WadRayMath.toRay(0),
+                WadRayMath.toRay(4),
+                WadRayMath.toRay(75)
             )
         );
 
@@ -159,7 +201,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             interestRateStrategy,
             7500,
             8000,
-            1000,
+            11000,
             18
         );
     }
@@ -176,10 +218,10 @@ contract AddressesProvider is Ownable, IAddressesProvider {
         address interestRateStrategy = address(
             new ReserveInterestRateStrategy(
                 this,
-                WadRayMath.toWad(45),
-                WadRayMath.toWad(0),
-                WadRayMath.toWad(7),
-                WadRayMath.toWad(300)
+                WadRayMath.toRay(45),
+                WadRayMath.toRay(0),
+                WadRayMath.toRay(7),
+                WadRayMath.toRay(300)
             )
         );
 
@@ -190,7 +232,7 @@ contract AddressesProvider is Ownable, IAddressesProvider {
             interestRateStrategy,
             7500,
             8000,
-            1000,
+            11000,
             18
         );
     }

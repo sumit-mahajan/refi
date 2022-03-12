@@ -47,7 +47,7 @@ describe("Lending Pool :: Withdraw", function () {
     it("Checks if equal aTokens burned and deposit recieved after a valid withdrawal", async function () {
         const { deployer, lendingPool, dai, aDai } = testEnv;
 
-        const beforeBalance = parseFloat(toEther(await dai.balanceOf(deployer.address)))
+        const beforeBalance = toEther(await dai.balanceOf(deployer.address))
 
         const Tx = await lendingPool.withdraw(
             dai.address,
@@ -58,8 +58,8 @@ describe("Lending Pool :: Withdraw", function () {
 
         customPrint("User 0 withdraws 1 dai");
 
-        const afterBalance = parseFloat(toEther(await dai.balanceOf(deployer.address)));
-        const aDaiBalance = parseFloat(toEther(await aDai.balanceOf(deployer.address)))
+        const afterBalance = toEther(await dai.balanceOf(deployer.address));
+        const aDaiBalance = toEther(await aDai.balanceOf(deployer.address))
 
         // No interest since DAI wasn't borrowed by anyone
         expect(aDaiBalance).to.equal(99, "ATokens not burned")
@@ -79,7 +79,7 @@ describe("Lending Pool :: Withdraw", function () {
         customPrint("User 0 withdraws all deposited dai");
 
         const userConfig = await protocolDataProvider.getUserReserveData(dai.address, deployer.address);
-        const aDaiBalance = parseFloat(toEther(await aDai.balanceOf(deployer.address)))
+        const aDaiBalance = toEther(await aDai.balanceOf(deployer.address))
 
         expect(userConfig.usageAsCollateralEnabled).to.equal(false, "Collateral not set false");
         expect(aDaiBalance).to.equal(0, "ATokens not burned")
@@ -88,7 +88,7 @@ describe("Lending Pool :: Withdraw", function () {
     it("Checks if user recieved interest with withdrawal", async function () {
         const { deployer, users, lendingPool, protocolDataProvider, link, aLink } = testEnv;
 
-        const beforeBalance = parseFloat(toEther(await link.balanceOf(deployer.address)))
+        const beforeBalance = toEther(await link.balanceOf(deployer.address))
 
         const Tx = await lendingPool.connect(users[1].signer).withdraw(
             link.address,
@@ -99,8 +99,8 @@ describe("Lending Pool :: Withdraw", function () {
 
         customPrint("User 1 withdraws all deposited LINK");
 
-        const aLinkBalance = parseFloat(toEther(await aLink.balanceOf(deployer.address)))
-        const afterBalance = parseFloat(toEther(await link.balanceOf(deployer.address)));
+        const aLinkBalance = toEther(await aLink.balanceOf(deployer.address))
+        const afterBalance = toEther(await link.balanceOf(deployer.address));
 
         // Interest is earned on LINK
         expect(afterBalance).to.be.above(beforeBalance + 1, "Deposit not received")

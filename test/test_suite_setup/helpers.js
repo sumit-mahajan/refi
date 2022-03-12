@@ -1,7 +1,7 @@
 const { ethers } = require("ethers")
 
 const customPrint = (str) => {
-    // console.log(str);
+    console.log(str);
 }
 
 const toWei = (num) => {
@@ -9,7 +9,7 @@ const toWei = (num) => {
 }
 
 const toEther = (num) => {
-    return ethers.utils.formatEther(num.toString());
+    return parseFloat(ethers.utils.formatEther(num.toString()));
 }
 
 module.exports = {

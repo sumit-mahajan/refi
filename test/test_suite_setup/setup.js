@@ -95,9 +95,9 @@ async function initializeSuite() {
 
     const aTokens = await testEnv.protocolDataProvider.getAllATokens();
 
-    const aWEthAddress = aTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
-    const aDaiAddress = aTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
-    const aLinkAddress = aTokens.find((aToken) => aToken.symbol === 'aLINK')?.tokenAddress;
+    const aWEthAddress = aTokens.find((aToken) => aToken.symbol === 'aWETH').tokenAddress;
+    const aDaiAddress = aTokens.find((aToken) => aToken.symbol === 'aDAI').tokenAddress;
+    const aLinkAddress = aTokens.find((aToken) => aToken.symbol === 'aLINK').tokenAddress;
 
     testEnv.aWeth = await ethers.getContractAt("AToken", aWEthAddress);
     testEnv.aDai = await ethers.getContractAt("AToken", aDaiAddress);

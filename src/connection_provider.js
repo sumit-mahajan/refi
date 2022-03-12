@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 import AddressesProvider from './artifacts/contracts/AddressesProvider.sol/AddressesProvider.json';
 
-const defaultChainId = 80001;
+const defaultChainId = 31337;
 
 export const supportedNetworks = {
     // npx hardhat node
@@ -13,7 +13,7 @@ export const supportedNetworks = {
         name: 'Hardhat',
         tokenSymbol: 'ETH',
         rpcURL: 'http://localhost:8545',
-        address: '0x5FbDB2315678afecb367f032d93F642f64180aa3',
+        address: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
     },
     // npx hardhat run scripts/deploy.js --network mumbai
     // Returned address is wrong. https://github.com/nomiclabs/hardhat/issues/2162. 
@@ -29,6 +29,7 @@ export const supportedNetworks = {
     4: {
         name: 'Rinkeby',
         tokenSymbol: 'ETH',
+        // consider changing RPC url if not working
         rpcURL: 'https://rinkeby-light.eth.linkpool.io/',
         address: '0x8B1913B4cD6cb731e53F25031786A42dCB195F4b',
     }
@@ -53,7 +54,7 @@ export function ConnectionProvider(props) {
         try {
             const provider = new ethers.providers.JsonRpcProvider(supportedNetworks[defaultChainId].rpcURL);
             const contract = new ethers.Contract(
-                supportedNetworks[defaultChainId].greeterAddress,
+                supportedNetworks[defaultChainId].address,
                 AddressesProvider.abi,
                 provider
             );
@@ -61,7 +62,7 @@ export function ConnectionProvider(props) {
             setConnectionState({ ...connectionState, contract });
         } catch (err) {
             setConnectionState({ ...connectionState, error: "useConnection : Initiate Error -> " + err.toString() });
-            console.log(connectionState.error);
+            console.log(err);
         }
     };
 
@@ -83,7 +84,7 @@ export function ConnectionProvider(props) {
             }
 
             const contract = new ethers.Contract(
-                supportedNetworks[chainId].greeterAddress,
+                supportedNetworks[chainId].address,
                 AddressesProvider.abi,
                 signer
             );;

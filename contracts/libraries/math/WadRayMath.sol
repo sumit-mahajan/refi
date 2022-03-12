@@ -47,8 +47,8 @@ library WadRayMath {
         return halfWAD;
     }
 
-    function toWad(uint256 num) external pure returns (uint256) {
-        return (num * WAD);
+    function toRay(uint256 num) external pure returns (uint256) {
+        return (num * 1e25);
     }
 
     /**

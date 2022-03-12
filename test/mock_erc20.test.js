@@ -26,40 +26,40 @@ describe("Mock ERC20", function () {
             )
         )
 
-        expect(parseInt(afterBalance)).to.equal(parseInt(beforeBalance) + 10, "Incorrect ERC20 balance");
+        expect(afterBalance).to.equal(beforeBalance + 10, "Incorrect ERC20 balance");
     });
 
     it("Checks 'transfer' functionality", async function () {
         const { deployer, users, walletBalanceProvider, dai } = testEnv;
 
-        const beforeBalanceA = parseInt(toEther(
+        const beforeBalanceA = toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        ))
-        const beforeBalanceB = parseInt(toEther(
+        )
+        const beforeBalanceB = toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 dai.address
             )
-        ))
+        )
 
         const Tx = await dai.transfer(users[1].address, toWei(1));
         await Tx.wait();
 
-        const afterBalanceA = parseInt(toEther(
+        const afterBalanceA = toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        ))
-        const afterBalanceB = parseInt(toEther(
+        )
+        const afterBalanceB = toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 dai.address
             )
-        ))
+        )
 
         expect(afterBalanceA).to.equal(beforeBalanceA - 1, "Incorrect 'from' balance");
         expect(afterBalanceB).to.equal(beforeBalanceB + 1, "Incorrect 'to' balance");
@@ -68,18 +68,18 @@ describe("Mock ERC20", function () {
     it("Checks 'approve' and 'transferFrom' functionality", async function () {
         const { deployer, users, walletBalanceProvider, dai } = testEnv;
 
-        const beforeBalanceA = parseInt(toEther(
+        const beforeBalanceA = toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        ))
-        const beforeBalanceB = parseInt(toEther(
+        )
+        const beforeBalanceB = toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 dai.address
             )
-        ))
+        )
 
         const approveTx = await dai.approve(users[1].address, toWei(1));
         await approveTx.wait();
@@ -89,18 +89,18 @@ describe("Mock ERC20", function () {
         );
         await transferTx.wait();
 
-        const afterBalanceA = parseInt(toEther(
+        const afterBalanceA = toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        ))
-        const afterBalanceB = parseInt(toEther(
+        )
+        const afterBalanceB = toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 dai.address
             )
-        ))
+        )
 
         expect(afterBalanceA).to.equal(beforeBalanceA - 1, "Incorrect 'from' balance");
         expect(afterBalanceB).to.equal(beforeBalanceB + 1, "Incorrect 'to' balance");
