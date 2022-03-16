@@ -4,11 +4,14 @@ import "./styles/global.scss";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { ConnectionProvider } from "./utils/connection_provider/connection_provider";
+import { AssetsProvider } from "./utils/assets_provider/assets_provider";
 
 ReactDOM.render(
   <React.StrictMode>
     <ConnectionProvider>
-      <App />
+      <AssetsProvider>
+        <App />
+      </AssetsProvider>
     </ConnectionProvider>
   </React.StrictMode>,
   document.getElementById("root")

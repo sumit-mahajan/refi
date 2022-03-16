@@ -47,7 +47,7 @@ describe("Lending Pool :: Repay", function () {
     it("Checks if equal debtTokens burned and repaid tokens received after a valid repay", async function () {
         const { deployer, lendingPool, link, aLink, dLink } = testEnv;
 
-        const linkBalanceBefore = parseFloat(toEther(await link.balanceOf(aLink.address)))
+        const linkBalanceBefore = toEther(await link.balanceOf(aLink.address))
 
         // One time infinite approve
         const approveLinkTx = await link.approve(lendingPool.address, MAX_UINT);
@@ -64,8 +64,8 @@ describe("Lending Pool :: Repay", function () {
 
         customPrint("User 0 repays 10 LINK");
 
-        const dLinkBalance = parseFloat(toEther(await dLink.balanceOf(deployer.address)))
-        const linkBalanceAfter = parseFloat(toEther(await link.balanceOf(aLink.address)))
+        const dLinkBalance = toEther(await dLink.balanceOf(deployer.address))
+        const linkBalanceAfter = toEther(await link.balanceOf(aLink.address))
 
         // Considering interest accured over period
         expect(dLinkBalance).to.be.above(10, "Incorrect Debt Tokens burned")
@@ -103,7 +103,7 @@ describe("Lending Pool :: Repay", function () {
     it("Checks if borrowing set to false after a full repay", async function () {
         const { deployer, lendingPool, protocolDataProvider, link, dLink } = testEnv;
 
-        const linkBalanceBefore = parseFloat(toEther(await link.balanceOf(deployer.address)))
+        const linkBalanceBefore = toEther(await link.balanceOf(deployer.address))
 
         // Repay any amount more than borrowed for a full repay
         const Tx = await lendingPool.repay(
@@ -116,8 +116,8 @@ describe("Lending Pool :: Repay", function () {
         customPrint("User 0 repays entire LINK loan");
 
         const userConfig = await protocolDataProvider.getUserReserveData(link.address, deployer.address);
-        const dLinkBalance = parseFloat(toEther(await dLink.balanceOf(deployer.address)))
-        const linkBalanceAfter = parseFloat(toEther(await link.balanceOf(deployer.address)))
+        const dLinkBalance = toEther(await dLink.balanceOf(deployer.address))
+        const linkBalanceAfter = toEther(await link.balanceOf(deployer.address))
 
         expect(userConfig.isBorrowed).to.equal(false, "Borrowing not set false");
         expect(dLinkBalance).to.equal(0, "Incorrect Debt Tokens burned")

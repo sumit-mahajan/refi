@@ -9,6 +9,7 @@ const DepositSection = ({
   walletBalance,
   approveToken,
   withdrawAsset,
+  isApproved,
 }) => {
   const [input, setInput] = useState(0);
   const max = () => setInput(walletBalance ?? 0);
@@ -41,16 +42,31 @@ const DepositSection = ({
       />
 
       <div className="buttons">
-        <button className="outlined-button" onClick={approveToken}>
-          Approve
-        </button>
+        {isApproved ? (
+          <></>
+        ) : (
+          <button className="outlined-button" onClick={approveToken}>
+            Approve
+          </button>
+        )}
+
         <button
-          onClick={() => withdrawAsset(input)}
+          onClick={() => {
+            withdrawAsset(input);
+            setInput("");
+          }}
           className="outlined-button"
         >
           Withdraw
         </button>
-        <button onClick={() => depositERC20(input)}>Deposit</button>
+        <button
+          onClick={() => {
+            depositERC20(input);
+            setInput("");
+          }}
+        >
+          Deposit
+        </button>
       </div>
     </div>
   );

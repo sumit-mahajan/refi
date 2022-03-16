@@ -13,7 +13,8 @@ const toEther = (num) => {
 };
 
 const calculateAPY = (aprInWei) => {
-  const apr = toEther(aprInWei);
+  // const apr = toEther(aprInWei);
+  const apr = (aprInWei * 100) / 1e27;
 
   let rate = apr / 2102400;
 

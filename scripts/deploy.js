@@ -206,53 +206,57 @@ const setupData = async () => {
   await dai.connect(users[2].signer).mint(users[2].address, toWei(1000));
   await link.connect(users[2].signer).mint(users[2].address, toWei(1000));
 
-  // const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
-  // await approveDaiTx.wait();
+  const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
+  await approveDaiTx.wait();
 
-  // console.log("User 0 infinite approves the lendingPool for DAI reserve");
+  console.log("User 0 infinite approves the lendingPool for DAI reserve");
 
-  // const depositDaiTx = await lendingPool.deposit(
-  //   dai.address,
-  //   toWei(100),
-  //   deployer.address
-  // )
-  // await depositDaiTx.wait()
+  const depositDaiTx = await lendingPool.deposit(
+    dai.address,
+    toWei(100),
+    deployer.address
+  );
+  await depositDaiTx.wait();
 
-  // console.log("User 0 deposits 100 DAI");
+  console.log("User 0 deposits 100 DAI");
 
-  // // One time infinite approve
-  // const approveLinkTx = await link.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
-  // await approveLinkTx.wait();
+  // One time infinite approve
+  const approveLinkTx = await link
+    .connect(users[1].signer)
+    .approve(lendingPool.address, MAX_UINT);
+  await approveLinkTx.wait();
 
-  // console.log("User 1 infinite approves the lendingPool for LINK reserve");
+  console.log("User 1 infinite approves the lendingPool for LINK reserve");
 
-  // const linkTx = await lendingPool.connect(users[1].signer).deposit(
-  //   link.address,
-  //   toWei(100),
-  //   users[1].address
-  // )
-  // await linkTx.wait()
+  const linkTx = await lendingPool
+    .connect(users[1].signer)
+    .deposit(link.address, toWei(100), users[1].address);
+  await linkTx.wait();
 
-  // console.log("User 1 deposits 100 LINK");
+  console.log("User 1 deposits 100 LINK");
 
-  // const borrowLinkTx = await lendingPool.borrow(
-  //   link.address,
-  //   toWei(35),
-  //   deployer.address
-  // )
-  // await borrowLinkTx.wait()
+  const borrowLinkTx = await lendingPool.borrow(
+    link.address,
+    toWei(35),
+    deployer.address
+  );
+  await borrowLinkTx.wait();
 
-  // console.log("User 0 borrows 35 LINK against DAI as collateral");
+  console.log("User 0 borrows 35 LINK against DAI as collateral");
 
-  // // One time infinite approve aWeth
-  // // Required at withdrawal time. i.e. do this before ETH deposit
-  // const approveAWethTx = await aWeth.connect(users[1].signer).approve(wethGateway.address, MAX_UINT);
-  // await approveAWethTx.wait();
+  // One time infinite approve aWeth
+  // Required at withdrawal time. i.e. do this before ETH deposit
+  const approveAWethTx = await aWeth
+    .connect(users[1].signer)
+    .approve(wethGateway.address, MAX_UINT);
+  await approveAWethTx.wait();
 
-  // console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
+  console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
 
-  // const Tx = await wethGateway.connect(users[1].signer).depositETH({ value: toWei(10) })
-  // await Tx.wait()
+  const Tx = await wethGateway
+    .connect(users[1].signer)
+    .depositETH({ value: toWei(10) });
+  await Tx.wait();
 
-  // console.log("User 1 deposits 10 ETH");
+  console.log("User 1 deposits 10 ETH");
 };

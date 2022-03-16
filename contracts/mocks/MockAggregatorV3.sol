@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-contract MockAggregatorV3 is AggregatorV3Interface, Ownable {
-    uint256 private priceInETH = 0.5 ether;
+contract MockAggregatorV3 is AggregatorV3Interface {
+    uint256 private priceInETH;
+
+    constructor(uint256 _priceInETH) {
+        priceInETH = _priceInETH;
+    }
 
     // Change price for testing liquidation
     function setPrice(uint256 _price) external {

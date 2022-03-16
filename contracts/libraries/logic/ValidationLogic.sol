@@ -253,11 +253,9 @@ library ValidationLogic {
             Errors.LP_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
         );
 
-        bool isCollateralEnabled = collateralReserve
-            .configuration
-            .getLiquidationThreshold() >
-            0 &&
-            userConfig.isUsingAsCollateral(collateralReserve.id);
+        bool isCollateralEnabled = userConfig.isUsingAsCollateral(
+            collateralReserve.id
+        );
 
         //if collateral isn't enabled as collateral by user, it cannot be liquidated
         require(isCollateralEnabled, Errors.LP_COLLATERAL_CANNOT_BE_LIQUIDATED);

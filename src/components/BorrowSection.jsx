@@ -38,10 +38,23 @@ const BorrowSection = ({
       />
 
       <div className="buttons">
-        <button className="outlined-button" onClick={() => repayDebt(input)}>
+        <button
+          className="outlined-button"
+          onClick={() => {
+            setInput("");
+            repayDebt(input);
+          }}
+        >
           Repay
         </button>
-        <button onClick={() => borrowAsset(input)}>Borrow</button>
+        <button
+          onClick={() => {
+            setInput("");
+            borrowAsset(input);
+          }}
+        >
+          Borrow
+        </button>
       </div>
     </div>
   );

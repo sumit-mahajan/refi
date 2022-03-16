@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "../styles/asset-page.scss";
 import { useConnection } from "../utils/connection_provider/connection_provider";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { MAX_UINT, toEther } from "../utils/helpers";
 import BorrowSection from "../components/BorrowSection";
-import SimpleTile from "../components/SimpleTile";
 import DepositSection from "../components/DepositSection";
 import { toWei } from "../utils/helpers";
+import { useAssetProvider } from "../utils/assets_provider/assets_provider";
 
 function AssetPage() {
+  const { id } = useParams();
+
   const {
     protocolDataProvider,
     walletBalanceProvider,
     lendingPoolContract,
-
     daiContract,
     linkContract,
     wethContract,
@@ -21,9 +22,11 @@ function AssetPage() {
     accounts,
   } = useConnection();
 
-  let {
-    state: { asset },
-  } = useLocation();
+  let { state: assets, refresh } = useAssetProvider();
+
+  console.log("REfreshsing");
+
+  const [asset, setAsset] = useState();
 
   const [positions, setPositions] = useState({
     healthFactor: 0,
@@ -31,18 +34,47 @@ function AssetPage() {
     currentDeposited: 0,
     walletBalance: 0,
     availableToBorrow: 0,
+    isApproved: true,
   });
 
   useEffect(() => {
-    fetchUserPositions();
-  }, [lendingPoolContract, accounts, protocolDataProvider]);
+    const fetchAsset = () => {
+      setAsset(assets.find((asset) => asset.symbol === id));
+    };
 
-  const fetchUserPositions = async () => {
-    if (accounts.length === 0) return;
-    if (walletBalanceProvider === null) return;
-    if (protocolDataProvider === null) return;
+    fetchAsset();
+  }, [assets, id]);
 
-    const data = await protocolDataProvider.getUserReserveData(
+  const isTokenApproved = useCallback(async () => {
+    switch (asset.symbol) {
+      case "DAI":
+        const approvedDAI = await daiContract.allowance(
+          accounts[0],
+          lendingPoolContract.address
+        );
+        return toEther(approvedDAI) !== 0;
+      case "LINK":
+        const approvedLINK = await linkContract.allowance(
+          accounts[0],
+          lendingPoolContract.address
+        );
+        return toEther(approvedLINK) !== 0;
+      case "WETH":
+        const approvedaWETH = await wethContract.allowance(
+          accounts[0],
+          wETHGatewayContract.address
+        );
+        return toEther(approvedaWETH) !== 0;
+      default:
+        break;
+    }
+  }, [asset, daiContract, linkContract, wethContract]);
+
+  const fetchPositons = useCallback(async () => {
+    const isApproved = await isTokenApproved();
+
+    //Fetch user data
+    const userData = await protocolDataProvider.getUserReserveData(
       asset.tokenAddress,
       accounts[0]
     );
@@ -51,13 +83,12 @@ function AssetPage() {
       accounts[0],
       asset.tokenAddress
     );
-
     const {
       currentVariableDebt,
       healthFactor,
       availableToBorrow,
       currentATokenBalance,
-    } = data;
+    } = userData;
 
     setPositions({
       currentBorrowed: toEther(currentVariableDebt),
@@ -65,8 +96,16 @@ function AssetPage() {
       currentDeposited: toEther(currentATokenBalance),
       walletBalance: toEther(walletBalance),
       availableToBorrow: toEther(availableToBorrow),
+      isApproved: isApproved,
     });
-  };
+  }, [isTokenApproved, protocolDataProvider, walletBalanceProvider]);
+
+  useEffect(() => {
+    if (asset === undefined) return;
+    if (accounts.length === 0) return;
+
+    fetchPositons();
+  }, [asset, accounts, fetchPositons]);
 
   const depositERC20 = async (amount) => {
     try {
@@ -74,8 +113,6 @@ function AssetPage() {
         await wETHGatewayContract.depositETH({
           value: toWei(amount),
         });
-
-        return;
       } else {
         await lendingPoolContract.deposit(
           asset.tokenAddress,
@@ -84,7 +121,7 @@ function AssetPage() {
         );
       }
 
-      window.location.reload(false);
+      refresh();
     } catch (error) {
       console.log(error);
     }
@@ -120,7 +157,7 @@ function AssetPage() {
         );
       }
 
-      window.location.reload(false);
+      refresh();
     } catch (error) {
       console.log(error);
     }
@@ -140,7 +177,7 @@ function AssetPage() {
         );
       }
 
-      window.location.reload(false);
+      refresh();
     } catch (error) {
       console.log(error);
     }
@@ -158,12 +195,15 @@ function AssetPage() {
         );
       }
 
-      window.location.reload(false);
+      refresh();
     } catch (error) {
       console.log(error);
     }
   };
 
+  if (asset === undefined) {
+    return <p>Loading</p>;
+  }
   return (
     <main>
       <section className="asset-container pt-5 pb-5 pr-5 pl-5 mt-6 mb-5">
@@ -221,6 +261,7 @@ function AssetPage() {
           walletBalance={positions.walletBalance}
           depositERC20={depositERC20}
           symbol={asset.symbol}
+          isApproved={positions.isApproved}
           approveToken={approveToken}
           withdrawAsset={withdrawAsset}
         />
@@ -228,7 +269,6 @@ function AssetPage() {
     </main>
   );
 }
-
 export default AssetPage;
 
 function AssetInfo({ name, value }) {

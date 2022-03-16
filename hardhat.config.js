@@ -40,7 +40,7 @@ module.exports = {
       accounts: [config.mumbaiPrivateKey]
     },
     rinkeby: {
-      url: "https://rinkeby-light.eth.linkpool.io/",
+      url: config.rinkebyRPCUrl,
       accounts: [config.rinkebyPrivateKey]
     }
   },

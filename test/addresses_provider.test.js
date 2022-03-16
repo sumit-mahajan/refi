@@ -86,7 +86,7 @@ describe("Test Environment Check", function () {
     expect(await testEnv.aLink.UNDERLYING_ASSET_ADDRESS()).to.equal(linkAddress, "AToken doesn't exist");
   });
 
-  it("Checks if users hold 1000 DAI and 1000 LINK each", async function () {
+  it("Checks if top 3 users hold 1000 DAI and 1000 LINK each", async function () {
     const { deployer, users, dai, link } = testEnv;
 
     // deployer == users[0]
@@ -99,8 +99,8 @@ describe("Test Environment Check", function () {
     await dai.connect(users[2].signer).mint(users[2].address, toWei(1000));
     await link.connect(users[2].signer).mint(users[2].address, toWei(1000));
 
-    const daiBalance = parseInt(toEther(await dai.balanceOf(deployer.address)));
-    const linkBalance = parseInt(toEther(await link.balanceOf(deployer.address)));
+    const daiBalance = toEther(await dai.balanceOf(deployer.address));
+    const linkBalance = toEther(await link.balanceOf(deployer.address));
 
     expect(daiBalance).to.equal(1000);
     expect(linkBalance).to.equal(1000);

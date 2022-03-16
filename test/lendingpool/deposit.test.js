@@ -68,12 +68,12 @@ describe("Lending Pool :: Deposit", function () {
         const reserveAfter = await lendingPool.getReserveData(dai.address)
         const userData = await lendingPool.getUserAccountData(deployer.address)
         const userConfig = await protocolDataProvider.getUserReserveData(dai.address, deployer.address);
-        const aDaiBalance = parseFloat(toEther(await aDai.balanceOf(deployer.address)))
+        const aDaiBalance = toEther(await aDai.balanceOf(deployer.address))
 
         expect(reserveBefore.lastUpdateTimestamp)
             .to.be.below(reserveAfter.lastUpdateTimestamp, "Timestamp not updated")
         expect(userConfig.usageAsCollateralEnabled).to.equal(true, "Collateral not set true");
-        expect(parseFloat(toEther(userData.totalCollateralETH))).to.equal(50, "Invalid collateral amount")
+        expect(toEther(userData.totalCollateralETH)).to.equal(50, "Invalid collateral amount")
         expect(aDaiBalance).to.equal(100, "ATokens not minted to user")
     });
 

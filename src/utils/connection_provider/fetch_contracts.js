@@ -34,49 +34,22 @@ const fetchContracts = async (provider, chainId) => {
     provider
   );
 
-  return {
-    addressProvider,
-    protocolDataProvider,
-    walletBalanceProvider,
-    lendingPoolContract,
-  };
-};
-
-const fetchSignerContracts = async (chainId, signer) => {
-  const addressProvider = new ethers.Contract(
-    supportedNetworks[chainId].address,
-    AddressesProvider.abi,
-    signer
-  );
-
-  const lendingPoolContract = new ethers.Contract(
-    await addressProvider.getLendingPool(),
-    LendingPool.abi,
-    signer
-  );
-
   const wETHGatewayContract = new ethers.Contract(
     await addressProvider.getWETHGateway(),
     WETHGateway.abi,
-    signer
+    provider
   );
 
   const daiContract = new ethers.Contract(
     await addressProvider.DAI(),
     ERCMock20.abi,
-    signer
-  );
-
-  const protocolDataProvider = new ethers.Contract(
-    await addressProvider.protocolDataProvider(),
-    ProtocolDataProvider.abi,
-    signer
+    provider
   );
 
   const linkContract = new ethers.Contract(
     await addressProvider.LINK(),
     ERCMock20.abi,
-    signer
+    provider
   );
 
   const aTokens = await protocolDataProvider.getAllATokens();
@@ -85,10 +58,12 @@ const fetchSignerContracts = async (chainId, signer) => {
     (aToken) => aToken.symbol === "aWETH"
   ).tokenAddress;
 
-  const wethContract = new ethers.Contract(aWEthAddress, aWETH.abi, signer);
+  const wethContract = new ethers.Contract(aWEthAddress, aWETH.abi, provider);
 
   return {
     addressProvider,
+    protocolDataProvider,
+    walletBalanceProvider,
     lendingPoolContract,
     wETHGatewayContract,
     daiContract,
@@ -97,4 +72,59 @@ const fetchSignerContracts = async (chainId, signer) => {
   };
 };
 
-export { fetchContracts, fetchSignerContracts };
+// const fetchSignerContracts = async (chainId, signer) => {
+//   const addressProvider = new ethers.Contract(
+//     supportedNetworks[chainId].address,
+//     AddressesProvider.abi,
+//     signer
+//   );
+
+//   const lendingPoolContract = new ethers.Contract(
+//     await addressProvider.getLendingPool(),
+//     LendingPool.abi,
+//     signer
+//   );
+
+//   const wETHGatewayContract = new ethers.Contract(
+//     await addressProvider.getWETHGateway(),
+//     WETHGateway.abi,
+//     signer
+//   );
+
+//   const daiContract = new ethers.Contract(
+//     await addressProvider.DAI(),
+//     ERCMock20.abi,
+//     signer
+//   );
+
+//   const protocolDataProvider = new ethers.Contract(
+//     await addressProvider.protocolDataProvider(),
+//     ProtocolDataProvider.abi,
+//     signer
+//   );
+
+//   const linkContract = new ethers.Contract(
+//     await addressProvider.LINK(),
+//     ERCMock20.abi,
+//     signer
+//   );
+
+//   const aTokens = await protocolDataProvider.getAllATokens();
+
+//   const aWEthAddress = aTokens.find(
+//     (aToken) => aToken.symbol === "aWETH"
+//   ).tokenAddress;
+
+//   const wethContract = new ethers.Contract(aWEthAddress, aWETH.abi, signer);
+
+//   return {
+//     addressProvider,
+//     lendingPoolContract,
+//     wETHGatewayContract,
+//     daiContract,
+//     linkContract,
+//     wethContract,
+//   };
+// };
+
+export { fetchContracts };
