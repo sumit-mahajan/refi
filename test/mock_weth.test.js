@@ -40,8 +40,8 @@ describe("Mock WETH", function () {
         )
 
         // Considering gas used, ETH balance will be slightly less
-        expect(afterEthBalance).to.be.lessThanOrEqual(beforeEthBalance - 5, "Incorrect ETH balance");
-        expect(afterWethBalance).to.equal(beforeWethBalance + 5, "Incorrect WETH balance");
+        expect(parseInt(afterEthBalance)).to.be.lessThanOrEqual(parseInt(beforeEthBalance - 5), "Incorrect ETH balance");
+        expect(parseInt(afterWethBalance)).to.equal(parseInt(beforeWethBalance) + 5, "Incorrect WETH balance");
     });
 
     it("Withdraws ETH by burning equal WETH", async function () {
@@ -77,10 +77,10 @@ describe("Mock WETH", function () {
         )
 
         // Considering gas used, ETH balance will be slightly less
-        expect(afterEthBalance).to.be.within(
-            beforeEthBalance, beforeEthBalance + 1, "Incorrect ETH balance"
+        expect(parseInt(afterEthBalance)).to.be.within(
+            parseInt(beforeEthBalance), parseInt(beforeEthBalance) + 1, "Incorrect ETH balance"
         )
-        expect(afterWethBalance).to.equal(beforeWethBalance - 1, "Incorrect WETH balance");
+        expect(parseInt(afterWethBalance)).to.equal(parseInt(beforeWethBalance) - 1, "Incorrect WETH balance");
     });
 
     it("Tries to Withdraw ETH without holding WETH", async function () {
@@ -96,34 +96,34 @@ describe("Mock WETH", function () {
     it("Checks 'transfer' functionality", async function () {
         const { deployer, users, walletBalanceProvider, weth } = testEnv;
 
-        const beforeBalanceA = toEther(
+        const beforeBalanceA = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 weth.address
             )
-        )
-        const beforeBalanceB = toEther(
+        ))
+        const beforeBalanceB = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 weth.address
             )
-        )
+        ))
 
         const Tx = await weth.transfer(users[1].address, toWei(1));
         await Tx.wait();
 
-        const afterBalanceA = toEther(
+        const afterBalanceA = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 weth.address
             )
-        )
-        const afterBalanceB = toEther(
+        ))
+        const afterBalanceB = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 weth.address
             )
-        )
+        ))
 
         expect(afterBalanceA).to.equal(beforeBalanceA - 1, "Incorrect 'from' balance");
         expect(afterBalanceB).to.equal(beforeBalanceB + 1, "Incorrect 'to' balance");
@@ -132,18 +132,18 @@ describe("Mock WETH", function () {
     it("Checks 'approve' and 'transferFrom' functionality", async function () {
         const { deployer, users, walletBalanceProvider, weth } = testEnv;
 
-        const beforeBalanceA = toEther(
+        const beforeBalanceA = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 weth.address
             )
-        )
-        const beforeBalanceB = toEther(
+        ))
+        const beforeBalanceB = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 weth.address
             )
-        )
+        ))
 
         const approveTx = await weth.approve(users[1].address, toWei(1));
         await approveTx.wait();
@@ -153,18 +153,18 @@ describe("Mock WETH", function () {
         );
         await transferTx.wait();
 
-        const afterBalanceA = toEther(
+        const afterBalanceA = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 weth.address
             )
-        )
-        const afterBalanceB = toEther(
+        ))
+        const afterBalanceB = parseInt(toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 weth.address
             )
-        )
+        ))
 
         expect(afterBalanceA).to.equal(beforeBalanceA - 1, "Incorrect 'from' balance");
         expect(afterBalanceB).to.equal(beforeBalanceB + 1, "Incorrect 'to' balance");

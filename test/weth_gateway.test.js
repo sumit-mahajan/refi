@@ -35,7 +35,7 @@ describe("WETH Gateway", function () {
         customPrint("User 1 deposits 100 LINK");
 
         // One time infinite approve aWeth
-        // Required at withdrawal time. i.e. do this before ETH deposit
+        // Required at withdrawal time
         const approveAWethTx = await aWeth.approve(wethGateway.address, MAX_UINT);
         await approveAWethTx.wait();
 
@@ -55,13 +55,13 @@ describe("WETH Gateway", function () {
         const reserveAfter = await lendingPool.getReserveData(weth.address)
         const userData = await lendingPool.getUserAccountData(deployer.address)
         const userConfig = await protocolDataProvider.getUserReserveData(weth.address, deployer.address);
-        const aWethBalance = toEther(await aWeth.balanceOf(deployer.address))
+        const aWethBalance = parseFloat(toEther(await aWeth.balanceOf(deployer.address)))
 
         expect(reserveBefore.lastUpdateTimestamp)
             .to.not.equal(reserveAfter.lastUpdateTimestamp, "Timestamp not updated")
 
         expect(userConfig.usageAsCollateralEnabled).to.equal(true, "Collateral not set true");
-        expect(toEther(userData.totalCollateralETH)).to.equal(10, "Invalid collateral amount")
+        expect(parseFloat(toEther(userData.totalCollateralETH))).to.equal(10, "Invalid collateral amount")
         expect(aWethBalance).to.equal(10, "ATokens not minted to user")
     });
 
@@ -71,24 +71,24 @@ describe("WETH Gateway", function () {
 
         customPrint("User 1 borrows 10 ETH against deposited LINK as collateral");
 
-        const ethBalanceBefore = toEther(
+        const ethBalanceBefore = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
             )
-        )
+        ))
 
         const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(10))
         await borrowEthTx.wait()
 
         const user1Config = await protocolDataProvider.getUserReserveData(weth.address, users[1].address);
-        const dWethBalance = toEther(await dWeth.balanceOf(users[1].address))
-        const ethBalanceAfter = toEther(
+        const dWethBalance = parseFloat(toEther(await dWeth.balanceOf(users[1].address)))
+        const ethBalanceAfter = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 users[1].address,
                 "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
             )
-        )
+        ))
 
         expect(user1Config.isBorrowed).to.equal(true, "Borrowing not set true");
         expect(dWethBalance).to.equal(10, "Incorrect Debt Tokens minted")
@@ -96,12 +96,12 @@ describe("WETH Gateway", function () {
 
         customPrint("User 0 borrows 10 DAI against depsited ETH as collateral");
 
-        const daiBalanceBefore = toEther(
+        const daiBalanceBefore = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        )
+        ))
 
         const borrowDaiTx = await lendingPool.borrow(
             dai.address,
@@ -111,13 +111,13 @@ describe("WETH Gateway", function () {
         await borrowDaiTx.wait()
 
         const user0Config = await protocolDataProvider.getUserReserveData(dai.address, deployer.address);
-        const dDaiBalance = toEther(await dDai.balanceOf(deployer.address))
-        const daiBalanceAfter = toEther(
+        const dDaiBalance = parseFloat(toEther(await dDai.balanceOf(deployer.address)))
+        const daiBalanceAfter = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 dai.address
             )
-        )
+        ))
 
         expect(user0Config.isBorrowed).to.equal(true, "Borrowing not set true");
         expect(dDaiBalance).to.equal(10, "Incorrect Debt Tokens minted")
@@ -127,7 +127,7 @@ describe("WETH Gateway", function () {
     it("Repays ETH loan", async function () {
         const { deployer, users, wethGateway, protocolDataProvider, weth, aWeth, dWeth } = testEnv;
 
-        const wethBalanceBefore = toEther(await weth.balanceOf(aWeth.address))
+        const wethBalanceBefore = parseFloat(toEther(await weth.balanceOf(aWeth.address)))
 
         // Repay any amount more than borrowed for a full repay
         const Tx = await wethGateway.connect(users[1].signer).repayETH(toWei(100), { value: toWei(100) })
@@ -136,8 +136,8 @@ describe("WETH Gateway", function () {
         customPrint("User 1 repays entire ETH loan");
 
         const userConfig = await protocolDataProvider.getUserReserveData(weth.address, deployer.address);
-        const dWethBalance = toEther(await dWeth.balanceOf(deployer.address))
-        const wethBalanceAfter = toEther(await weth.balanceOf(aWeth.address))
+        const dWethBalance = parseFloat(toEther(await dWeth.balanceOf(deployer.address)))
+        const wethBalanceAfter = parseFloat(toEther(await weth.balanceOf(aWeth.address)))
 
         expect(userConfig.isBorrowed).to.equal(false, "Borrowing not set false");
         expect(dWethBalance).to.equal(0, "Incorrect Debt Tokens burned")
@@ -159,31 +159,31 @@ describe("WETH Gateway", function () {
 
         customPrint("User 0 repays entire DAI loan");
 
-        const beforeEthBalance = toEther(
+        const beforeEthBalance = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
             )
-        )
+        ))
 
         const Tx = await wethGateway.withdrawETH(MAX_UINT)
         await Tx.wait()
 
         customPrint("User 0 withdraws all deposited ETH");
 
-        const afterEthBalance = toEther(
+        const afterEthBalance = parseFloat(toEther(
             await walletBalanceProvider.balanceOf(
                 deployer.address,
                 "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
             )
-        )
+        ))
         const userConfig = await protocolDataProvider.getUserReserveData(weth.address, deployer.address);
-        const aWethBalance = toEther(await aWeth.balanceOf(deployer.address))
+        const aWethBalance = parseFloat(toEther(await aWeth.balanceOf(deployer.address)))
 
         expect(userConfig.usageAsCollateralEnabled).to.equal(false, "Collateral not set false");
         expect(aWethBalance).to.equal(0, "ATokens not burned")
-        // Interest is earned, but still gas cost is more than that
-        expect(afterEthBalance).to.be.above(beforeEthBalance + 9.9, "Incorrect ETH balance"
+        // Interest is earned
+        expect(afterEthBalance).to.be.above(parseInt(beforeEthBalance) + 10, "Incorrect ETH balance"
         )
     });
 

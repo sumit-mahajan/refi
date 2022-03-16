@@ -1,9 +1,9 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.scss';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import { ConnectionProvider } from './connection_provider';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./styles/global.scss";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { ConnectionProvider } from "./utils/connection_provider/connection_provider";
 
 ReactDOM.render(
   <React.StrictMode>
@@ -11,7 +11,7 @@ ReactDOM.render(
       <App />
     </ConnectionProvider>
   </React.StrictMode>,
-  document.getElementById('root')
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function

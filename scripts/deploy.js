@@ -29,22 +29,28 @@ async function main() {
   await genericLogic.deployed();
 
   // Deploy ValidationLogic Library for linking purpose
-  const ValidationLogic = await hre.ethers.getContractFactory("ValidationLogic", {
-    libraries: {
-      GenericLogic: genericLogic.address,
+  const ValidationLogic = await hre.ethers.getContractFactory(
+    "ValidationLogic",
+    {
+      libraries: {
+        GenericLogic: genericLogic.address,
+      },
     }
-  });
+  );
   const validationLogic = await ValidationLogic.deploy();
   await validationLogic.deployed();
 
   // Deploy AddressesProvider contract
-  const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
-    libraries: {
-      ReserveLogic: reserveLogic.address,
-      ValidationLogic: validationLogic.address,
-      WadRayMath: wadRayMath.address
+  const AddressesProvider = await hre.ethers.getContractFactory(
+    "AddressesProvider",
+    {
+      libraries: {
+        ReserveLogic: reserveLogic.address,
+        ValidationLogic: validationLogic.address,
+        WadRayMath: wadRayMath.address,
+      },
     }
-  });
+  );
   const addressesProvider = await AddressesProvider.deploy();
   await addressesProvider.deployed();
 
@@ -67,11 +73,12 @@ main()
 
 // For UI testing
 
-const MAX_UINT = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+const MAX_UINT =
+  "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
 const toWei = (num) => {
   return hre.ethers.utils.parseEther(num.toString());
-}
+};
 
 const testEnv = {
   deployer: {},
@@ -91,7 +98,7 @@ const testEnv = {
   link: {},
   aLink: {},
   dLink: {},
-}
+};
 
 const setupEnvironment = async () => {
   const [_deployer, ...restSigners] = await hre.ethers.getSigners();
@@ -108,12 +115,27 @@ const setupEnvironment = async () => {
   }
   testEnv.deployer = deployer;
 
-  testEnv.lendingPool = await hre.ethers.getContractAt("LendingPool", await testEnv.addressesProvider.getLendingPool());
-  testEnv.wethGateway = await hre.ethers.getContractAt("WETHGateway", await testEnv.addressesProvider.getWETHGateway());
-  testEnv.priceOracle = await hre.ethers.getContractAt("PriceOracle", await testEnv.addressesProvider.getPriceOracle());
+  testEnv.lendingPool = await hre.ethers.getContractAt(
+    "LendingPool",
+    await testEnv.addressesProvider.getLendingPool()
+  );
+  testEnv.wethGateway = await hre.ethers.getContractAt(
+    "WETHGateway",
+    await testEnv.addressesProvider.getWETHGateway()
+  );
+  testEnv.priceOracle = await hre.ethers.getContractAt(
+    "PriceOracle",
+    await testEnv.addressesProvider.getPriceOracle()
+  );
 
-  testEnv.protocolDataProvider = await hre.ethers.getContractAt("ProtocolDataProvider", await testEnv.addressesProvider.protocolDataProvider());
-  testEnv.walletBalanceProvider = await hre.ethers.getContractAt("WalletBalanceProvider", await testEnv.addressesProvider.walletBalanceProvider());
+  testEnv.protocolDataProvider = await hre.ethers.getContractAt(
+    "ProtocolDataProvider",
+    await testEnv.addressesProvider.protocolDataProvider()
+  );
+  testEnv.walletBalanceProvider = await hre.ethers.getContractAt(
+    "WalletBalanceProvider",
+    await testEnv.addressesProvider.walletBalanceProvider()
+  );
 
   const wethAddress = await testEnv.addressesProvider.WETH();
   const daiAddress = await testEnv.addressesProvider.DAI();
@@ -125,25 +147,53 @@ const setupEnvironment = async () => {
 
   const aTokens = await testEnv.protocolDataProvider.getAllATokens();
 
-  const aWEthAddress = aTokens.find((aToken) => aToken.symbol === 'aWETH').tokenAddress;
-  const aDaiAddress = aTokens.find((aToken) => aToken.symbol === 'aDAI').tokenAddress;
-  const aLinkAddress = aTokens.find((aToken) => aToken.symbol === 'aLINK').tokenAddress;
+  const aWEthAddress = aTokens.find(
+    (aToken) => aToken.symbol === "aWETH"
+  ).tokenAddress;
+  const aDaiAddress = aTokens.find(
+    (aToken) => aToken.symbol === "aDAI"
+  ).tokenAddress;
+  const aLinkAddress = aTokens.find(
+    (aToken) => aToken.symbol === "aLINK"
+  ).tokenAddress;
 
   testEnv.aWeth = await hre.ethers.getContractAt("AToken", aWEthAddress);
   testEnv.aDai = await hre.ethers.getContractAt("AToken", aDaiAddress);
   testEnv.aLink = await hre.ethers.getContractAt("AToken", aLinkAddress);
 
-  const dWethAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.weth.address)).variableDebtTokenAddress;
-  const dDaiAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.dai.address)).variableDebtTokenAddress;
-  const dLinkAddress = (await testEnv.protocolDataProvider.getReserveTokensAddresses(testEnv.link.address)).variableDebtTokenAddress;
+  const dWethAddress = (
+    await testEnv.protocolDataProvider.getReserveTokensAddresses(
+      testEnv.weth.address
+    )
+  ).variableDebtTokenAddress;
+  const dDaiAddress = (
+    await testEnv.protocolDataProvider.getReserveTokensAddresses(
+      testEnv.dai.address
+    )
+  ).variableDebtTokenAddress;
+  const dLinkAddress = (
+    await testEnv.protocolDataProvider.getReserveTokensAddresses(
+      testEnv.link.address
+    )
+  ).variableDebtTokenAddress;
 
-  testEnv.dWeth = await hre.ethers.getContractAt("VariableDebtToken", dWethAddress);
-  testEnv.dDai = await hre.ethers.getContractAt("VariableDebtToken", dDaiAddress);
-  testEnv.dLink = await hre.ethers.getContractAt("VariableDebtToken", dLinkAddress);
-}
+  testEnv.dWeth = await hre.ethers.getContractAt(
+    "VariableDebtToken",
+    dWethAddress
+  );
+  testEnv.dDai = await hre.ethers.getContractAt(
+    "VariableDebtToken",
+    dDaiAddress
+  );
+  testEnv.dLink = await hre.ethers.getContractAt(
+    "VariableDebtToken",
+    dLinkAddress
+  );
+};
 
 const setupData = async () => {
-  const { deployer, users, dai, link, aWeth, lendingPool, wethGateway } = testEnv;
+  const { deployer, users, dai, link, aWeth, lendingPool, wethGateway } =
+    testEnv;
   // deployer == users[0]
 
   // Load 3 user accounts with mock DAI and LINK
@@ -156,53 +206,53 @@ const setupData = async () => {
   await dai.connect(users[2].signer).mint(users[2].address, toWei(1000));
   await link.connect(users[2].signer).mint(users[2].address, toWei(1000));
 
-  const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
-  await approveDaiTx.wait();
+  // const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
+  // await approveDaiTx.wait();
 
-  console.log("User 0 infinite approves the lendingPool for DAI reserve");
+  // console.log("User 0 infinite approves the lendingPool for DAI reserve");
 
-  const depositDaiTx = await lendingPool.deposit(
-    dai.address,
-    toWei(100),
-    deployer.address
-  )
-  await depositDaiTx.wait()
+  // const depositDaiTx = await lendingPool.deposit(
+  //   dai.address,
+  //   toWei(100),
+  //   deployer.address
+  // )
+  // await depositDaiTx.wait()
 
-  console.log("User 0 deposits 100 DAI");
+  // console.log("User 0 deposits 100 DAI");
 
-  // One time infinite approve
-  const approveLinkTx = await link.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
-  await approveLinkTx.wait();
+  // // One time infinite approve
+  // const approveLinkTx = await link.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
+  // await approveLinkTx.wait();
 
-  console.log("User 1 infinite approves the lendingPool for LINK reserve");
+  // console.log("User 1 infinite approves the lendingPool for LINK reserve");
 
-  const linkTx = await lendingPool.connect(users[1].signer).deposit(
-    link.address,
-    toWei(100),
-    users[1].address
-  )
-  await linkTx.wait()
+  // const linkTx = await lendingPool.connect(users[1].signer).deposit(
+  //   link.address,
+  //   toWei(100),
+  //   users[1].address
+  // )
+  // await linkTx.wait()
 
-  console.log("User 1 deposits 100 LINK");
+  // console.log("User 1 deposits 100 LINK");
 
-  const borrowLinkTx = await lendingPool.borrow(
-    link.address,
-    toWei(35),
-    deployer.address
-  )
-  await borrowLinkTx.wait()
+  // const borrowLinkTx = await lendingPool.borrow(
+  //   link.address,
+  //   toWei(35),
+  //   deployer.address
+  // )
+  // await borrowLinkTx.wait()
 
-  console.log("User 0 borrows 35 LINK against DAI as collateral");
+  // console.log("User 0 borrows 35 LINK against DAI as collateral");
 
-  // One time infinite approve aWeth
-  // Required at withdrawal time. i.e. do this before ETH deposit
-  const approveAWethTx = await aWeth.connect(users[1].signer).approve(wethGateway.address, MAX_UINT);
-  await approveAWethTx.wait();
+  // // One time infinite approve aWeth
+  // // Required at withdrawal time. i.e. do this before ETH deposit
+  // const approveAWethTx = await aWeth.connect(users[1].signer).approve(wethGateway.address, MAX_UINT);
+  // await approveAWethTx.wait();
 
-  console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
+  // console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
 
-  const Tx = await wethGateway.connect(users[1].signer).depositETH({ value: toWei(10) })
-  await Tx.wait()
+  // const Tx = await wethGateway.connect(users[1].signer).depositETH({ value: toWei(10) })
+  // await Tx.wait()
 
-  console.log("User 1 deposits 10 ETH");
-}
+  // console.log("User 1 deposits 10 ETH");
+};

@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
@@ -26,15 +25,6 @@ contract WalletBalanceProvider {
 
     address constant MOCK_ETH_ADDRESS =
         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
-
-    mapping(bytes32 => AggregatorV3Interface) private assetsSources;
-
-    constructor(bytes32[] memory assets, address[] memory sources) {
-        require(assets.length == sources.length, "INCONSISTENT_PARAMS_LENGTH");
-        for (uint256 i = 0; i < assets.length; i++) {
-            assetsSources[assets[i]] = AggregatorV3Interface(sources[i]);
-        }
-    }
 
     /**
     @dev Fallback function, don't accept any ETH
@@ -116,13 +106,5 @@ contract WalletBalanceProvider {
         balances[reserves.length] = balanceOf(user, MOCK_ETH_ADDRESS);
 
         return (reservesWithEth, balances);
-    }
-
-    function getPriceInUsd(bytes32 symbol) public view returns (int256) {
-        AggregatorV3Interface source = assetsSources[symbol];
-
-        (, int256 price, , , ) = source.latestRoundData();
-
-        return price;
     }
 }

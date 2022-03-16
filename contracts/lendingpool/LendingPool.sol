@@ -367,12 +367,6 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             collateralAsset
         ];
         DataTypes.ReserveData storage debtReserve = _reserves[debtAsset];
-        require(
-            collateralReserve.aTokenAddress != address(0) &&
-                debtReserve.aTokenAddress != address(0),
-            Errors.VL_INVALID_ASSET
-        );
-
         DataTypes.UserConfigurationMap storage userConfig = _usersConfig[user];
 
         LiquidationCallLocalVars memory vars;
@@ -441,11 +435,22 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
 
         debtReserve.updateState();
 
-        IVariableDebtToken(debtReserve.variableDebtTokenAddress).burn(
-            user,
-            vars.actualDebtToLiquidate,
-            debtReserve.variableBorrowIndex
-        );
+        if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
+            IVariableDebtToken(debtReserve.variableDebtTokenAddress).burn(
+                user,
+                vars.actualDebtToLiquidate,
+                debtReserve.variableBorrowIndex
+            );
+        } else {
+            // If the user doesn't have variable debt, no need to try to burn variable debt tokens
+            if (vars.userVariableDebt > 0) {
+                IVariableDebtToken(debtReserve.variableDebtTokenAddress).burn(
+                    user,
+                    vars.userVariableDebt,
+                    debtReserve.variableBorrowIndex
+                );
+            }
+        }
 
         debtReserve.updateInterestRates(
             debtAsset,

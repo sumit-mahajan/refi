@@ -13,10 +13,10 @@ describe("Price Oracle", function () {
         expect(await priceOracle.BASE_CURRENCY())
             .to.equal(await addressesProvider.WETH(), "Invalid BASE_CURRENCY")
 
-        expect(toEther(await priceOracle.BASE_CURRENCY_UNIT())).to.equal(1, "Invalid BASE_CURRENCY_UNIT")
+        expect(parseFloat(toEther(await priceOracle.BASE_CURRENCY_UNIT()))).to.equal(1, "Invalid BASE_CURRENCY_UNIT")
     });
 
-    it("Checks if mock price sources w.r.t. ETH working", async function () {
+    it("Checks if mock price sources working", async function () {
         const { priceOracle, weth, dai, link } = testEnv;
 
         const prices = await priceOracle.getAssetsPrices(
@@ -27,9 +27,9 @@ describe("Price Oracle", function () {
             ]
         )
 
-        expect(toEther(prices[0])).to.equal(1, "Wrong Price for WETH")
-        expect(toEther(prices[1])).to.equal(0.5, "Wrong Price for DAI")
-        expect(toEther(prices[2])).to.equal(0.5, "Wrong Price for LINK")
+        expect(parseFloat(toEther(prices[0]))).to.equal(1, "Wrong Price for WETH")
+        expect(parseFloat(toEther(prices[1]))).to.equal(0.5, "Wrong Price for DAI")
+        expect(parseFloat(toEther(prices[2]))).to.equal(0.5, "Wrong Price for LINK")
     });
 
     it("Tries to set price for mock DAI source", async function () {
@@ -41,22 +41,10 @@ describe("Price Oracle", function () {
         const Tx = await daiSource.setPrice(toWei(1));
         await Tx.wait();
 
-        const price = toEther(await priceOracle.getAssetPrice(dai.address));
+        const price = parseFloat(toEther(await priceOracle.getAssetPrice(dai.address)));
         expect(price).to.equal(1, "Price set for DAI source failed")
 
         const resetTx = await daiSource.setPrice(toWei(0.5));
         await resetTx.wait();
-    });
-
-    it("Checks if mock price sources w.r.t. USD working", async function () {
-        const { walletBalanceProvider } = testEnv;
-
-        const daiToUsd = await walletBalanceProvider.getPriceInUsd(ethers.utils.formatBytes32String("DAI"))
-        const ethToUsd = await walletBalanceProvider.getPriceInUsd(ethers.utils.formatBytes32String("ETH"))
-        const linkToUsd = await walletBalanceProvider.getPriceInUsd(ethers.utils.formatBytes32String("LINK"))
-
-        expect(ethToUsd).to.equal(300000000000, "Wrong Price for WETH")
-        expect(daiToUsd).to.equal(99000000, "Wrong Price for DAI")
-        expect(linkToUsd).to.equal(2000000000, "Wrong Price for LINK")
     });
 });
