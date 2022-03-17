@@ -33,7 +33,7 @@ contract AddressesProvider is IAddressesProvider {
     address public immutable walletBalanceProvider;
 
     // Rinkeby Addresses
-    address public WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
+    address public override WETH = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
     address public DAI = 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa;
     address public LINK = 0x01BE23585060835E02B77ef475b0Cc51aA1e0709;
 
@@ -45,7 +45,7 @@ contract AddressesProvider is IAddressesProvider {
     address public LINK_TO_USD = 0xd8bD0a1cB028a31AA859A21A3758685a95dE4623;
 
     // // Mumbai Addresses
-    // address public WETH = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // WMATIC
+    // address public override WETH = 0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889; // WMATIC
     // address public DAI = 0xcB1e72786A6eb3b44C2a2429e317c8a2462CFeb1;
     // address public LINK = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
 

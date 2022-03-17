@@ -7,6 +7,8 @@ pragma solidity ^0.8.0;
  * @author Aave
  **/
 interface IAddressesProvider {
+    function WETH() external view returns (address);
+
     /**
      * @dev Returns the address of the deployed PriceOracle contract
      * @return The address of the PriceOracle contract

@@ -76,13 +76,13 @@ describe("Lending Pool : Liquidation", function () {
         expect(toEther(userReserveData.healthFactor)).to.be.below(1, "Health factor not set");
     });
 
-    it("User 3 liquidates the unhealthy position", async function () {
+    it("Tests normal liquidation", async function () {
         const { deployer, users, lendingPool, dai, aDai, link, dLink, aLink } = testEnv;
 
         const approveLinkTx = await link.connect(users[2].signer).approve(lendingPool.address, MAX_UINT);
         await approveLinkTx.wait();
 
-        customPrint("User 3 infinite approves the lendingPool for LINK reserve");
+        customPrint("User 2 infinite approves the lendingPool for LINK reserve");
 
         const dLinkBalanceBefore = toEther(await dLink.balanceOf(deployer.address))
         const aDaiBalanceBefore = toEther(await aDai.balanceOf(deployer.address))
@@ -104,7 +104,7 @@ describe("Lending Pool : Liquidation", function () {
         )
         await Tx.wait()
 
-        customPrint("User 3 liquidates the unhealthy position");
+        customPrint("User 2 liquidates the unhealthy position");
 
         const dLinkBalanceAfter = toEther(await dLink.balanceOf(deployer.address))
         customPrint("User 0 has remaining debt of " + dLinkBalanceAfter + "LINK after liquidation");
@@ -148,22 +148,66 @@ describe("Lending Pool : Liquidation", function () {
         expect(linkPoolLiquidityAfter).to.be.above(linkPoolLiquidityBefore, "Invalid LINK liquidity")
     });
 
-    // it("Tests recieveAToken", async function () {
-    //     const { deployer, priceOracle, protocolDataProvider, dai, link } = testEnv;
+    it("Tests liquidation with recieveAToken=true", async function () {
+        const { deployer, users, priceOracle, lendingPool, dLink, dai, aDai, link } = testEnv;
 
-    //     // Check aToken transfer
-    //     // Only debtAsset state, interest updated
-    // });
+        const sourceAddress = await priceOracle.getSourceOfAsset(link.address);
+        const linkSource = await ethers.getContractAt("MockAggregatorV3", sourceAddress);
 
-    // it("Tests liquidation with ETH as collateral", async function () {
-    //     const { deployer, priceOracle, protocolDataProvider, dai, link } = testEnv;
+        const linkSourceTx = await linkSource.setPrice(toWei(1));
+        await linkSourceTx.wait();
 
-    // });
+        customPrint("Simulated increase in LINK price by 100%")
 
-    // it("Tests liquidation with ETH as debt", async function () {
-    //     const { deployer, priceOracle, protocolDataProvider, dai, link } = testEnv;
+        const linkReserveBefore = await lendingPool.getReserveData(link.address)
+        const daiReserveBefore = await lendingPool.getReserveData(dai.address)
 
-    // });
+        const dLinkBalanceBefore = toEther(await dLink.balanceOf(deployer.address))
+        const liquidatorADaiBalanceBefore = toEther(await aDai.balanceOf(users[2].address));
+
+        const Tx = await lendingPool.connect(users[2].signer).liquidationCall(
+            dai.address,
+            link.address,
+            deployer.address,
+            MAX_UINT,
+            true
+        )
+        await Tx.wait()
+
+        customPrint("User 2 liquidates the unhealthy position");
+
+        const dLinkBalanceAfter = toEther(await dLink.balanceOf(deployer.address))
+        customPrint("User 0 has remaining debt of " + dLinkBalanceAfter + "LINK after liquidation");
+
+        const aDaiBalanceAfter = toEther(await aDai.balanceOf(deployer.address))
+        customPrint("User 0 has remaining collateral of " + aDaiBalanceAfter + "DAI after liquidation");
+
+        const linkReserveAfter = await lendingPool.getReserveData(link.address)
+        const daiReserveAfter = await lendingPool.getReserveData(dai.address)
+
+        const liquidatorADaiBalanceAfter = toEther(await aDai.balanceOf(users[2].address));
+
+        // Check updated state, interest rates for only debt reserve
+        expect(linkReserveBefore.lastUpdateTimestamp)
+            .to.be.below(linkReserveAfter.lastUpdateTimestamp, "Timestamp not updated for Debt Reserve")
+        expect(linkReserveBefore.liquidityIndex)
+            .to.be.below(linkReserveAfter.liquidityIndex, "Liquidity index not updated for Debt Reserve")
+        expect(linkReserveBefore.variableBorrowIndex)
+            .to.be.below(linkReserveAfter.variableBorrowIndex, "Variable Borrow index not updated for Debt Reserve")
+        expect(linkReserveBefore.currentLiquidityRate)
+            .to.be.above(linkReserveAfter.currentLiquidityRate, "Liquidity Rate not updated for Debt Reserve")
+        expect(linkReserveBefore.currentVariableBorrowRate)
+            .to.be.above(linkReserveAfter.currentVariableBorrowRate, "Variable Borrow Rate not updated for Debt Reserve")
+
+        expect(daiReserveBefore.lastUpdateTimestamp)
+            .to.equal(daiReserveAfter.lastUpdateTimestamp, "Timestamp updated for Collateral Reserve")
+
+        // Check AToken transfer
+        expect(liquidatorADaiBalanceAfter).to.be.above(liquidatorADaiBalanceBefore + 41, "ATokens tokens not transferred");
+
+        // Check Debt tokens burned
+        expect(dLinkBalanceAfter).to.be.below(dLinkBalanceBefore, "Debt tokens not burnt");
+    });
 
     it("Resets the protocol after liquidation", async function () {
         const { deployer, users, priceOracle, lendingPool, dai, link } = testEnv;

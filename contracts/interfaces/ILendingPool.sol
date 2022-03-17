@@ -282,15 +282,15 @@ interface ILendingPool {
         view
         returns (DataTypes.UserConfigurationMap memory);
 
-    function getUserReserveStatus(address user, address asset) 
-        external 
-        view 
+    function getUserReserveStatus(address user, address asset)
+        external
+        view
         returns (bool isBorrowing, bool isUsingAsCollateral);
 
-    function getUserIsBorrowingAny(address user) 
-        external 
-        view 
-        returns (bool isBorrowingAny);    
+    function getUserIsBorrowingAny(address user)
+        external
+        view
+        returns (bool isBorrowingAny);
 
     /**
      * @dev Returns the normalized income normalized income of the reserve

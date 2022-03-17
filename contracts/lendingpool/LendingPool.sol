@@ -9,6 +9,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {IAToken} from "../interfaces/IAToken.sol";
+import {IWETH} from "../interfaces/IWETH.sol";
 import {IVariableDebtToken} from "../interfaces/IVariableDebtToken.sol";
 import {IPriceOracle} from "../interfaces/IPriceOracle.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
@@ -24,6 +25,7 @@ import {UserConfiguration} from "../libraries/configuration/UserConfiguration.so
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
 
 import {LendingPoolStorage} from "./LendingPoolStorage.sol";
+import "hardhat/console.sol";
 
 /**
  * @title LendingPool contract
@@ -501,11 +503,19 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         }
 
         // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
-        IERC20(debtAsset).safeTransferFrom(
-            msg.sender,
-            debtReserve.aTokenAddress,
-            vars.actualDebtToLiquidate
-        );
+        if (debtAsset == _addressesProvider.WETH()) {
+            IWETH(debtAsset).transferFrom(
+                msg.sender,
+                debtReserve.aTokenAddress,
+                vars.actualDebtToLiquidate
+            );
+        } else {
+            IERC20(debtAsset).safeTransferFrom(
+                msg.sender,
+                debtReserve.aTokenAddress,
+                vars.actualDebtToLiquidate
+            );
+        }
 
         emit LiquidationCall(
             collateralAsset,
@@ -676,11 +686,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         return _usersConfig[user];
     }
 
-    function getUserReserveStatus(address user, address asset) 
-        external 
-        view 
+    function getUserReserveStatus(address user, address asset)
+        external
+        view
         override
-        returns (bool isBorrowing, bool isUsingAsCollateral) 
+        returns (bool isBorrowing, bool isUsingAsCollateral)
     {
         DataTypes.ReserveData memory reserve = _reserves[asset];
         DataTypes.UserConfigurationMap memory userConfig = _usersConfig[user];
@@ -689,11 +699,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         isUsingAsCollateral = userConfig.isUsingAsCollateral(reserve.id);
     }
 
-    function getUserIsBorrowingAny(address user) 
-        external 
-        view 
+    function getUserIsBorrowingAny(address user)
+        external
+        view
         override
-        returns (bool isBorrowingAny) 
+        returns (bool isBorrowingAny)
     {
         DataTypes.UserConfigurationMap memory userConfig = _usersConfig[user];
         isBorrowingAny = userConfig.isBorrowingAny();

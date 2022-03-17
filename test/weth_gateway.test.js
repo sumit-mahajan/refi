@@ -10,6 +10,10 @@ describe("WETH Gateway", function () {
     before("User 1 deposits 100 DAI and 100 LINK", async function () {
         const { users, lendingPool, wethGateway, dai, link, aWeth } = testEnv;
 
+        // One time infinite approve DAI User 0
+        const approveDai0Tx = await dai.approve(lendingPool.address, MAX_UINT);
+        await approveDai0Tx.wait();
+
         // One time infinite approve DAI
         const approveDaiTx = await dai.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
         await approveDaiTx.wait();
@@ -25,6 +29,12 @@ describe("WETH Gateway", function () {
 
         customPrint("User 1 deposits 100 DAI");
 
+        // One time infinite approve LINK
+        const approveLinkTx = await link.connect(users[1].signer).approve(lendingPool.address, MAX_UINT);
+        await approveLinkTx.wait();
+
+        customPrint("User 1 infinite approves the lendingPool for LINK reserve");
+
         const linkTx = await lendingPool.connect(users[1].signer).deposit(
             link.address,
             toWei(100),
@@ -33,6 +43,12 @@ describe("WETH Gateway", function () {
         await linkTx.wait()
 
         customPrint("User 1 deposits 100 LINK");
+    })
+
+    it("Deposits ETH", async function () {
+        const { deployer, lendingPool, wethGateway, protocolDataProvider, weth, aWeth } = testEnv;
+
+        const reserveBefore = await lendingPool.getReserveData(weth.address)
 
         // One time infinite approve aWeth
         // Required at withdrawal time. i.e. do this before ETH deposit
@@ -40,12 +56,6 @@ describe("WETH Gateway", function () {
         await approveAWethTx.wait();
 
         customPrint("User 0 infinite approves the wEthGateway for aWeth tokens");
-    })
-
-    it("Deposits ETH", async function () {
-        const { deployer, lendingPool, wethGateway, protocolDataProvider, weth, aWeth } = testEnv;
-
-        const reserveBefore = await lendingPool.getReserveData(weth.address)
 
         const Tx = await wethGateway.depositETH({ value: toWei(10) })
         await Tx.wait()
@@ -186,5 +196,27 @@ describe("WETH Gateway", function () {
         expect(afterEthBalance).to.be.above(beforeEthBalance + 9.9, "Incorrect ETH balance"
         )
     });
+
+    it("Resets protocol for furthur tests", async function () {
+        const { deployer, users, lendingPool, protocolDataProvider, dai, link } = testEnv;
+
+        const Tx = await lendingPool.connect(users[1].signer).withdraw(
+            link.address,
+            MAX_UINT,
+            users[1].address
+        )
+        await Tx.wait()
+
+        customPrint("User 1 withdraws all deposited LINK");
+
+        const daiTx = await lendingPool.connect(users[1].signer).withdraw(
+            dai.address,
+            MAX_UINT,
+            users[1].address
+        )
+        await Tx.wait()
+
+        customPrint("User 1 withdraws all deposited DAI");
+    })
 
 });

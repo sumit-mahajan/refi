@@ -9,7 +9,7 @@ const toWei = (num) => {
 };
 
 const toEther = (num) => {
-  return ethers.utils.formatEther(num.toString());
+  return parseFloat(ethers.utils.formatEther(num.toString()));
 };
 
 const calculateAPY = (aprInWei) => {

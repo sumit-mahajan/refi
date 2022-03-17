@@ -88,19 +88,19 @@ describe("Lending Pool :: Withdraw", function () {
     it("Checks if user recieved interest with withdrawal", async function () {
         const { deployer, users, lendingPool, protocolDataProvider, link, aLink } = testEnv;
 
-        const beforeBalance = toEther(await link.balanceOf(deployer.address))
+        const beforeBalance = toEther(await link.balanceOf(users[1].address))
 
         const Tx = await lendingPool.connect(users[1].signer).withdraw(
             link.address,
             MAX_UINT,
-            deployer.address
+            users[1].address
         )
         await Tx.wait()
 
         customPrint("User 1 withdraws all deposited LINK");
 
-        const aLinkBalance = toEther(await aLink.balanceOf(deployer.address))
-        const afterBalance = toEther(await link.balanceOf(deployer.address));
+        const aLinkBalance = toEther(await aLink.balanceOf(users[1].address))
+        const afterBalance = toEther(await link.balanceOf(users[1].address));
 
         // Interest is earned on LINK
         expect(afterBalance).to.be.above(beforeBalance + 1, "Deposit not received")
