@@ -41,7 +41,7 @@ module.exports = {
     },
     rinkeby: {
       url: config.rinkebyRPCUrl,
-      accounts: [config.rinkebyPrivateKey]
+      accounts: config.rinkebyPrivateKeys
     }
   },
   paths: {

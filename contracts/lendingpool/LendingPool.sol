@@ -676,6 +676,29 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         return _usersConfig[user];
     }
 
+    function getUserReserveStatus(address user, address asset) 
+        external 
+        view 
+        override
+        returns (bool isBorrowing, bool isUsingAsCollateral) 
+    {
+        DataTypes.ReserveData memory reserve = _reserves[asset];
+        DataTypes.UserConfigurationMap memory userConfig = _usersConfig[user];
+
+        isBorrowing = userConfig.isBorrowing(reserve.id);
+        isUsingAsCollateral = userConfig.isUsingAsCollateral(reserve.id);
+    }
+
+    function getUserIsBorrowingAny(address user) 
+        external 
+        view 
+        override
+        returns (bool isBorrowingAny) 
+    {
+        DataTypes.UserConfigurationMap memory userConfig = _usersConfig[user];
+        isBorrowingAny = userConfig.isBorrowingAny();
+    }
+
     /**
      * @dev Returns the normalized income per unit of asset
      * @param asset The address of the underlying asset of the reserve
