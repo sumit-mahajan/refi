@@ -16,7 +16,7 @@ const DepositSection = ({
 
   return (
     <div className="deposit">
-      <h4>Deposited Asset</h4>
+      <h4>Deposit Asset</h4>
       <hr className="mb-5" />
 
       <div className="mb-5">

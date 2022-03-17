@@ -141,11 +141,10 @@ contract ReserveInterestRateStrategy is IReserveInterestRateStrategy {
                 )
             );
         }
-        // console.log("VariableBorrowRate", vars.currentVariableBorrowRate);
 
-        vars.currentLiquidityRate = totalVariableDebt
-            .rayMul(vars.utilizationRate)
-            .percentMul(PercentageMath.PERCENTAGE_FACTOR);
+        vars.currentLiquidityRate = vars.currentVariableBorrowRate.rayMul(
+            vars.utilizationRate
+        );
 
         return (vars.currentLiquidityRate, vars.currentVariableBorrowRate);
     }

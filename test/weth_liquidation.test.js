@@ -8,7 +8,7 @@ require('./weth_gateway.test')
 describe("WethGateway : Liquidation", function () {
 
     before("User 0 deposits 100 ETH and User 1 deposits 200 LINK", async function () {
-        const { deployer, users, link, lendingPool, aWeth, wethGateway } = testEnv;
+        const { deployer, users, link, lendingPool, aWeth, dWeth, wethGateway } = testEnv;
 
         // One time infinite approve aWeth
         // Required at withdrawal time. i.e. do this before ETH deposit
@@ -36,6 +36,11 @@ describe("WethGateway : Liquidation", function () {
         await linkTx.wait()
 
         customPrint("User 1 deposits 200 LINK");
+
+        const approveDelegationTx = await dWeth.connect(users[1].signer).approveDelegation(wethGateway.address, toWei(75));
+        await approveDelegationTx.wait()
+
+        customPrint("User 1 approves WethGateway contract to borrow 75 ETH on behalf of itself");
 
         const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(75))
         await borrowEthTx.wait()

@@ -40,14 +40,10 @@ library ValidationLogic {
      * @param amount The amount to be deposited
      */
     function validateDeposit(
-        address asset,
         uint256 amount,
-        mapping(address => DataTypes.ReserveData) storage reserves
+        DataTypes.ReserveData storage reserve
     ) external view {
-        require(
-            reserves[asset].aTokenAddress != address(0),
-            Errors.VL_INVALID_ASSET
-        );
+        require(reserve.aTokenAddress != address(0), Errors.VL_INVALID_ASSET);
         require(amount != 0, Errors.VL_INVALID_AMOUNT);
     }
 

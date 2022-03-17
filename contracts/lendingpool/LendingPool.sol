@@ -87,7 +87,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
     ) external override {
         DataTypes.ReserveData storage reserve = _reserves[asset];
 
-        ValidationLogic.validateDeposit(asset, amount, _reserves);
+        ValidationLogic.validateDeposit(amount, reserve);
 
         address aToken = reserve.aTokenAddress;
 

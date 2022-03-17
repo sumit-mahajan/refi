@@ -39,14 +39,17 @@ const AssetsProvider = ({ children }) => {
         utilizationRate,
       } = assetInfo;
 
+      console.log("Liquidity rate ", asset.symbol, toEther(liquidityRate))
+      console.log("Borrow rate ", asset.symbol, toEther(variableBorrowRate))
+
       const data = {
-        symbol: asset.symbol,
+        symbol: isWETH ? "ETH" : asset.symbol,
         tokenAddress: asset.tokenAddress,
         depositAPY: calculateAPY(liquidityRate),
         availableLiquidity: priceInUsd * toEther(availableLiquidity),
         borrowAPY: calculateAPY(variableBorrowRate),
         totalBorrowed: priceInUsd * toEther(totalVariableDebt),
-        utilizationRatio: toEther(utilizationRate),
+        utilizationRatio: utilizationRate / 1e27,
         isERC20: isWETH,
       };
 

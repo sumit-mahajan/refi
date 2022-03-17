@@ -88,6 +88,11 @@ describe("WETH Gateway", function () {
             )
         )
 
+        const approveDelegationTx = await dWeth.connect(users[1].signer).approveDelegation(wethGateway.address, toWei(10));
+        await approveDelegationTx.wait()
+
+        customPrint("User 1 approves WethGateway contract to borrow 10 ETH on behalf of itself");
+
         const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(10))
         await borrowEthTx.wait()
 

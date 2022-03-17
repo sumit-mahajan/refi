@@ -78,6 +78,7 @@ function HomePage() {
           >
             <ListTile
               symbol={asset.symbol}
+              image={"/images/crypto_logos/" + asset.symbol.toLowerCase() + ".svg"}
               marketSize={asset.availableLiquidity + asset.totalBorrowed}
               depositAPY={asset.depositAPY}
               borrowAPY={asset.borrowAPY}

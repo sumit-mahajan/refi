@@ -111,13 +111,22 @@ contract ProtocolDataProvider {
             ADDRESSES_PROVIDER.getLendingPool()
         ).getReserveData(asset);
 
-        utilizationRate = totalVariableDebt == 0
+        uint256 _totalVariableDebt = IERC20Detailed(
+            reserve.variableDebtTokenAddress
+        ).totalSupply();
+        uint256 _availableLiquidity = IERC20Detailed(asset).balanceOf(
+            reserve.aTokenAddress
+        );
+
+        utilizationRate = _totalVariableDebt == 0
             ? 0
-            : totalVariableDebt.rayDiv(availableLiquidity.add(totalVariableDebt));
+            : _totalVariableDebt.rayDiv(
+                _availableLiquidity.add(_totalVariableDebt)
+            );
 
         return (
-            IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
-            IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
+            _availableLiquidity,
+            _totalVariableDebt,
             reserve.currentLiquidityRate,
             reserve.currentVariableBorrowRate,
             reserve.liquidityIndex,
@@ -162,16 +171,17 @@ contract ProtocolDataProvider {
         // health Factor and availbletoborrow calculation
         // First I need to create reservesData object
         uint256 availableBorrowsETH;
-        (
-            ,
-            ,
-            availableBorrowsETH,
-            ,
-            ,
-            healthFactor
-        ) = ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getUserAccountData(user);
+        (, , availableBorrowsETH, , , healthFactor) = ILendingPool(
+            ADDRESSES_PROVIDER.getLendingPool()
+        ).getUserAccountData(user);
 
-        availableToBorrow = availableBorrowsETH.mul(10**reserve.configuration.getDecimalsMemory()).div(IPriceOracle(ADDRESSES_PROVIDER.getPriceOracle()).getAssetPrice(asset));
+        availableToBorrow = availableBorrowsETH
+            .mul(10**reserve.configuration.getDecimalsMemory())
+            .div(
+                IPriceOracle(ADDRESSES_PROVIDER.getPriceOracle()).getAssetPrice(
+                    asset
+                )
+            );
 
         usageAsCollateralEnabled = userConfig.isUsingAsCollateral(reserve.id);
         isBorrowed = userConfig.isBorrowing(reserve.id);

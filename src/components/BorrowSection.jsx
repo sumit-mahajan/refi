@@ -16,15 +16,15 @@ const BorrowSection = ({
 
   return (
     <div className="borrow">
-      <h4>Borrowed Asset</h4>
+      <h4>Borrow Asset</h4>
       <hr className="mb-5" />
 
-      <div className="mb-4">
+      <div className="mb-5">
         <SimpleTile
           name="Currently Borrowed"
           value={currentBorrowed.toFixed(2) + " " + symbol}
         />
-        <SimpleTile name="Health Factor" value={healthFactor.toFixed(2)} />
+        {/* <SimpleTile name="Health Factor" value={healthFactor.toFixed(2)} /> */}
       </div>
 
       <InputField

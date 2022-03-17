@@ -210,7 +210,7 @@ function AssetPage() {
         <div className="asset-name mb-5">
           <img
             className="mr-2"
-            src="https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png"
+            src={"/images/crypto_logos/" + asset.symbol.toLowerCase() + ".svg"}
             alt="Crypto Icon"
           />
           <h4>{asset.symbol}</h4>
@@ -240,22 +240,13 @@ function AssetPage() {
           <AssetInfo name="Liquidation Threshold" value="80%" />
           <AssetInfo name="Liquidation Penalty" value="10%" />
           <AssetInfo
-            name="Utilization Ratio"
-            value={asset.utilizationRatio + "%"}
+            name="Percentage Utilization"
+            value={(asset.utilizationRatio * 100).toFixed(2) + "%"}
           />
         </div>
       </section>
 
       <section className="market-container mb-8">
-        <BorrowSection
-          currentBorrowed={positions.currentBorrowed}
-          healthFactor={positions.healthFactor}
-          walletBalance={positions.walletBalance}
-          availableToBorrow={positions.availableToBorrow}
-          symbol={asset.symbol}
-          borrowAsset={borrowAsset}
-          repayDebt={repayDebt}
-        />
         <DepositSection
           currentDeposited={positions.currentDeposited}
           walletBalance={positions.walletBalance}
@@ -264,6 +255,15 @@ function AssetPage() {
           isApproved={positions.isApproved}
           approveToken={approveToken}
           withdrawAsset={withdrawAsset}
+        />
+        <BorrowSection
+          currentBorrowed={positions.currentBorrowed}
+          healthFactor={positions.healthFactor}
+          walletBalance={positions.walletBalance}
+          availableToBorrow={positions.availableToBorrow}
+          symbol={asset.symbol}
+          borrowAsset={borrowAsset}
+          repayDebt={repayDebt}
         />
       </section>
     </main>

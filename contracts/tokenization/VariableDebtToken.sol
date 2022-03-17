@@ -78,7 +78,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
         uint256 index
     ) external override onlyLendingPool returns (bool) {
         if (user != onBehalfOf) {
-            // _decreaseBorrowAllowance(onBehalfOf, user, amount);
+            _decreaseBorrowAllowance(onBehalfOf, user, amount);
         }
 
         uint256 previousBalance = super.balanceOf(onBehalfOf);
