@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import "../styles/asset-page.scss";
 import { useConnection } from "../utils/connection_provider/connection_provider";
 import { useParams } from "react-router-dom";
-import { MAX_UINT, toEther } from "../utils/helpers";
+import { getImageFromSymbol, MAX_UINT, toEther } from "../utils/helpers";
 import BorrowSection from "../components/BorrowSection";
 import DepositSection from "../components/DepositSection";
 import { toWei } from "../utils/helpers";
@@ -17,14 +17,13 @@ function AssetPage() {
     lendingPoolContract,
     daiContract,
     linkContract,
-    wethContract,
+    awethContract,
     wETHGatewayContract,
     accounts,
+    dwethContract,
   } = useConnection();
 
   let { state: assets, refresh } = useAssetProvider();
-
-  console.log("REfreshsing");
 
   const [asset, setAsset] = useState();
 
@@ -59,8 +58,8 @@ function AssetPage() {
           lendingPoolContract.address
         );
         return toEther(approvedLINK) !== 0;
-      case "WETH":
-        const approvedaWETH = await wethContract.allowance(
+      case "ETH":
+        const approvedaWETH = await awethContract.allowance(
           accounts[0],
           wETHGatewayContract.address
         );
@@ -68,10 +67,11 @@ function AssetPage() {
       default:
         break;
     }
-  }, [asset, daiContract, linkContract, wethContract]);
+  }, [asset, daiContract, linkContract, awethContract]);
 
   const fetchPositons = useCallback(async () => {
     const isApproved = await isTokenApproved();
+    const isDwethApproved = await isDWETHApproved();
 
     //Fetch user data
     const userData = await protocolDataProvider.getUserReserveData(
@@ -79,10 +79,20 @@ function AssetPage() {
       accounts[0]
     );
 
-    const walletBalance = await walletBalanceProvider.balanceOf(
-      accounts[0],
-      asset.tokenAddress
-    );
+    let walletBalance = 0;
+
+    if (asset.symbol === "ETH") {
+      walletBalance = await walletBalanceProvider.balanceOf(
+        accounts[0],
+        "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+      );
+    } else {
+      walletBalance = await walletBalanceProvider.balanceOf(
+        accounts[0],
+        asset.tokenAddress
+      );
+    }
+
     const {
       currentVariableDebt,
       healthFactor,
@@ -97,6 +107,7 @@ function AssetPage() {
       walletBalance: toEther(walletBalance),
       availableToBorrow: toEther(availableToBorrow),
       isApproved: isApproved,
+      isDwethApproved: isDwethApproved,
     });
   }, [isTokenApproved, protocolDataProvider, walletBalanceProvider]);
 
@@ -109,7 +120,7 @@ function AssetPage() {
 
   const depositERC20 = async (amount) => {
     try {
-      if (asset.symbol === "WETH") {
+      if (asset.symbol === "ETH") {
         await wETHGatewayContract.depositETH({
           value: toWei(amount),
         });
@@ -137,8 +148,9 @@ function AssetPage() {
         await linkContract.approve(lendingPoolContract.address, MAX_UINT);
         break;
 
-      case "WETH":
-        await wethContract.approve(wETHGatewayContract.address, MAX_UINT);
+      case "ETH":
+        console.log("Here");
+        await awethContract.approve(wETHGatewayContract.address, MAX_UINT);
         break;
       default:
         break;
@@ -147,7 +159,7 @@ function AssetPage() {
 
   const borrowAsset = async (amount) => {
     try {
-      if (asset.symbol === "WETH") {
+      if (asset.symbol === "ETH") {
         await wETHGatewayContract.borrowETH(toWei(amount));
       } else {
         await lendingPoolContract.borrow(
@@ -165,7 +177,7 @@ function AssetPage() {
 
   const repayDebt = async (amount) => {
     try {
-      if (asset.symbol === "WETH") {
+      if (asset.symbol === "ETH") {
         await wETHGatewayContract.repayETH(toWei(amount), {
           value: toWei(amount),
         });
@@ -185,7 +197,7 @@ function AssetPage() {
 
   const withdrawAsset = async (amount) => {
     try {
-      if (asset.symbol === "WETH") {
+      if (asset.symbol === "ETH") {
         await wETHGatewayContract.withdrawETH(toWei(amount));
       } else {
         await lendingPoolContract.withdraw(
@@ -201,6 +213,21 @@ function AssetPage() {
     }
   };
 
+  const isDWETHApproved = async () => {
+    const value = await dwethContract.borrowAllowance(
+      accounts[0],
+      wETHGatewayContract.address
+    );
+    return toEther(value) !== 0;
+  };
+
+  const approveDWETH = async () => {
+    await dwethContract.approveDelegation(
+      wETHGatewayContract.address,
+      MAX_UINT
+    );
+  };
+
   if (asset === undefined) {
     return <p>Loading</p>;
   }
@@ -210,7 +237,7 @@ function AssetPage() {
         <div className="asset-name mb-5">
           <img
             className="mr-2"
-            src={"/images/crypto_logos/" + asset.symbol.toLowerCase() + ".svg"}
+            src={getImageFromSymbol(asset.symbol)}
             alt="Crypto Icon"
           />
           <h4>{asset.symbol}</h4>
@@ -247,6 +274,17 @@ function AssetPage() {
       </section>
 
       <section className="market-container mb-8">
+        <BorrowSection
+          currentBorrowed={positions.currentBorrowed}
+          healthFactor={positions.healthFactor}
+          walletBalance={positions.walletBalance}
+          availableToBorrow={positions.availableToBorrow}
+          symbol={asset.symbol}
+          borrowAsset={borrowAsset}
+          isApproved={positions.isDwethApproved}
+          approveDWETH={approveDWETH}
+          repayDebt={repayDebt}
+        />
         <DepositSection
           currentDeposited={positions.currentDeposited}
           walletBalance={positions.walletBalance}
@@ -255,15 +293,6 @@ function AssetPage() {
           isApproved={positions.isApproved}
           approveToken={approveToken}
           withdrawAsset={withdrawAsset}
-        />
-        <BorrowSection
-          currentBorrowed={positions.currentBorrowed}
-          healthFactor={positions.healthFactor}
-          walletBalance={positions.walletBalance}
-          availableToBorrow={positions.availableToBorrow}
-          symbol={asset.symbol}
-          borrowAsset={borrowAsset}
-          repayDebt={repayDebt}
         />
       </section>
     </main>

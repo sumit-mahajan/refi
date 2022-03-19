@@ -4,6 +4,7 @@ import ListTile from "../components/ListTile";
 
 import { useNavigate } from "react-router-dom";
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
+import { getImageFromSymbol } from "../utils/helpers";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -78,7 +79,8 @@ function HomePage() {
           >
             <ListTile
               symbol={asset.symbol}
-              image={"/images/crypto_logos/" + asset.symbol.toLowerCase() + ".svg"}
+              // image={"/images/" + asset.symbol.toLowerCase() + ".svg"}
+              image={getImageFromSymbol(asset.symbol)}
               marketSize={asset.availableLiquidity + asset.totalBorrowed}
               depositAPY={asset.depositAPY}
               borrowAPY={asset.borrowAPY}

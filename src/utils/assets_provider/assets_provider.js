@@ -39,9 +39,6 @@ const AssetsProvider = ({ children }) => {
         utilizationRate,
       } = assetInfo;
 
-      console.log("Liquidity rate ", asset.symbol, toEther(liquidityRate))
-      console.log("Borrow rate ", asset.symbol, toEther(variableBorrowRate))
-
       const data = {
         symbol: isWETH ? "ETH" : asset.symbol,
         tokenAddress: asset.tokenAddress,

@@ -6,7 +6,7 @@ dataSources:
     name: LendingPool
     network: rinkeby
     source:
-      address: "0x68619377d6dD11903CF7Ce32C160185644a1f57b"
+      address: "0x315E8ee29a3c5a9d99234f5d69833705e0e9C7B5"
       abi: LendingPool
       startBlock: 10263469
     mapping:

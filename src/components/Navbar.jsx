@@ -4,6 +4,8 @@ import "./navbar.scss";
 import { useNavigate } from "react-router";
 import { useConnection } from "../utils/connection_provider/connection_provider";
 import { supportedNetworks } from "../utils/connection_provider/network_config";
+import { Link } from "react-router-dom";
+import { displayAddress } from "../utils/helpers";
 
 function Navbar() {
   const { chainId, accounts, connectWallet } = useConnection();
@@ -14,10 +16,12 @@ function Navbar() {
 
   return (
     <nav className="navbar mt-4">
-      <a href="/#"><h3 className="logo">REFI</h3></a>
+      <a href="/#">
+        <h3 className="logo">REFI</h3>
+      </a>
       <div className="nav-options">
+        <Link to="/liquidation">Liquidation</Link>
         <h6 className="info-box">{supportedNetworks[chainId].name}</h6>
-
         <h6
           className="info-box"
           onClick={connectWallet}
@@ -25,14 +29,7 @@ function Navbar() {
             cursor: isConnected ? "inherit" : "pointer",
           }}
         >
-          {isConnected ?
-            accounts[0].substring(0, 5) +
-            "..." +
-            accounts[0].substring(
-              accounts[0].length - 3,
-              accounts[0].length
-            )
-            : "Connect"}
+          {isConnected ? displayAddress(accounts[0]) : "Connect"}
         </h6>
       </div>
     </nav>

@@ -10,6 +10,8 @@ const BorrowSection = ({
   walletBalance,
   borrowAsset,
   repayDebt,
+  isApproved,
+  approveDWETH,
 }) => {
   const [input, setInput] = useState(0);
   const max = () => setInput(walletBalance ?? 0);
@@ -32,12 +34,23 @@ const BorrowSection = ({
         setInput={setInput}
         leftText={"Wallet Balance - " + walletBalance.toFixed(2) + " " + symbol}
         rightText={
-          "Available to Borrow - " + availableToBorrow.toFixed(2) + " " + symbol
+          "Available to Borrow - " + availableToBorrow.toFixed(4) + " " + symbol
         }
         max={max}
       />
 
       <div className="buttons">
+        {symbol === "ETH" ? (
+          isApproved ? (
+            <></>
+          ) : (
+            <button className="outlined-button" onClick={approveDWETH}>
+              Approve
+            </button>
+          )
+        ) : (
+          <></>
+        )}
         <button
           className="outlined-button"
           onClick={() => {

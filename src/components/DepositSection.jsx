@@ -13,7 +13,6 @@ const DepositSection = ({
 }) => {
   const [input, setInput] = useState(0);
   const max = () => setInput(walletBalance ?? 0);
-
   return (
     <div className="deposit">
       <h4>Deposit Asset</h4>
