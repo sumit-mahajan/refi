@@ -6,8 +6,10 @@ import ProtocolDataProvider from "../../artifacts/contracts/data_provider/Protoc
 import WalletBalanceProvider from "../../artifacts/contracts/data_provider/WalletBalanceProvider.sol/WalletBalanceProvider.json";
 import LendingPool from "../../artifacts/contracts/lendingpool/LendingPool.sol/LendingPool.json";
 import WETHGateway from "../../artifacts/contracts/utils/WETHGateway.sol/WETHGateway.json";
-import ERCMock20 from "../../artifacts/contracts/mocks/MockERC20.sol/MockERC20.json";
-import aWETH from "../../artifacts/contracts/tokenization/AToken.sol/AToken.json";
+import ERC20 from "../../artifacts/contracts/mocks/MockERC20.sol/MockERC20.json";
+import aToken from "../../artifacts/contracts/tokenization/AToken.sol/AToken.json";
+import MockWETH from "../../artifacts/contracts/mocks/MockWETH.sol/MockWETH.json";
+import dToken from "../../artifacts/contracts/tokenization/VariableDebtToken.sol/VariableDebtToken.json";
 
 const fetchContracts = async (provider, chainId) => {
   const addressProvider = new ethers.Contract(
@@ -42,23 +44,35 @@ const fetchContracts = async (provider, chainId) => {
 
   const daiContract = new ethers.Contract(
     await addressProvider.DAI(),
-    ERCMock20.abi,
+    ERC20.abi,
     provider
   );
 
   const linkContract = new ethers.Contract(
     await addressProvider.LINK(),
-    ERCMock20.abi,
+    ERC20.abi,
     provider
   );
 
   const aTokens = await protocolDataProvider.getAllATokens();
 
-  const aWEthAddress = aTokens.find(
+  const wethContract = new ethers.Contract(
+    await addressProvider.WETH(),
+    MockWETH.abi,
+    provider
+  );
+
+  const awethAddress = aTokens.find(
     (aToken) => aToken.symbol === "aWETH"
   ).tokenAddress;
 
-  const wethContract = new ethers.Contract(aWEthAddress, aWETH.abi, provider);
+  const awethContract = new ethers.Contract(awethAddress, aToken.abi, provider);
+
+  const dwethAddress = (
+    await protocolDataProvider.getReserveTokensAddresses(wethContract.address)
+  ).variableDebtTokenAddress;
+
+  const dwethContract = new ethers.Contract(dwethAddress, dToken.abi, provider);
 
   return {
     addressProvider,
@@ -69,6 +83,8 @@ const fetchContracts = async (provider, chainId) => {
     daiContract,
     linkContract,
     wethContract,
+    awethContract,
+    dwethContract,
   };
 };
 

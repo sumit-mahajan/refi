@@ -37,14 +37,14 @@ module.exports = {
     },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
-      accounts: [config.mumbaiPrivateKey]
+      accounts: [config.mumbaiPrivateKey],
     },
     rinkeby: {
       url: config.rinkebyRPCUrl,
-      accounts: config.rinkebyPrivateKeys
-    }
+      accounts: [config.rinkebyPrivateKey1, config.rinkebyPrivateKey2],
+    },
   },
   paths: {
-    artifacts: './src/artifacts'
-  }
+    artifacts: "./src/artifacts",
+  },
 };

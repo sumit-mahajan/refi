@@ -58,8 +58,8 @@ async function main() {
 
   // For UI testing
   testEnv.addressesProvider = addressesProvider;
-  await setupEnvironment();
-  await setupData();
+  // await setupEnvironment();
+  // await setupData();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

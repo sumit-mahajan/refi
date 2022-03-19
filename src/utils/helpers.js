@@ -1,3 +1,4 @@
+import { gql } from "@apollo/client";
 const { ethers } = require("ethers");
 
 const customPrint = (str) => {
@@ -30,11 +31,47 @@ const MAX_UINT =
 
 const WETH_ADDRESS = "0x851356ae760d987E095750cCeb3bC6014560891C";
 
-module.exports = {
+const query = gql`
+  {
+    users(where: { isBorrowingAny: true }) {
+      id
+      collateralReserve: reserves(where: { isUsingAsCollateral: true }) {
+        reserve
+      }
+      borrowReserve: reserves(where: { isBorrowing: true }) {
+        reserve
+      }
+    }
+  }
+`;
+
+const getImageFromSymbol = (symbol) => {
+  switch (symbol) {
+    case "ETH":
+      return "/images/eth.svg";
+    case "DAI":
+      return "/images/dai.svg";
+    case "LINK":
+      return "/images/link.svg";
+
+    default:
+      return "/images/eth.svg";
+  }
+};
+
+const displayAddress = (address) =>
+  address.substring(0, 5) +
+  "..." +
+  address.substring(address.length - 3, address.length);
+
+export {
   toWei,
   toEther,
   customPrint,
+  query,
   calculateAPY,
+  getImageFromSymbol,
+  displayAddress,
   MAX_UINT,
   WETH_ADDRESS,
 };

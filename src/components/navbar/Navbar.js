@@ -11,8 +11,6 @@ import "./navbar.scss";
 function Navbar() {
   const { chainId, accounts, connectWallet } = useConnection();
 
-  const navigate = useNavigate();
-
   return (
     <div>
       <nav className="navbar flex-betn-ctr">
@@ -31,6 +29,7 @@ function Navbar() {
             <Chip
               bgColor="var(--accent)"
               textColor="white"
+              onclick={() => {}}
               content={
                 accounts[0].substring(0, 5) +
                 "..." +

@@ -37,6 +37,7 @@ export function ConnectionProvider(props) {
         accounts,
         chainId,
         ...contracts,
+        provider,
       });
     } catch (e) {
       setState({ ...state, error: e.message });
@@ -60,7 +61,7 @@ export function ConnectionProvider(props) {
       } else {
         const contracts = await fetchContracts(provider, defaultChainId);
 
-        setState({ ...state, ...contracts });
+        setState({ ...state, ...contracts, provider });
       }
     } catch (error) {
       console.log("Error ConnectionProvider -> ", error);
