@@ -44,4 +44,17 @@ library DataTypes {
     struct UserConfigurationMap {
         uint256 data;
     }
+
+    struct UserReputation {
+        // Historical score till last calculation
+        uint256 lastScore;
+
+        // Percentage of borrowed amount w.r.t. collateral at the start of ongoing loan 
+        uint256 lastPercentageBorrowed;
+
+        // Latest timestamp at which historical score was updated
+        uint256 lastUpdateTimestamp;
+    }
+
+    enum UserClass { Diamond, Gold, Silver, Bronze };
 }

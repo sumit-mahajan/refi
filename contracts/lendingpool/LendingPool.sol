@@ -111,66 +111,6 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
     }
 
     /**
-     * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
-     * E.g. User has 100 aUSDC, calls withdraw() and receives 100 USDC, burning the 100 aUSDC
-     * @param asset The address of the underlying asset to withdraw
-     * @param amount The underlying amount to be withdrawn
-     *   - Send the value type(uint256).max in order to withdraw the whole aToken balance
-     * @param to Address that will receive the underlying, same as msg.sender if the user
-     *   wants to receive it on his own wallet, or a different address if the beneficiary is a
-     *   different wallet
-     * @return The final amount withdrawn
-     **/
-    function withdraw(
-        address asset,
-        uint256 amount,
-        address to
-    ) external override returns (uint256) {
-        DataTypes.ReserveData storage reserve = _reserves[asset];
-
-        address aToken = reserve.aTokenAddress;
-
-        uint256 userBalance = IAToken(aToken).balanceOf(msg.sender);
-
-        uint256 amountToWithdraw = amount;
-
-        if (amount == type(uint256).max) {
-            amountToWithdraw = userBalance;
-        }
-
-        ValidationLogic.validateWithdraw(
-            asset,
-            amountToWithdraw,
-            userBalance,
-            _reserves,
-            _usersConfig[msg.sender],
-            _reservesList,
-            _reservesCount,
-            _addressesProvider.getPriceOracle()
-        );
-
-        reserve.updateState();
-
-        reserve.updateInterestRates(asset, aToken, 0, amountToWithdraw);
-
-        if (amountToWithdraw == userBalance) {
-            _usersConfig[msg.sender].setUsingAsCollateral(reserve.id, false);
-            emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
-        }
-
-        IAToken(aToken).burn(
-            msg.sender,
-            to,
-            amountToWithdraw,
-            reserve.liquidityIndex
-        );
-
-        emit Withdraw(asset, msg.sender, to, amountToWithdraw);
-
-        return amountToWithdraw;
-    }
-
-    /**
      * @dev Allows users to borrow a specific `amount` of the reserve underlying asset, provided that the borrower
      * already deposited enough collateral, or he was given enough allowance by a credit delegator on the
      * corresponding debt token (StableDebtToken or VariableDebtToken)
@@ -296,6 +236,66 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         emit Repay(asset, onBehalfOf, msg.sender, paybackAmount);
 
         return paybackAmount;
+    }
+
+    /**
+     * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
+     * E.g. User has 100 aUSDC, calls withdraw() and receives 100 USDC, burning the 100 aUSDC
+     * @param asset The address of the underlying asset to withdraw
+     * @param amount The underlying amount to be withdrawn
+     *   - Send the value type(uint256).max in order to withdraw the whole aToken balance
+     * @param to Address that will receive the underlying, same as msg.sender if the user
+     *   wants to receive it on his own wallet, or a different address if the beneficiary is a
+     *   different wallet
+     * @return The final amount withdrawn
+     **/
+    function withdraw(
+        address asset,
+        uint256 amount,
+        address to
+    ) external override returns (uint256) {
+        DataTypes.ReserveData storage reserve = _reserves[asset];
+
+        address aToken = reserve.aTokenAddress;
+
+        uint256 userBalance = IAToken(aToken).balanceOf(msg.sender);
+
+        uint256 amountToWithdraw = amount;
+
+        if (amount == type(uint256).max) {
+            amountToWithdraw = userBalance;
+        }
+
+        ValidationLogic.validateWithdraw(
+            asset,
+            amountToWithdraw,
+            userBalance,
+            _reserves,
+            _usersConfig[msg.sender],
+            _reservesList,
+            _reservesCount,
+            _addressesProvider.getPriceOracle()
+        );
+
+        reserve.updateState();
+
+        reserve.updateInterestRates(asset, aToken, 0, amountToWithdraw);
+
+        if (amountToWithdraw == userBalance) {
+            _usersConfig[msg.sender].setUsingAsCollateral(reserve.id, false);
+            emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
+        }
+
+        IAToken(aToken).burn(
+            msg.sender,
+            to,
+            amountToWithdraw,
+            reserve.liquidityIndex
+        );
+
+        emit Withdraw(asset, msg.sender, to, amountToWithdraw);
+
+        return amountToWithdraw;
     }
 
     /**
@@ -907,6 +907,21 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _reservesList[reservesCount] = asset;
 
             _reservesCount = reservesCount + 1;
+        }
+    }
+
+    function getUserClass(address user) public view returns (DataTypes.UserClass) {
+        uint256 score = userReputationMap[user].lastScore;
+        // TODO: add reputation memory
+
+        if(score <= 600 ether) {
+            return DataTypes.UserClass.Bronze;
+        } else if(score <= 700 ether) {
+            return DataTypes.UserClass.Silver;
+        } else if(score <= 800 ether) {
+            return DataTypes.UserClass.Gold;
+        } else {
+            return DataTypes.UserClass.Diamond;
         }
     }
 }
