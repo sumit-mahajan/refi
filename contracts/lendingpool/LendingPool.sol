@@ -20,6 +20,7 @@ import {PercentageMath} from "../libraries/math/PercentageMath.sol";
 import {ReserveLogic} from "../libraries/logic/ReserveLogic.sol";
 import {GenericLogic} from "../libraries/logic/GenericLogic.sol";
 import {ValidationLogic} from "../libraries/logic/ValidationLogic.sol";
+import {ReputationLogic} from "../libraries/logic/ReputationLogic.sol";
 import {ReserveConfiguration} from "../libraries/configuration/ReserveConfiguration.sol";
 import {UserConfiguration} from "../libraries/configuration/UserConfiguration.sol";
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
@@ -50,6 +51,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
     using PercentageMath for uint256;
     using SafeERC20 for IERC20;
     using ReserveLogic for DataTypes.ReserveData;
+    using ReputationLogic for DataTypes.UserReputation;
     using UserConfiguration for DataTypes.UserConfigurationMap;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -911,17 +913,6 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
     }
 
     function getUserClass(address user) public view returns (DataTypes.UserClass) {
-        uint256 score = userReputationMap[user].lastScore;
-        // TODO: add reputation memory
-
-        if(score <= 600 ether) {
-            return DataTypes.UserClass.Bronze;
-        } else if(score <= 700 ether) {
-            return DataTypes.UserClass.Silver;
-        } else if(score <= 800 ether) {
-            return DataTypes.UserClass.Gold;
-        } else {
-            return DataTypes.UserClass.Diamond;
-        }
+        return userReputationMap[user].getReputationClass();
     }
 }

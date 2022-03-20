@@ -22,6 +22,27 @@ library ReserveLogic {
     using ReserveLogic for DataTypes.ReserveData;
     using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
+    uint256 constant MILLISECONDS_PER_MONTH = 2629800000;
+
+    /**
+     * @dev Returns real time reputation class of a user
+     * @param userReputation The user reputation object
+     * @return UserClass
+     **/
+    function getReputationClass(DataTypes.UserReputation storage userReputation) external view returns(uint) {
+        uint256 score = userReputation.cumulateReputation();
+
+        if(score <= 600 ether) {
+            return DataTypes.UserClass.Bronze;
+        } else if(score <= 700 ether) {
+            return DataTypes.UserClass.Silver;
+        } else if(score <= 800 ether) {
+            return DataTypes.UserClass.Gold;
+        } else {
+            return DataTypes.UserClass.Diamond;
+        }
+    }
+
     /**
      * Returns the time in milliseconds needed for a perfect borrower to move through the given class bottom up
      * @dev Gets the reputationFactor for given user class
@@ -47,16 +68,60 @@ library ReserveLogic {
     /**
      * If a user borrows 85% of its allowed borrowing capacity, it is considered optimal and results in highest score increment
      * @dev Calculates the BorrowPercentFactor from given user's current loan
-     * @param percentageBorrowed The percentage of amount borrowed against collateral
+     * @param percentageBorrowed The percentage of amount borrowed wrt max borrow capacity
      * @return BorrowPercentFactor 
      **/
     function getBorrowPercentFactor(uint256 percentageBorrowed) internal view returns(uint) {
         if(percentageBorrowed > 85 ether) {
             // Two point equation between (85,1) and (100,0.4)
-            return (4.4 ether - 0.04 * percentageBorrowed);
+            return (4.4 ether - 4 * percentageBorrowed / uint(100));
         } else {
             return percentageBorrowed.wadDiv(85 ether);
         }
+    }
+
+    /**
+     * @dev Logic for adding the accured reputation to score
+     * @param userReputation The user reputation object
+     **/
+    function cumulateReputation(DataTypes.UserReputation storage userReputation) external view returns(uint) {
+        uint256 score = userReputation.lastScore;
+
+        uint256 timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
+        uint16 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
+        uint256 reputationFactor = userReputation.getReputationFactor();
+
+        if(nMonths == 0) {
+            score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
+                (timeDiff * 1e7).wadDiv(reputationFactor * 1e7)
+            );
+        } else {
+            uint256 remainder = timeDiff - nMonths * MILLISECONDS_PER_MONTH;
+            for(uint16 i = 0; i < nMonths; i++) {
+                score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
+                    (MILLISECONDS_PER_MONTH * 1e7).wadDiv(reputationFactor * 1e7)
+                );
+                reputationFactor = userReputation.getReputationFactor();
+            }
+            score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
+                (remainder * 1e7).wadDiv(reputationFactor * 1e7)
+            );
+        }
+
+        // Upper limit for reputation score is 900
+        if(score > 900 ether) {
+            score = 900 ether;
+        }
+
+        return score;
+    }
+
+    /**
+     * @dev Adds the accured reputation to score before every transaction
+     * @param userReputation The user reputation object
+     **/
+    function addReputation(DataTypes.UserReputation storage userReputation) internal {
+        userReputation.lastScore = userReputation.cumulateReputation();
     }
 
     /**
@@ -78,5 +143,22 @@ library ReserveLogic {
         if(userReputation.lastScore < 300 ether) {
             userReputation.lastScore = 300 ether;
         }
+    }
+
+    /**
+     * @dev Sets the percentage of borrowed amount wrt borrowing capacity after every transaction of user
+     * @param userReputation The user reputation object
+     * @param totalCollateralInETH The user's total collateral
+     * @param totalDebtInETH The user's total debt
+     * @param userAllowedLTV The user's personalized LTV decided using credit score
+     **/
+    function setCurrentBorrowPercent(
+        DataTypes.UserReputation storage userReputation,
+        uint256 totalCollateralInETH,
+        uint256 totalDebtInETH,
+        uint256 userAllowedLTV
+    ) internal {
+        userReputation.lastPercentageBorrowed = ((totalDebtInETH.wadDiv(totalCollateralInETH))
+        .wadDiv(userAllowedLTV * 1e14)) / uint256(1e14);
     }
 }
