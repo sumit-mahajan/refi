@@ -3,24 +3,23 @@ pragma solidity ^0.8.0;
 
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
 import {MathUtils} from "../math/MathUtils.sol";
 import {WadRayMath} from "../math/WadRayMath.sol";
 import {PercentageMath} from "../math/PercentageMath.sol";
 import {Errors} from "../utils/Errors.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
+import "hardhat/console.sol";
 
 /**
  * @title ReserveLogic library
  * @author Aave
  * @notice Implements the logic to update the reserves state
  */
-library ReserveLogic {
+library ReputationLogic {
     using SafeMath for uint256;
     using WadRayMath for uint256;
     using PercentageMath for uint256;
-    using ReserveLogic for DataTypes.ReserveData;
-    using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+    using ReputationLogic for DataTypes.UserReputation;
 
     uint256 constant MILLISECONDS_PER_MONTH = 2629800000;
 
@@ -29,14 +28,18 @@ library ReserveLogic {
      * @param userReputation The user reputation object
      * @return UserClass
      **/
-    function getReputationClass(DataTypes.UserReputation storage userReputation) external view returns(uint) {
+    function getReputationClass(DataTypes.UserReputation storage userReputation)
+        external
+        view
+        returns (DataTypes.UserClass)
+    {
         uint256 score = userReputation.cumulateReputation();
 
-        if(score <= 600 ether) {
+        if (score <= 600 ether) {
             return DataTypes.UserClass.Bronze;
-        } else if(score <= 700 ether) {
+        } else if (score <= 700 ether) {
             return DataTypes.UserClass.Silver;
-        } else if(score <= 800 ether) {
+        } else if (score <= 800 ether) {
             return DataTypes.UserClass.Gold;
         } else {
             return DataTypes.UserClass.Diamond;
@@ -47,16 +50,18 @@ library ReserveLogic {
      * Returns the time in milliseconds needed for a perfect borrower to move through the given class bottom up
      * @dev Gets the reputationFactor for given user class
      * @param userReputation The user reputation object
-     * @return reputationFactor 
+     * @return reputationFactor
      **/
-    function getReputationFactor(DataTypes.UserReputation storage userReputation) internal view returns(uint) {
-        if(userReputation.lastScore <= 600 ether) {
+    function getReputationFactor(
+        DataTypes.UserReputation storage userReputation
+    ) internal view returns (uint256) {
+        if (userReputation.lastScore <= 600 ether) {
             // 3 months to millisconds
             return 7889238000;
-        } else if(userReputation.lastScore <= 700 ether) {
+        } else if (userReputation.lastScore <= 700 ether) {
             // 9 months to millisconds
             return 23667714000;
-        } else if(userReputation.lastScore <= 800 ether) {
+        } else if (userReputation.lastScore <= 800 ether) {
             // 1 year to millisconds
             return 31556952000;
         } else {
@@ -69,12 +74,16 @@ library ReserveLogic {
      * If a user borrows 85% of its allowed borrowing capacity, it is considered optimal and results in highest score increment
      * @dev Calculates the BorrowPercentFactor from given user's current loan
      * @param percentageBorrowed The percentage of amount borrowed wrt max borrow capacity
-     * @return BorrowPercentFactor 
+     * @return BorrowPercentFactor
      **/
-    function getBorrowPercentFactor(uint256 percentageBorrowed) internal view returns(uint) {
-        if(percentageBorrowed > 85 ether) {
+    function getBorrowPercentFactor(uint256 percentageBorrowed)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (percentageBorrowed > 85 ether) {
             // Two point equation between (85,1) and (100,0.4)
-            return (4.4 ether - 4 * percentageBorrowed / uint(100));
+            return (4.4 ether - (4 * percentageBorrowed) / uint256(100));
         } else {
             return percentageBorrowed.wadDiv(85 ether);
         }
@@ -84,32 +93,40 @@ library ReserveLogic {
      * @dev Logic for adding the accured reputation to score
      * @param userReputation The user reputation object
      **/
-    function cumulateReputation(DataTypes.UserReputation storage userReputation) external view returns(uint) {
+    function cumulateReputation(DataTypes.UserReputation storage userReputation)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 score = userReputation.lastScore;
 
         uint256 timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
-        uint16 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
+        uint256 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
         uint256 reputationFactor = userReputation.getReputationFactor();
 
-        if(nMonths == 0) {
-            score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
-                (timeDiff * 1e7).wadDiv(reputationFactor * 1e7)
-            );
+        if (nMonths == 0) {
+            score += getBorrowPercentFactor(
+                userReputation.lastPercentageBorrowed
+            ).wadMul((timeDiff * 1e7).wadDiv(reputationFactor * 1e7));
         } else {
             uint256 remainder = timeDiff - nMonths * MILLISECONDS_PER_MONTH;
-            for(uint16 i = 0; i < nMonths; i++) {
-                score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
-                    (MILLISECONDS_PER_MONTH * 1e7).wadDiv(reputationFactor * 1e7)
-                );
+            for (uint16 i = 0; i < nMonths; i++) {
+                score += getBorrowPercentFactor(
+                    userReputation.lastPercentageBorrowed
+                ).wadMul(
+                        (MILLISECONDS_PER_MONTH * 1e7).wadDiv(
+                            reputationFactor * 1e7
+                        )
+                    );
                 reputationFactor = userReputation.getReputationFactor();
             }
-            score += getBorrowPercentFactor(userReputation.lastPercentageBorrowed).wadMul(
-                (remainder * 1e7).wadDiv(reputationFactor * 1e7)
-            );
+            score += getBorrowPercentFactor(
+                userReputation.lastPercentageBorrowed
+            ).wadMul((remainder * 1e7).wadDiv(reputationFactor * 1e7));
         }
 
         // Upper limit for reputation score is 900
-        if(score > 900 ether) {
+        if (score > 900 ether) {
             score = 900 ether;
         }
 
@@ -120,29 +137,41 @@ library ReserveLogic {
      * @dev Adds the accured reputation to score before every transaction
      * @param userReputation The user reputation object
      **/
-    function addReputation(DataTypes.UserReputation storage userReputation) internal {
+    function addReputation(DataTypes.UserReputation storage userReputation)
+        internal
+    {
+        if (userReputation.lastScore == 0) {
+            userReputation.lastScore = 300 ether;
+        }
         userReputation.lastScore = userReputation.cumulateReputation();
+
+        // console.log(userReputation.lastScore);
+        // console.log(userReputation.lastScore / uint256(1e18));
     }
 
     /**
      * @dev Drops the reputation score in case of liquidation
      * @param userReputation The user reputation object
      **/
-    function dropReputation(DataTypes.UserReputation storage userReputation) internal {
-        if(userReputation.lastScore <= 600 ether) {
-            userReputation.lastScore.sub(50 ether)
-        } else if(userReputation.lastScore <= 700 ether) {
-            userReputation.lastScore.sub(100 ether)
-        } else if(userReputation.lastScore <= 800 ether) {
-            userReputation.lastScore.sub(150 ether)
+    function dropReputation(DataTypes.UserReputation storage userReputation)
+        internal
+    {
+        if (userReputation.lastScore <= 600 ether) {
+            userReputation.lastScore.sub(50 ether);
+        } else if (userReputation.lastScore <= 700 ether) {
+            userReputation.lastScore.sub(100 ether);
+        } else if (userReputation.lastScore <= 800 ether) {
+            userReputation.lastScore.sub(150 ether);
         } else {
-            userReputation.lastScore.sub(200 ether)
+            userReputation.lastScore.sub(200 ether);
         }
 
         // Lower limit for reputation score is 300
-        if(userReputation.lastScore < 300 ether) {
+        if (userReputation.lastScore < 300 ether) {
             userReputation.lastScore = 300 ether;
         }
+        // console.log(userReputation.lastScore);
+        // console.log(userReputation.lastScore / uint256(1e18));
     }
 
     /**
@@ -158,7 +187,16 @@ library ReserveLogic {
         uint256 totalDebtInETH,
         uint256 userAllowedLTV
     ) internal {
-        userReputation.lastPercentageBorrowed = ((totalDebtInETH.wadDiv(totalCollateralInETH))
-        .wadDiv(userAllowedLTV * 1e14)) / uint256(1e14);
+        if (totalDebtInETH == 0 || totalCollateralInETH == 0) {
+            userReputation.lastPercentageBorrowed = 0;
+        } else {
+            userReputation.lastPercentageBorrowed =
+                (
+                    (totalDebtInETH.wadDiv(totalCollateralInETH)).wadDiv(
+                        userAllowedLTV * 1e14
+                    )
+                ) /
+                uint256(1e14);
+        }
     }
 }

@@ -91,6 +91,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
 
         ValidationLogic.validateDeposit(amount, reserve);
 
+        // Cumulate accured reputation
+        _userReputationMap[onBehalfOf].addReputation();
+
         address aToken = reserve.aTokenAddress;
 
         reserve.updateState();
@@ -108,6 +111,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _usersConfig[onBehalfOf].setUsingAsCollateral(reserve.id, true);
             emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
         }
+
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(onBehalfOf);
 
         emit Deposit(asset, msg.sender, onBehalfOf, amount);
     }
@@ -159,6 +165,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             oracle
         );
 
+        // Cumulate accured reputation
+        _userReputationMap[onBehalfOf].addReputation();
+
         reserve.updateState();
 
         bool isFirstBorrowing = false;
@@ -173,6 +182,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         reserve.updateInterestRates(asset, aTokenAddress, 0, amount);
 
         IAToken(aTokenAddress).transferUnderlyingTo(user, amount);
+
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(onBehalfOf);
 
         emit Borrow(
             asset,
@@ -210,6 +222,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
 
         ValidationLogic.validateRepay(amount, onBehalfOf, variableDebt);
 
+        // Cumulate accured reputation
+        _userReputationMap[onBehalfOf].addReputation();
+
         uint256 paybackAmount = variableDebt;
 
         if (amount < paybackAmount) {
@@ -235,9 +250,27 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
 
         IAToken(aToken).handleRepayment(msg.sender, paybackAmount);
 
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(onBehalfOf);
+
         emit Repay(asset, onBehalfOf, msg.sender, paybackAmount);
 
         return paybackAmount;
+    }
+
+    function withdrawETH(
+        address asset,
+        uint256 amount,
+        address to,
+        address user
+    ) external override {
+        // Cumulate accured reputation
+        _userReputationMap[user].addReputation();
+
+        withdraw(asset, amount, to);
+
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(user);
     }
 
     /**
@@ -255,7 +288,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         address asset,
         uint256 amount,
         address to
-    ) external override returns (uint256) {
+    ) public override returns (uint256) {
         DataTypes.ReserveData storage reserve = _reserves[asset];
 
         address aToken = reserve.aTokenAddress;
@@ -279,6 +312,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _addressesProvider.getPriceOracle()
         );
 
+        if (msg.sender != _addressesProvider.getWETHGateway()) {
+            // Cumulate accured reputation
+            _userReputationMap[msg.sender].addReputation();
+        }
+
         reserve.updateState();
 
         reserve.updateInterestRates(asset, aToken, 0, amountToWithdraw);
@@ -294,6 +332,11 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             amountToWithdraw,
             reserve.liquidityIndex
         );
+
+        if (msg.sender != _addressesProvider.getWETHGateway()) {
+            // Set lastPercentageBorrowed
+            setUserBorrowPercent(msg.sender);
+        }
 
         emit Withdraw(asset, msg.sender, to, amountToWithdraw);
 
@@ -322,10 +365,16 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _addressesProvider.getPriceOracle()
         );
 
+        // Cumulate accured reputation
+        _userReputationMap[msg.sender].addReputation();
+
         _usersConfig[msg.sender].setUsingAsCollateral(
             reserve.id,
             useAsCollateral
         );
+
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(msg.sender);
 
         if (useAsCollateral) {
             emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
@@ -399,6 +448,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             vars.healthFactor,
             vars.userVariableDebt
         );
+
+        // Cumulate accured reputation
+        _userReputationMap[user].addReputation();
 
         vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
 
@@ -518,6 +570,12 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
                 vars.actualDebtToLiquidate
             );
         }
+
+        // Drop reputation
+        _userReputationMap[user].dropReputation();
+
+        // Set lastPercentageBorrowed
+        setUserBorrowPercent(user);
 
         emit LiquidationCall(
             collateralAsset,
@@ -912,7 +970,34 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         }
     }
 
-    function getUserClass(address user) public view returns (DataTypes.UserClass) {
-        return userReputationMap[user].getReputationClass();
+    function getUserClass(address user)
+        public
+        view
+        returns (DataTypes.UserClass)
+    {
+        return _userReputationMap[user].getReputationClass();
+    }
+
+    function setUserBorrowPercent(address user) internal {
+        (
+            uint256 userCollateralBalance,
+            uint256 userVariableDebt,
+            ,
+            ,
+
+        ) = GenericLogic.calculateUserAccountData(
+                user,
+                _reserves,
+                _usersConfig[user],
+                _reservesList,
+                _reservesCount,
+                _addressesProvider.getPriceOracle()
+            );
+
+        _userReputationMap[user].setCurrentBorrowPercent(
+            userCollateralBalance,
+            userVariableDebt,
+            7500
+        );
     }
 }

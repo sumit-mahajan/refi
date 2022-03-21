@@ -143,6 +143,13 @@ interface ILendingPool {
         address onBehalfOf
     ) external;
 
+    function withdrawETH(
+        address asset,
+        uint256 amount,
+        address to,
+        address user
+    ) external;
+
     /**
      * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
      * E.g. User has 100 aUSDC, calls withdraw() and receives 100 USDC, burning the 100 aUSDC

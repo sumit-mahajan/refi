@@ -45,12 +45,18 @@ async function deployProtocol() {
     const validationLogic = await ValidationLogic.deploy();
     await validationLogic.deployed();
 
+    // Deploy ReputationLogic Library for linking purpose
+    const ReputationLogic = await hre.ethers.getContractFactory("ReputationLogic");
+    const reputationLogic = await ReputationLogic.deploy();
+    await reputationLogic.deployed();
+
     // Deploy AddressesProvider contract
     const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
         libraries: {
             ReserveLogic: reserveLogic.address,
             ValidationLogic: validationLogic.address,
-            WadRayMath: wadRayMath.address
+            WadRayMath: wadRayMath.address,
+            ReputationLogic: reputationLogic.address,
         }
     });
     const addressesProvider = await AddressesProvider.deploy();

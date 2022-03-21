@@ -95,10 +95,11 @@ contract WETHGateway is IWETHGateway, Ownable {
         }
 
         aWETH.transferFrom(msg.sender, address(this), amountToWithdraw);
-        ILendingPool(lendingPool).withdraw(
+        ILendingPool(lendingPool).withdrawETH(
             address(WETH),
             amountToWithdraw,
-            address(this)
+            address(this),
+            msg.sender
         );
 
         WETH.withdraw(amountToWithdraw);
