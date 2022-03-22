@@ -22,6 +22,12 @@ interface IAddressesProvider {
     function getLendingPool() external view returns (address);
 
     /**
+     * @dev Returns the address of the deployed RefiCollection contract
+     * @return The address of the RefiCollection contract
+     **/
+    function getRefiCollection() external view returns (address);
+
+    /**
      * @dev Returns the address of the deployed WETHGateway contract
      * @return The address of the WETHGateway contract
      **/

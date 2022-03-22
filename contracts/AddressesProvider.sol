@@ -8,6 +8,7 @@ import {PriceOracle} from "./utils/PriceOracle.sol";
 import {ReserveInterestRateStrategy} from "./lendingpool/ReserveInterestRateStrategy.sol";
 import {AToken} from "./tokenization/AToken.sol";
 import {VariableDebtToken} from "./tokenization/VariableDebtToken.sol";
+import {RefiCollection} from "./tokenization/RefiCollection.sol";
 import {WadRayMath} from "./libraries/math/WadRayMath.sol";
 
 import {MockWETH} from "./mocks/MockWETH.sol";
@@ -28,6 +29,7 @@ contract AddressesProvider is IAddressesProvider {
     address private immutable LENDING_POOL;
     address private immutable WETH_GATEWAY;
     address private immutable PRICE_ORACLE;
+    address private immutable REFI_COLLECTION;
 
     address public immutable protocolDataProvider;
     address public immutable walletBalanceProvider;
@@ -61,6 +63,9 @@ contract AddressesProvider is IAddressesProvider {
         // Deploy LendingPool
         LendingPool lendingPool = new LendingPool(this);
         LENDING_POOL = address(lendingPool);
+
+        RefiCollection refiCollection = new RefiCollection(LENDING_POOL);
+        REFI_COLLECTION = address(refiCollection);
 
         if (!isProduction) {
             // Deploy mock tokens and sources for tests
@@ -251,6 +256,14 @@ contract AddressesProvider is IAddressesProvider {
      **/
     function getWETHGateway() external view override returns (address) {
         return WETH_GATEWAY;
+    }
+
+    /**
+     * @dev Returns the address of the deployed RefiCollection contract
+     * @return The address of the RefiCollection contract
+     **/
+    function getRefiCollection() external view override returns (address) {
+        return REFI_COLLECTION;
     }
 
     /**

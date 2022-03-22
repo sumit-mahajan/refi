@@ -299,6 +299,11 @@ interface ILendingPool {
         view
         returns (bool isBorrowingAny);
 
+    function getUserClass(address user)
+        external
+        view
+        returns (DataTypes.UserClass);
+
     /**
      * @dev Returns the normalized income normalized income of the reserve
      * @param asset The address of the underlying asset of the reserve

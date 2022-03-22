@@ -973,6 +973,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
     function getUserClass(address user)
         public
         view
+        override
         returns (DataTypes.UserClass)
     {
         return _userReputationMap[user].getReputationClass();
