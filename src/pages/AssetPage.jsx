@@ -12,6 +12,7 @@ import "../styles/asset_page.scss";
 import WithdrawSection from "../components/lendingpool/WithdrawSection";
 import RepaySection from "../components/lendingpool/RepaySection";
 import Box from "../components/Box";
+import Loading from "../components/loading/Loading";
 
 function AssetPage() {
   const { id } = useParams();
@@ -234,7 +235,7 @@ function AssetPage() {
   };
 
   if (asset === undefined) {
-    return <p>Loading</p>;
+    return <Loading message={"Loading Asset Data"} />;
   }
   return (
     <main>
