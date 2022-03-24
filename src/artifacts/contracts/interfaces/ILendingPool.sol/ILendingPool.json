@@ -561,6 +561,25 @@
           "type": "address"
         }
       ],
+      "name": "getUserClass",
+      "outputs": [
+        {
+          "internalType": "enum DataTypes.UserClass",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
       "name": "getUserConfiguration",
       "outputs": [
         {

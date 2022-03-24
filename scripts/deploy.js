@@ -40,17 +40,21 @@ async function main() {
   const validationLogic = await ValidationLogic.deploy();
   await validationLogic.deployed();
 
+  // Deploy ReputationLogic Library for linking purpose
+  const ReputationLogic = await hre.ethers.getContractFactory("ReputationLogic");
+  const reputationLogic = await ReputationLogic.deploy();
+  await reputationLogic.deployed();
+
   // Deploy AddressesProvider contract
-  const AddressesProvider = await hre.ethers.getContractFactory(
-    "AddressesProvider",
-    {
-      libraries: {
-        ReserveLogic: reserveLogic.address,
-        ValidationLogic: validationLogic.address,
-        WadRayMath: wadRayMath.address,
-      },
+  const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
+    libraries: {
+      ReserveLogic: reserveLogic.address,
+      ValidationLogic: validationLogic.address,
+      WadRayMath: wadRayMath.address,
+      ReputationLogic: reputationLogic.address,
     }
-  );
+  });
+
   const addressesProvider = await AddressesProvider.deploy();
   await addressesProvider.deployed();
 
@@ -58,8 +62,8 @@ async function main() {
 
   // For UI testing
   testEnv.addressesProvider = addressesProvider;
-  // await setupEnvironment();
-  // await setupData();
+  await setupEnvironment();
+  await setupData();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

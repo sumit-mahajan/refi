@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import "../styles/asset-page.scss";
-import { useConnection } from "../utils/connection_provider/connection_provider";
 import { useParams } from "react-router-dom";
-import { getImageFromSymbol, MAX_UINT, toEther } from "../utils/helpers";
+
+import { useConnection } from "../utils/connection_provider/connection_provider";
+import { useAssetProvider } from "../utils/assets_provider/assets_provider";
+import { getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
+
 import BorrowSection from "../components/BorrowSection";
 import DepositSection from "../components/DepositSection";
-import { toWei } from "../utils/helpers";
-import { useAssetProvider } from "../utils/assets_provider/assets_provider";
+
+import "../styles/asset_page.scss";
 
 function AssetPage() {
   const { id } = useParams();
@@ -245,12 +247,12 @@ function AssetPage() {
 
         <div className="asset-stats mb-5">
           <div>
-            <p>Total Borrowed</p>
-            <h4>$ {asset.totalBorrowed.toFixed(2)}</h4>
+            <p>Reserve Size</p>
+            <h4>$ {(asset.availableLiquidityUsd + asset.totalBorrowedUsd).toFixed(2)}</h4>
           </div>
           <div>
             <p>Available Liquidity</p>
-            <h4>$ {asset.availableLiquidity.toFixed(2)}</h4>
+            <h4>$ {asset.availableLiquidityUsd.toFixed(2)}</h4>
           </div>
         </div>
 
@@ -263,13 +265,13 @@ function AssetPage() {
             name="Borrow APY"
             value={asset.borrowAPY.toFixed(2) + "%"}
           />
-          <AssetInfo name="Max LTV" value="75%" />
-          <AssetInfo name="Liquidation Threshold" value="80%" />
-          <AssetInfo name="Liquidation Penalty" value="10%" />
           <AssetInfo
             name="Percentage Utilization"
             value={(asset.utilizationRatio * 100).toFixed(2) + "%"}
           />
+          <AssetInfo name="Max LTV" value="75%" />
+          <AssetInfo name="Liquidation Threshold" value="80%" />
+          <AssetInfo name="Liquidation Penalty" value="10%" />
         </div>
       </section>
 

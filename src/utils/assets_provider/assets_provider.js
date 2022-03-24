@@ -43,9 +43,11 @@ const AssetsProvider = ({ children }) => {
         symbol: isWETH ? "ETH" : asset.symbol,
         tokenAddress: asset.tokenAddress,
         depositAPY: calculateAPY(liquidityRate),
-        availableLiquidity: priceInUsd * toEther(availableLiquidity),
         borrowAPY: calculateAPY(variableBorrowRate),
-        totalBorrowed: priceInUsd * toEther(totalVariableDebt),
+        availableLiquidity: toEther(availableLiquidity),
+        totalBorrowed: toEther(totalVariableDebt),
+        availableLiquidityUsd: priceInUsd * toEther(availableLiquidity),
+        totalBorrowedUsd: priceInUsd * toEther(totalVariableDebt),
         utilizationRatio: utilizationRate / 1e27,
         isERC20: isWETH,
       };

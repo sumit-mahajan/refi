@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "../styles/home.scss";
-import ListTile from "../components/ListTile";
+import ListTile from "../components/list_tile/ListTile";
 
 import { useNavigate } from "react-router-dom";
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
@@ -61,7 +61,7 @@ function HomePage() {
       <section className="assets ">
         <div className="asset-labels pt-1 pb-1 ">
           <p className="spread">Assets</p>
-          <p>Market Size</p>
+          <p>Reserve Size</p>
           <p>Deposit APY</p>
           <p>Borrow APY</p>
           <p>Total Borrowed</p>
@@ -81,7 +81,7 @@ function HomePage() {
               symbol={asset.symbol}
               // image={"/images/" + asset.symbol.toLowerCase() + ".svg"}
               image={getImageFromSymbol(asset.symbol)}
-              marketSize={asset.availableLiquidity + asset.totalBorrowed}
+              marketSize={asset.availableLiquidityUsd + asset.totalBorrowedUsd}
               depositAPY={asset.depositAPY}
               borrowAPY={asset.borrowAPY}
               totalBorrowed={asset.totalBorrowed}

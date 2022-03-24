@@ -1,55 +1,40 @@
-.navbar {
-    height: 70px;
-    width: 100%;
-    background-color: var(--secondary);
-    padding: 0% var(--body-padding);
-}
+@import "../../styles/colors";
 
-.logo {
-    font-size: var(--lg-text-size);
-    font-weight: 500;
-    color: white;
-    cursor: pointer;
-}
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-.logo:hover {
-    color: var(--primary);
-}
+  .logo {
+    font-size: 2.5rem;
+    letter-spacing: 8px;
+    font-weight: 600;
+  }
 
-.nav-menu {
+  .nav-options {
     display: flex;
+    gap: 1rem;
+    align-items: center;
 
-    .nav-option {
-        position: relative;
-        color: white;
-        font-size: var(--sm-text-size);
-        font-weight: 500;
-        cursor: pointer;
+    .tabs {
+      position: absolute;
+      right: 50%;
+      transform: translateX(50%);
     }
 
-    .nav-option:hover {
-        color: var(--primary);
+    a {
+      padding: 1rem;
+      font-size: 1.8rem;
+      font-weight: 600;
     }
 
-    .nav-option-c {
-        color: var(--primary);
+    h6 {
+      padding: 1rem 2rem;
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      border-radius: 1rem;
+      background-color: $grey-surface;
     }
-
-    .nav-option-c::before {
-        content: "";
-        position: absolute;
-        bottom: -3px;
-        background-color: var(--primary);
-        height: 0.5px;
-        width: 100%;
-        transition: transform 250ms linear;
-    }
-
-    .nav-option-c:hover::before {
-        transform: translateY(3px);
-    }
-}
-
-.nav-btn-flex {
-    display: flex;
+  }
 }

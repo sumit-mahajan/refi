@@ -64,7 +64,9 @@ contract AddressesProvider is IAddressesProvider {
         LendingPool lendingPool = new LendingPool(this);
         LENDING_POOL = address(lendingPool);
 
-        RefiCollection refiCollection = new RefiCollection(LENDING_POOL);
+        RefiCollection refiCollection = new RefiCollection(
+            address(lendingPool)
+        );
         REFI_COLLECTION = address(refiCollection);
 
         if (!isProduction) {

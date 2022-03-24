@@ -1,5 +1,5 @@
 import React from "react";
-import "./list-tile.scss";
+import "./list_tile.scss";
 
 function ListTile({
   symbol,
