@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import "../styles/home.scss";
-import ListTile from "../components/list_tile/ListTile";
-
 import { useNavigate } from "react-router-dom";
+
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
 import { getImageFromSymbol } from "../utils/helpers";
+
+import ListTile from "../components/list_tile/ListTile";
+
+import "../styles/home_page.scss";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -12,46 +14,6 @@ function HomePage() {
   const { state: assets } = useAssetProvider();
 
   console.log("Rendered Home page");
-
-  // const getAllAssets = async () => {
-  //   if (protocolDataProvider === null) return;
-
-  //   //Get All Assets
-  //   const assets = await protocolDataProvider.getAllReservesTokens();
-
-  //   //Get Asset Info for each Asset
-  //   const promises = assets.map(async (asset) => {
-  //     const assetInfo = await protocolDataProvider.getReserveData(
-  //       asset.tokenAddress
-  //     );
-
-  //     const {
-  //       liquidityRate,
-  //       variableBorrowRate,
-  //       totalVariableDebt,
-  //       availableLiquidity,
-  //       utilizationRate,
-  //     } = assetInfo;
-
-  //     console.log(utilizationRate);
-
-  //     const data = {
-  //       symbol: asset.symbol,
-  //       tokenAddress: asset.tokenAddress,
-  //       depositAPY: calculateAPY(liquidityRate),
-  //       availableLiquidity: toEther(availableLiquidity),
-  //       borrowAPY: calculateAPY(variableBorrowRate),
-  //       totalBorrowed: toEther(totalVariableDebt),
-  //       utilizationRatio: toEther(utilizationRate),
-  //     };
-
-  //     return data;
-  //   });
-
-  //   const data = await Promise.all(promises);
-
-  //   setAssets(data);
-  // };
 
   return (
     <div>
@@ -61,10 +23,10 @@ function HomePage() {
       <section className="assets ">
         <div className="asset-labels pt-1 pb-1 ">
           <p className="spread">Assets</p>
-          <p>Reserve Size</p>
+          <p>Market Size</p>
           <p>Deposit APY</p>
           <p>Borrow APY</p>
-          <p>Total Borrowed</p>
+          <p>Utilization</p>
         </div>
 
         {assets.map((asset, index) => (
@@ -85,6 +47,7 @@ function HomePage() {
               depositAPY={asset.depositAPY}
               borrowAPY={asset.borrowAPY}
               totalBorrowed={asset.totalBorrowed}
+              utilizationRatio={asset.utilizationRatio}
             />
             <hr />
           </div>

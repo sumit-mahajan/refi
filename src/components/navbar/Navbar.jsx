@@ -22,7 +22,7 @@ function Navbar() {
       <div className="nav-options">
         <div className="tabs">
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/liquidation">Liquidations</Link>
+          <Link to="/liquidation">Liquidation</Link>
         </div>
         <h6 className="info-box">{supportedNetworks[chainId].name}</h6>
         <h6

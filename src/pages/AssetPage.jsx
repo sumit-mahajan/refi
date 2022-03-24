@@ -5,10 +5,13 @@ import { useConnection } from "../utils/connection_provider/connection_provider"
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
 import { getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
 
-import BorrowSection from "../components/BorrowSection";
-import DepositSection from "../components/DepositSection";
+import DepositSection from "../components/lendingpool/DepositSection";
+import BorrowSection from "../components/lendingpool/BorrowSection";
 
 import "../styles/asset_page.scss";
+import WithdrawSection from "../components/lendingpool/WithdrawSection";
+import RepaySection from "../components/lendingpool/RepaySection";
+import Box from "../components/Box";
 
 function AssetPage() {
   const { id } = useParams();
@@ -120,7 +123,7 @@ function AssetPage() {
     fetchPositons();
   }, [asset, accounts, fetchPositons]);
 
-  const depositERC20 = async (amount) => {
+  const depositAsset = async (amount) => {
     try {
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.depositETH({
@@ -177,7 +180,7 @@ function AssetPage() {
     }
   };
 
-  const repayDebt = async (amount) => {
+  const repayAsset = async (amount) => {
     try {
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.repayETH(toWei(amount), {
@@ -247,12 +250,16 @@ function AssetPage() {
 
         <div className="asset-stats mb-5">
           <div>
-            <p>Reserve Size</p>
+            <p>Market Size</p>
             <h4>$ {(asset.availableLiquidityUsd + asset.totalBorrowedUsd).toFixed(2)}</h4>
           </div>
           <div>
             <p>Available Liquidity</p>
             <h4>$ {asset.availableLiquidityUsd.toFixed(2)}</h4>
+          </div>
+          <div>
+            <p>Price</p>
+            <h4>$ {asset.priceInUsd.toFixed(2)}</h4>
           </div>
         </div>
 
@@ -276,26 +283,45 @@ function AssetPage() {
       </section>
 
       <section className="market-container mb-8">
-        <BorrowSection
-          currentBorrowed={positions.currentBorrowed}
-          healthFactor={positions.healthFactor}
-          walletBalance={positions.walletBalance}
-          availableToBorrow={positions.availableToBorrow}
-          symbol={asset.symbol}
-          borrowAsset={borrowAsset}
-          isApproved={positions.isDwethApproved}
-          approveDWETH={approveDWETH}
-          repayDebt={repayDebt}
-        />
-        <DepositSection
-          currentDeposited={positions.currentDeposited}
-          walletBalance={positions.walletBalance}
-          depositERC20={depositERC20}
-          symbol={asset.symbol}
-          isApproved={positions.isApproved}
-          approveToken={approveToken}
-          withdrawAsset={withdrawAsset}
-        />
+        <div className="earn-section">
+          <DepositSection
+            symbol={asset.symbol}
+            walletBalance={positions.walletBalance}
+            isApproved={positions.isApproved}
+            approveToken={approveToken}
+            depositAsset={depositAsset}
+          />
+          {positions.currentDeposited > 0 ?
+            <>
+              <Box height={50} />
+              <WithdrawSection
+                symbol={asset.symbol}
+                currentDeposited={positions.currentDeposited}
+                withdrawAsset={withdrawAsset}
+              />
+            </> : <></>
+          }
+
+        </div>
+        <div className="borrow-section">
+          <BorrowSection
+            symbol={asset.symbol}
+            availableToBorrow={positions.availableToBorrow}
+            isApproved={positions.isDwethApproved}
+            approveDWETH={approveDWETH}
+            borrowAsset={borrowAsset}
+          />
+          {positions.currentBorrowed > 0 ?
+            <>
+              <Box height={50} />
+              <RepaySection
+                symbol={asset.symbol}
+                currentBorrowed={positions.currentBorrowed}
+                repayAsset={repayAsset}
+              />
+            </> : <></>
+          }
+        </div>
       </section>
     </main>
   );

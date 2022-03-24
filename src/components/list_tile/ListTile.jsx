@@ -8,6 +8,7 @@ function ListTile({
   depositAPY,
   borrowAPY,
   totalBorrowed,
+  utilizationRatio
 }) {
   return (
     <div className="tile-container pt-2 pb-2 ">
@@ -22,7 +23,7 @@ function ListTile({
       <p>$ {marketSize.toFixed(2)}</p>
       <p>{depositAPY.toFixed(2)}%</p>
       <p>{borrowAPY.toFixed(2)}%</p>
-      <p>$ {totalBorrowed.toFixed(2)}</p>
+      <p>{(utilizationRatio * 100).toFixed(2)}%</p>
     </div>
   );
 }

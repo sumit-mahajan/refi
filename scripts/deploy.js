@@ -204,11 +204,11 @@ const setupData = async () => {
   await dai.mint(deployer.address, toWei(1000));
   await link.mint(deployer.address, toWei(1000));
 
+  await dai.connect(users[0].signer).mint(users[0].address, toWei(1000));
+  await link.connect(users[0].signer).mint(users[0].address, toWei(1000));
+
   await dai.connect(users[1].signer).mint(users[1].address, toWei(1000));
   await link.connect(users[1].signer).mint(users[1].address, toWei(1000));
-
-  await dai.connect(users[2].signer).mint(users[2].address, toWei(1000));
-  await link.connect(users[2].signer).mint(users[2].address, toWei(1000));
 
   const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
   await approveDaiTx.wait();
@@ -226,15 +226,15 @@ const setupData = async () => {
 
   // One time infinite approve
   const approveLinkTx = await link
-    .connect(users[1].signer)
+    .connect(users[0].signer)
     .approve(lendingPool.address, MAX_UINT);
   await approveLinkTx.wait();
 
   console.log("User 1 infinite approves the lendingPool for LINK reserve");
 
   const linkTx = await lendingPool
-    .connect(users[1].signer)
-    .deposit(link.address, toWei(100), users[1].address);
+    .connect(users[0].signer)
+    .deposit(link.address, toWei(100), users[0].address);
   await linkTx.wait();
 
   console.log("User 1 deposits 100 LINK");
@@ -251,14 +251,14 @@ const setupData = async () => {
   // One time infinite approve aWeth
   // Required at withdrawal time. i.e. do this before ETH deposit
   const approveAWethTx = await aWeth
-    .connect(users[1].signer)
+    .connect(users[0].signer)
     .approve(wethGateway.address, MAX_UINT);
   await approveAWethTx.wait();
 
   console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
 
   const Tx = await wethGateway
-    .connect(users[1].signer)
+    .connect(users[0].signer)
     .depositETH({ value: toWei(10) });
   await Tx.wait();
 

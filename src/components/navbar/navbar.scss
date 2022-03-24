@@ -20,6 +20,20 @@ nav {
       position: absolute;
       right: 50%;
       transform: translateX(50%);
+
+      *::before {
+        content: "";
+        transition: all 100ms linear;
+      }
+
+      *:hover::before {
+        content: "";
+        position: absolute;
+        width: 42%;
+        height: 0.1rem;
+        background-color: black;
+        bottom: -20%;
+      }
     }
 
     a {

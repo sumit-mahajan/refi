@@ -48,11 +48,13 @@ export function ConnectionProvider(props) {
 
   const initialize = useCallback(async () => {
     try {
-      if (!window.ethereum) {
-        throw new Error("Browser Wallet not found");
-      }
+      let provider;
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      if (window.ethereum) {
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+      } else {
+        provider = new ethers.providers.JsonRpcProvider(supportedNetworks[defaultChainId].rpcURL);
+      }
 
       const isMetamaskConnected = (await provider.listAccounts()).length > 0;
 

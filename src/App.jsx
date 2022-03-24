@@ -1,13 +1,23 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
-import HomePage from "./pages/HomePage";
-import AssetPage from "./pages/AssetPage";
-import Navbar from "./components/navbar/Navbar";
-import Liquidation from "./pages/Liquidation";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "./utils/apollo_client.js";
 
+import { useConnection } from "./utils/connection_provider/connection_provider";
+
+import Navbar from "./components/navbar/Navbar";
+import HomePage from "./pages/HomePage";
+import AssetPage from "./pages/AssetPage";
+import Liquidation from "./pages/Liquidation";
+
 function App() {
+  const { error } = useConnection();
+
+  if (error !== "") {
+    return (<div className="backdrop">
+      <p className="content-size">{error}</p>
+    </div>);
+  }
+
   return (
     <ApolloProvider client={client}>
       <BrowserRouter>

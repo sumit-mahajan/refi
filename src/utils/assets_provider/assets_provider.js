@@ -50,6 +50,7 @@ const AssetsProvider = ({ children }) => {
         totalBorrowedUsd: priceInUsd * toEther(totalVariableDebt),
         utilizationRatio: utilizationRate / 1e27,
         isERC20: isWETH,
+        priceInUsd
       };
 
       return data;
