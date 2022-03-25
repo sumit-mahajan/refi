@@ -37,6 +37,12 @@
       height: 7rem;
       border-radius: 100px;
     }
+
+    a, .t-link {
+      color: #8b8b8b;
+      text-decoration: underline;
+      cursor: pointer;
+    }
   }
 
   .asset-stats {

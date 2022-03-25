@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SimpleTile from "../SimpleTile";
 import { InputField } from "../InputField";
-import Slider from "../slider/Slider";
+import Box from "../Box";
 
 const DepositSection = ({
   symbol,
@@ -29,8 +29,6 @@ const DepositSection = ({
         setInput={setInput}
         symbol={symbol}
       />
-
-      <Slider />
 
       <div className="buttons">
         {isApproved ? (

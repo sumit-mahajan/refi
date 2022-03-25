@@ -2,7 +2,7 @@ import React from "react";
 
 export const InputField = ({ input, setInput, symbol }) => {
   return (
-    <div className="mb-5">
+    <div className="mb-3">
       <div className="input-field">
         <input
           className="mb-1"

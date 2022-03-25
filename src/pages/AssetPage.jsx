@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 
 import { useConnection } from "../utils/connection_provider/connection_provider";
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
-import { getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
+import { displayAddress, getBlockExplorerLink, getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
 
 import DepositSection from "../components/lendingpool/DepositSection";
 import BorrowSection from "../components/lendingpool/BorrowSection";
@@ -13,11 +13,13 @@ import WithdrawSection from "../components/lendingpool/WithdrawSection";
 import RepaySection from "../components/lendingpool/RepaySection";
 import Box from "../components/Box";
 import Loading from "../components/loading/Loading";
+import InfoIcon from "../components/info_icon/InfoIcon";
 
 function AssetPage() {
   const { id } = useParams();
 
   const {
+    chainId,
     protocolDataProvider,
     walletBalanceProvider,
     lendingPoolContract,
@@ -234,6 +236,39 @@ function AssetPage() {
     );
   };
 
+  const getTokenFaucet = async () => {
+
+    if (asset.symbol === "ETH") {
+      if (chainId === 4) {
+        window.open(
+          "https://faucet.rinkeby.io/", "_blank");
+      }
+    }
+
+    else if (asset.symbol === "MATIC") {
+      window.open(
+        "https://faucet.polygon.technology/", "_blank");
+    }
+
+    else if (asset.symbol === "DAI") {
+      if (chainId === 4) {
+        window.open(
+          "https://ethereum.stackexchange.com/questions/72388/does-rinkeby-have-a-faucet-where-i-can-fill-a-wallet-with-dai", "_blank");
+      } else {
+        await daiContract.mint(accounts[0], toWei(100));
+      }
+    }
+
+    else if (asset.symbol === "LINK") {
+      if (chainId === 4) {
+        window.open(
+          "https://faucets.chain.link/rinkeby", "_blank");
+      } else {
+        await linkContract.mint(accounts[0], toWei(100));
+      }
+    }
+  }
+
   if (asset === undefined) {
     return <Loading message={"Loading Asset Data"} />;
   }
@@ -247,6 +282,16 @@ function AssetPage() {
             alt="Crypto Icon"
           />
           <h4>{asset.symbol}</h4>
+          <Box width={40} />
+          <div>
+            <a target="_blank" href={getBlockExplorerLink(chainId, asset.tokenAddress)}>
+              {displayAddress(asset.tokenAddress)}
+            </a>
+            <Box height={5} />
+            <div className="t-link" onClick={getTokenFaucet}>
+              Get Testnet {asset.symbol}
+            </div>
+          </div>
         </div>
 
         <div className="asset-stats mb-5">
