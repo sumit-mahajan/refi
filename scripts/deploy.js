@@ -241,12 +241,12 @@ const setupData = async () => {
 
   const borrowLinkTx = await lendingPool.borrow(
     link.address,
-    toWei(35),
+    toWei(65),
     deployer.address
   );
   await borrowLinkTx.wait();
 
-  console.log("User 0 borrows 35 LINK against DAI as collateral");
+  console.log("User 0 borrows 65 LINK against DAI as collateral");
 
   // One time infinite approve aWeth
   // Required at withdrawal time. i.e. do this before ETH deposit

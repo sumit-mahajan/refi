@@ -1,12 +1,12 @@
 import Box from "../components/Box";
 import "../styles/dashboard.scss";
 
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { Buffer } from 'buffer';
 
 import { useConnection } from "../utils/connection_provider/connection_provider";
 import { getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
-import {createAndUploadImages} from "../utils/createAndUploadImages";
+import { createAndUploadImages } from "../utils/createAndUploadImages";
 
 import Loading from "../components/loading/Loading";
 
@@ -19,7 +19,7 @@ const UserClass = [
 
 const Dashboard = () => {
 
-    const {refiCollectionContract, lendingPoolContract, accounts} = useConnection();
+    const { refiCollectionContract, lendingPoolContract, accounts } = useConnection();
 
     const [loadingStatus, setLoadingStatus] = useState({
         isLoading: false,
@@ -33,7 +33,7 @@ const Dashboard = () => {
         tokenId: 0
     });
 
-    const mintCards = async() => {
+    const mintCards = async () => {
         try {
             const address = accounts[0];
 
@@ -56,7 +56,7 @@ const Dashboard = () => {
             //     diamond: 'bafkreid43mzna4mzfmokdc56jvy4qcjonzvri2e67rzg4ck4dkzspaqrli'
             // }
             // console.log(imageCIDs);
-            
+
             setLoadingStatus({
                 isLoading: true,
                 message: "Minting your card"
@@ -70,7 +70,7 @@ const Dashboard = () => {
                 imageCIDs.diamond
             )
             await mintTx.wait()
-            
+
             fetchDetails()
             setLoadingStatus({
                 isLoading: false,
@@ -81,11 +81,11 @@ const Dashboard = () => {
         }
     }
 
-    const fetchDetails = async() => {
+    const fetchDetails = async () => {
         // Get class and score from lending Pool
         const userClass = await lendingPoolContract.getUserClass(accounts[0]);
 
-        console.log("UserCalss", userClass)
+        console.log("UserClass", userClass)
         // console.log(UserClass[userClass[0]], toEther(userClass[1]));
 
         let rep = {
@@ -99,11 +99,11 @@ const Dashboard = () => {
         const tokenId = await refiCollectionContract.getTokenId(accounts[0]);
 
         // console.log("TokenId", tokenId.toNumber())
-        if(tokenId.toNumber() !== 0) {
+        if (tokenId.toNumber() !== 0) {
             let tokenURI = await refiCollectionContract.tokenURI(tokenId);
             // console.log("Token URI", tokenURI)
             tokenURI = tokenURI.split(',')[1]
-            
+
             const metadata = await Buffer.from(tokenURI, 'base64').toString('ascii');
             rep.cardImage = JSON.parse(metadata).image;
             rep.tokenId = tokenId.toNumber()
@@ -113,12 +113,12 @@ const Dashboard = () => {
         console.log(reputation)
     }
 
-    useEffect(()=> {
+    useEffect(() => {
         fetchDetails()
     }, [accounts])
 
 
-    if(loadingStatus.isLoading) {
+    if (loadingStatus.isLoading) {
         return <Loading message={loadingStatus.message} />;
     }
     return (
@@ -128,13 +128,13 @@ const Dashboard = () => {
             <section className="credit-flex">
                 {
                     (reputation.cardImage === "") ?
-                    <button style={{width: "40rem"}} onClick={mintCards}>Mint Your Card</button> : 
-                    <img src={reputation.cardImage} alt="Credit card" />
+                        <button style={{ width: "40rem" }} onClick={mintCards}>Mint Your Card</button> :
+                        <img src={reputation.cardImage} alt="Credit card" />
                 }
                 <Box width={60} />
                 <div>
                     <h3>Your Credit Score</h3>
-                    <h1>{reputation.score}</h1>
+                    <h1>{reputation.score.toFixed(0)}</h1>
                     <p>You are {reputation.class} user. You belong to the most elite users on the protocol</p>
                 </div>
                 <div className="opensea-btn">
