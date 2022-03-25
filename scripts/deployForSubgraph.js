@@ -6,7 +6,7 @@
 const hre = require("hardhat");
 
 async function main() {
-  const addressesProviderAddress = "0x9A51aA832c05E078E4d86d5d6045908eC77df66f";
+  const addressesProviderAddress = "0xFA93ae5dFE5D363EE5f490a710354333b984e984";
 
   const addressesProvider = await hre.ethers.getContractAt(
     "AddressesProvider",
@@ -172,45 +172,45 @@ const setupData = async () => {
 
   // const users = [];
 
-  // console.log("Deployer - ", deployer.address)
-  // console.log("User - ", users[0].address)
-  // console.log("User - ", users[1].address)
+  console.log("Deployer - ", deployer.address)
+  console.log("User - ", users[0].address)
+  console.log("User - ", users[1].address)
 
   // Available accounts
   // deployer, users[0], users[1]
 
   // Load 3 user accounts with mock DAI and LINK
-  // await dai.mint(deployer.address, toWei(1000));
-  // await dai.mint(users[1].address, toWei(1000));
+  await dai.mint(deployer.address, toWei(1000));
+  await dai.mint(users[1].address, toWei(1000));
 
-  // const approveDaiTx = await dai
-  //   .connect(users[0].signer)
-  //   .approve(lendingPool.address, MAX_UINT);
-  // await approveDaiTx.wait();
+  const approveDaiTx = await dai
+    .connect(users[0].signer)
+    .approve(lendingPool.address, MAX_UINT);
+  await approveDaiTx.wait();
 
-  // console.log("User 0 infinite approves the lendingPool for DAI reserve");
+  console.log("User 0 infinite approves the lendingPool for DAI reserve");
 
-  // const depositDaiTx = await lendingPool
-  //   .connect(users[0].signer)
-  //   .deposit(dai.address, toWei(0.05), users[0].address);
-  // await depositDaiTx.wait();
+  const depositDaiTx = await lendingPool
+    .connect(users[0].signer)
+    .deposit(dai.address, toWei(0.05), users[0].address);
+  await depositDaiTx.wait();
 
-  // console.log("User 0 deposits 0.05 DAI");
+  console.log("User 0 deposits 0.05 DAI");
 
   // One time infinite approve
-  //   const approveLinkTx = await link
-  //     .connect(users[1].signer)
-  //     .approve(lendingPool.address, MAX_UINT);
-  //   await approveLinkTx.wait();
+    const approveLinkTx = await link
+      .connect(users[1].signer)
+      .approve(lendingPool.address, MAX_UINT);
+    await approveLinkTx.wait();
 
-  //   console.log("User 1 infinite approves the lendingPool for LINK reserve");
+    console.log("User 1 infinite approves the lendingPool for LINK reserve");
 
-  //   const linkTx = await lendingPool
-  //     .connect(users[1].signer)
-  //     .deposit(link.address, toWei(20), users[1].address);
-  //   await linkTx.wait();
+    const linkTx = await lendingPool
+      .connect(users[1].signer)
+      .deposit(link.address, toWei(20), users[1].address);
+    await linkTx.wait();
 
-  //   console.log("User 1 deposits 20 LINK");
+    console.log("User 1 deposits 20 LINK");
 
   //   const borrowLinkTx = await lendingPool
   //     .connect(users[1].signer)
@@ -270,16 +270,16 @@ const setupData = async () => {
 
   // console.log("User[1] borrows 0.01 DAI");
 
-  const sourceAddress = await priceOracle.getSourceOfAsset(dai.address);
-  const daiSource = await hre.ethers.getContractAt(
-    "MockAggregatorV3",
-    sourceAddress
-  );
+  // const sourceAddress = await priceOracle.getSourceOfAsset(dai.address);
+  // const daiSource = await hre.ethers.getContractAt(
+  //   "MockAggregatorV3",
+  //   sourceAddress
+  // );
 
-  const daiSourceTx = await daiSource.setPrice(toWei(2.2));
-  await daiSourceTx.wait();
+  // const daiSourceTx = await daiSource.setPrice(toWei(2.2));
+  // await daiSourceTx.wait();
 
-  console.log("Simulated increase in DAI price by 8%");
+  // console.log("Simulated increase in DAI price by 8%");
 
   //   const withdrawETHTx = await wethGateway
   //     .connect(users[1].signer)

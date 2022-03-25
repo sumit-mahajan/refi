@@ -5,6 +5,7 @@ import AddressesProvider from "../../artifacts/contracts/AddressesProvider.sol/A
 import ProtocolDataProvider from "../../artifacts/contracts/data_provider/ProtocolDataProvider.sol/ProtocolDataProvider.json";
 import WalletBalanceProvider from "../../artifacts/contracts/data_provider/WalletBalanceProvider.sol/WalletBalanceProvider.json";
 import LendingPool from "../../artifacts/contracts/lendingpool/LendingPool.sol/LendingPool.json";
+import RefiCollection from "../../artifacts/contracts/tokenization/RefiCollection.sol/RefiCollection.json";
 import WETHGateway from "../../artifacts/contracts/utils/WETHGateway.sol/WETHGateway.json";
 import ERC20 from "../../artifacts/contracts/mocks/MockERC20.sol/MockERC20.json";
 import aToken from "../../artifacts/contracts/tokenization/AToken.sol/AToken.json";
@@ -35,6 +36,12 @@ const fetchContracts = async (provider, chainId) => {
     LendingPool.abi,
     provider
   );
+
+  const refiCollectionContract = new ethers.Contract(
+    await addressProvider.getRefiCollection(),
+    RefiCollection.abi,
+    provider
+  )
 
   const wETHGatewayContract = new ethers.Contract(
     await addressProvider.getWETHGateway(),
@@ -79,6 +86,7 @@ const fetchContracts = async (provider, chainId) => {
     protocolDataProvider,
     walletBalanceProvider,
     lendingPoolContract,
+    refiCollectionContract,
     wETHGatewayContract,
     daiContract,
     linkContract,

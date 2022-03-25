@@ -567,6 +567,11 @@
           "internalType": "enum DataTypes.UserClass",
           "name": "",
           "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "score",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
