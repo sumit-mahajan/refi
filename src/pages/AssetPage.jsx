@@ -34,6 +34,8 @@ function AssetPage() {
   let { state: assets, refresh } = useAssetProvider();
 
   const [asset, setAsset] = useState();
+  const [isLoading, setLoading] = useState(false);
+  const [localError, setError] = useState({ deposit: null, withdraw: null, borrow: null, repay: null });
 
   const [positions, setPositions] = useState({
     healthFactor: 0,
@@ -126,8 +128,41 @@ function AssetPage() {
     fetchPositons();
   }, [asset, accounts, fetchPositons]);
 
+  const approveToken = async () => {
+    try {
+      setError({});
+      setLoading(true);
+
+      switch (asset.symbol) {
+        case "DAI":
+          await daiContract.approve(lendingPoolContract.address, MAX_UINT);
+          break;
+
+        case "LINK":
+          await linkContract.approve(lendingPoolContract.address, MAX_UINT);
+          break;
+
+        case "ETH":
+          console.log("Here");
+          await awethContract.approve(wETHGatewayContract.address, MAX_UINT);
+          break;
+        default:
+          break;
+      }
+
+      setLoading(false);
+    } catch (error) {
+      setError({ deposit: 'Oops! The transaction failed' })
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
   const depositAsset = async (amount) => {
     try {
+      setError({});
+      setLoading(true);
+
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.depositETH({
           value: toWei(amount),
@@ -141,32 +176,19 @@ function AssetPage() {
       }
 
       refresh();
+      setLoading(false);
     } catch (error) {
+      setError({ deposit: 'Oops! The transaction failed' })
+      setLoading(false);
       console.log(error);
-    }
-  };
-
-  const approveToken = async () => {
-    switch (asset.symbol) {
-      case "DAI":
-        await daiContract.approve(lendingPoolContract.address, MAX_UINT);
-        break;
-
-      case "LINK":
-        await linkContract.approve(lendingPoolContract.address, MAX_UINT);
-        break;
-
-      case "ETH":
-        console.log("Here");
-        await awethContract.approve(wETHGatewayContract.address, MAX_UINT);
-        break;
-      default:
-        break;
     }
   };
 
   const borrowAsset = async (amount) => {
     try {
+      setError({});
+      setLoading(true);
+
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.borrowETH(toWei(amount));
       } else {
@@ -178,13 +200,19 @@ function AssetPage() {
       }
 
       refresh();
+      setLoading(false);
     } catch (error) {
+      setError({ borrow: 'Oops! The transaction failed' })
+      setLoading(false);
       console.log(error);
     }
   };
 
   const repayAsset = async (amount) => {
     try {
+      setError({});
+      setLoading(true);
+
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.repayETH(toWei(amount), {
           value: toWei(amount),
@@ -198,13 +226,19 @@ function AssetPage() {
       }
 
       refresh();
+      setLoading(false);
     } catch (error) {
+      setError({ repay: 'Oops! The transaction failed' })
+      setLoading(false);
       console.log(error);
     }
   };
 
   const withdrawAsset = async (amount) => {
     try {
+      setError({});
+      setLoading(true);
+
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.withdrawETH(toWei(amount));
       } else {
@@ -216,7 +250,10 @@ function AssetPage() {
       }
 
       refresh();
+      setLoading(false);
     } catch (error) {
+      setError({ withdraw: 'Oops! The transaction failed' })
+      setLoading(false);
       console.log(error);
     }
   };
@@ -230,26 +267,35 @@ function AssetPage() {
   };
 
   const approveDWETH = async () => {
-    await dwethContract.approveDelegation(
-      wETHGatewayContract.address,
-      MAX_UINT
-    );
+    try {
+      setError({});
+      setLoading(true);
+
+      await dwethContract.approveDelegation(
+        wETHGatewayContract.address,
+        MAX_UINT
+      );
+
+      refresh();
+      setLoading(false);
+    } catch (error) {
+      setError({ borrow: 'Oops! The transaction failed' })
+      setLoading(false);
+      console.log(error);
+    }
   };
 
   const getTokenFaucet = async () => {
-
     if (asset.symbol === "ETH") {
       if (chainId === 4) {
         window.open(
           "https://faucet.rinkeby.io/", "_blank");
       }
     }
-
     else if (asset.symbol === "MATIC") {
       window.open(
         "https://faucet.polygon.technology/", "_blank");
     }
-
     else if (asset.symbol === "DAI") {
       if (chainId === 4) {
         window.open(
@@ -258,7 +304,6 @@ function AssetPage() {
         await daiContract.mint(accounts[0], toWei(100));
       }
     }
-
     else if (asset.symbol === "LINK") {
       if (chainId === 4) {
         window.open(
@@ -271,7 +316,10 @@ function AssetPage() {
 
   if (asset === undefined) {
     return <Loading message={"Loading Asset Data"} />;
+  } else if (isLoading) {
+    return <Loading message={"Please confirm the transaction from Browser Wallet"} />;
   }
+
   return (
     <main>
       <section className="asset-container pt-5 pb-5 pr-5 pl-5 mt-6 mb-5">
@@ -336,6 +384,7 @@ function AssetPage() {
             isApproved={positions.isApproved}
             approveToken={approveToken}
             depositAsset={depositAsset}
+            error={localError.deposit}
           />
           {positions.currentDeposited > 0 ?
             <>
@@ -344,6 +393,7 @@ function AssetPage() {
                 symbol={asset.symbol}
                 currentDeposited={positions.currentDeposited}
                 withdrawAsset={withdrawAsset}
+                error={localError.withdraw}
               />
             </> : <></>
           }
@@ -356,6 +406,7 @@ function AssetPage() {
             isApproved={positions.isDwethApproved}
             approveDWETH={approveDWETH}
             borrowAsset={borrowAsset}
+            error={localError.borrow}
           />
           {positions.currentBorrowed > 0 ?
             <>
@@ -364,6 +415,7 @@ function AssetPage() {
                 symbol={asset.symbol}
                 currentBorrowed={positions.currentBorrowed}
                 repayAsset={repayAsset}
+                error={localError.repay}
               />
             </> : <></>
           }

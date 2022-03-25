@@ -2,10 +2,9 @@ import React from "react";
 
 export const InputField = ({ input, setInput, symbol }) => {
   return (
-    <div className="mb-3">
+    <div>
       <div className="input-field">
         <input
-          className="mb-1"
           type="number"
           placeholder="Amount"
           value={input}

@@ -1,13 +1,15 @@
 import React, { useState } from "react";
+import Box from "../Box";
 import { InputField } from "../InputField";
 import SimpleTile from "../SimpleTile";
 
 const RepaySection = ({
     symbol,
     currentBorrowed,
-    repayAsset
+    repayAsset,
+    error
 }) => {
-    const [input, setInput] = useState(0);
+    const [input, setInput] = useState();
 
     return (
         <div className="borrow">
@@ -28,17 +30,23 @@ const RepaySection = ({
                 symbol={symbol}
             />
 
-            <div className="buttons">
-                <button
-                    onClick={() => {
-                        setInput("");
-                        repayAsset(input);
-                    }}
-                >
-                    Repay
-                </button>
+            {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
 
-            </div>
+            <button
+                onClick={() => {
+                    setInput("");
+                    repayAsset(input);
+                }}
+            >
+                Repay
+            </button>
+
+            <Box height={20} />
+            <p className="or">OR</p>
+            <Box height={10} />
+
+            <div className="ul-btn" onClick={() => { repayAsset(currentBorrowed + 1); }}>Repay All</div>
+
         </div>
     );
 };

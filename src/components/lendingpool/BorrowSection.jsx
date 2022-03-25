@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Box from "../Box";
 import { InputField } from "../InputField";
 import SimpleTile from "../SimpleTile";
 
@@ -8,8 +9,9 @@ const BorrowSection = ({
   isApproved,
   approveDWETH,
   borrowAsset,
+  error
 }) => {
-  const [input, setInput] = useState(0);
+  const [input, setInput] = useState();
 
   return (
     <div className="borrow">
@@ -30,10 +32,19 @@ const BorrowSection = ({
         symbol={symbol}
       />
 
+      {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
+
       <div className="buttons">
         {symbol === "ETH" ? (
           isApproved ? (
-            <></>
+            <button
+              onClick={() => {
+                setInput("");
+                borrowAsset(input);
+              }}
+            >
+              Borrow
+            </button>
           ) : (
             <button onClick={approveDWETH}>
               Approve
