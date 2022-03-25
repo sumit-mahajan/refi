@@ -974,9 +974,13 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         public
         view
         override
-        returns (DataTypes.UserClass)
+        returns (DataTypes.UserClass userClass, uint256 score)
     {
-        return _userReputationMap[user].getReputationClass();
+        ( userClass, score) = _userReputationMap[user].getReputationClass();
+        return (
+            userClass,
+            score
+        );
     }
 
     function setUserBorrowPercent(address user) internal {

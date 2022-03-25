@@ -18,15 +18,18 @@ contract RefiCollection is ERC721{
     // Mapping to store all NFT tokenId -> metadata
     mapping(uint256 => Metadata) private metadatas;
 
+    // Mapping to maintain user address to tokenId
+    mapping(address => uint256) private userToTokenId; 
+
     address private immutable LENDING_POOL;
 
     struct Metadata {
         string name;
         string description;
-        string bronzeCardURL;
-        string silverCardURL;
-        string goldCardURL;
-        string diamondCardURL;
+        string bronzeCardCID;
+        string silverCardCID;
+        string goldCardCID;
+        string diamondCardCID;
     }
 
     constructor(address lendingPoolAddr) ERC721("Refi Protocol", "REFI") {
@@ -39,15 +42,16 @@ contract RefiCollection is ERC721{
     {
         super._beforeTokenTransfer(from, to, tokenId);
         require(from == address(0), "Only minting is allowed. These NFTs can't be burned or transferred");
+        require(balanceOf(to) == 0, "Only one card per user");
     }
 
     function mint(
         string memory _name,
         string memory _description,
-        string memory _bronzeCardURL,
-        string memory _silverCardURL,
-        string memory _goldCardURL,
-        string memory _diamondCardURL
+        string memory _bronzeCardCID,
+        string memory _silverCardCID,
+        string memory _goldCardCID,
+        string memory _diamondCardCID
     ) public {
         _tokenIds.increment();
         uint256 tokenId = _tokenIds.current();
@@ -57,31 +61,33 @@ contract RefiCollection is ERC721{
         metadatas[tokenId] = Metadata({
             name: _name,
             description: _description,
-            bronzeCardURL: _bronzeCardURL,
-            silverCardURL: _silverCardURL,
-            goldCardURL: _goldCardURL,
-            diamondCardURL: _diamondCardURL
+            bronzeCardCID: _bronzeCardCID,
+            silverCardCID: _silverCardCID,
+            goldCardCID: _goldCardCID,
+            diamondCardCID: _diamondCardCID
         });
+
+        userToTokenId[msg.sender] = tokenId;
     }
 
     function getImageURL(uint256 tokenId, address owner) internal view returns (string memory) {
-        DataTypes.UserClass uc = ILendingPool(LENDING_POOL).getUserClass(owner);
+        (DataTypes.UserClass uc, ) = ILendingPool(LENDING_POOL).getUserClass(owner);
 
         Metadata memory meta = metadatas[tokenId];
 
-        string memory url;
+        string memory cid;
 
         if (uc == DataTypes.UserClass.Diamond) {
-            url = meta.diamondCardURL;
+            cid = meta.diamondCardCID;
         } else if (uc == DataTypes.UserClass.Gold) {
-            url = meta.goldCardURL;
+            cid = meta.goldCardCID;
         } else if (uc == DataTypes.UserClass.Silver) {
-            url = meta.silverCardURL;
+            cid = meta.silverCardCID;
         } else {
-            url = meta.bronzeCardURL;
+            cid = meta.bronzeCardCID;
         }
 
-        return url;
+        return string(abi.encodePacked("https://ipfs.io/ipfs/", cid));
     }
 
     function tokenURI(uint256 tokenId) override(ERC721) public view returns (string memory) {
@@ -100,5 +106,9 @@ contract RefiCollection is ERC721{
             ))
         );
         return string(abi.encodePacked('data:application/json;base64,', json));
-    }    
+    }
+
+    function getTokenId(address owner) public view returns (uint256 token) {
+        return userToTokenId[owner];
+    }        
 }

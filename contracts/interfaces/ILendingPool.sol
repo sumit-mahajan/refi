@@ -302,7 +302,7 @@ interface ILendingPool {
     function getUserClass(address user)
         external
         view
-        returns (DataTypes.UserClass);
+        returns (DataTypes.UserClass, uint256 score);
 
     /**
      * @dev Returns the normalized income normalized income of the reserve

@@ -31,18 +31,18 @@ library ReputationLogic {
     function getReputationClass(DataTypes.UserReputation storage userReputation)
         external
         view
-        returns (DataTypes.UserClass)
+        returns (DataTypes.UserClass, uint256 score)
     {
-        uint256 score = userReputation.cumulateReputation();
+        score = userReputation.cumulateReputation();
 
         if (score <= 600 ether) {
-            return DataTypes.UserClass.Bronze;
+            return (DataTypes.UserClass.Bronze, score);
         } else if (score <= 700 ether) {
-            return DataTypes.UserClass.Silver;
+            return (DataTypes.UserClass.Silver, score);
         } else if (score <= 800 ether) {
-            return DataTypes.UserClass.Gold;
+            return (DataTypes.UserClass.Gold, score);
         } else {
-            return DataTypes.UserClass.Diamond;
+            return (DataTypes.UserClass.Diamond, score);
         }
     }
 
