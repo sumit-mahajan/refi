@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SimpleTile from "../SimpleTile";
 import { InputField } from "../InputField";
-import Slider from "../slider/Slider";
+import Box from "../Box";
 
 const DepositSection = ({
   symbol,
@@ -9,8 +9,9 @@ const DepositSection = ({
   isApproved,
   approveToken,
   depositAsset,
+  error
 }) => {
-  const [input, setInput] = useState(0);
+  const [input, setInput] = useState();
 
   return (
     <div className="deposit">
@@ -30,7 +31,7 @@ const DepositSection = ({
         symbol={symbol}
       />
 
-      <Slider />
+      {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
 
       <div className="buttons">
         {isApproved ? (

@@ -37,6 +37,12 @@
       height: 7rem;
       border-radius: 100px;
     }
+
+    a, .t-link {
+      color: #8b8b8b;
+      text-decoration: underline;
+      cursor: pointer;
+    }
   }
 
   .asset-stats {
@@ -63,12 +69,52 @@
     flex: 1;
   }
 
+  .error-field {
+    height: 6rem;
+    display: grid;
+    place-content: center;
+
+    p {
+      font-size: 1.8rem;
+      color: red;
+    }
+  }
+
   .borrow {
     @include surfaceContainer(3rem, 1.2rem);
   }
 
   .deposit {
     @include surfaceContainer(3rem, 1.2rem);
+  }
+
+  .deposit, .borrow {
+    .or {
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .ul-btn {
+      position: relative;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .ul-btn::before {
+      content: "";
+      position: absolute;
+      bottom: 0%;
+      height: 0.2rem;
+      width: 15%;
+      background-color: black;
+    }
+
+    .ul-btn-w::before {
+      content: "";
+      width: 21%;
+    }
   }
 
   .simple-tile {
@@ -87,12 +133,6 @@
 
   h4 {
     font-size: 3rem;
-  }
-
-  .buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 4rem;
   }
 }
 

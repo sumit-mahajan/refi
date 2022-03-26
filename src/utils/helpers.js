@@ -64,6 +64,16 @@ const displayAddress = (address) =>
   "..." +
   address.substring(address.length - 3, address.length);
 
+const getBlockExplorerLink = (chainId, address) => {
+  if (chainId === 31337) {
+    return "";
+  } else if (chainId === 4) {
+    return "https://rinkeby.etherscan.io/address/" + address.toString()
+  } else if (chainId === 80001) {
+    return "https://mumbai.polygonscan.com/address/" + address.toString()
+  }
+}
+
 export {
   toWei,
   toEther,
@@ -72,6 +82,7 @@ export {
   calculateAPY,
   getImageFromSymbol,
   displayAddress,
+  getBlockExplorerLink,
   MAX_UINT,
   WETH_ADDRESS,
 };

@@ -57,16 +57,20 @@ library ReputationLogic {
     ) internal view returns (uint256) {
         if (userReputation.lastScore <= 600 ether) {
             // 3 months to millisconds
-            return 7889238000;
+            // return 7889238000;
+            return 120000;
         } else if (userReputation.lastScore <= 700 ether) {
             // 9 months to millisconds
-            return 23667714000;
+            // return 23667714000;
+            return 60000;
         } else if (userReputation.lastScore <= 800 ether) {
             // 1 year to millisconds
-            return 31556952000;
+            // return 31556952000;
+            return 60000;
         } else {
             // 10 years to millisconds
-            return 315569520000;
+            // return 315569520000;
+            return 60000;
         }
     }
 
@@ -81,11 +85,14 @@ library ReputationLogic {
         pure
         returns (uint256)
     {
-        if (percentageBorrowed > 85 ether) {
-            // Two point equation between (85,1) and (100,0.4)
-            return (4.4 ether - (4 * percentageBorrowed) / uint256(100));
+        if (percentageBorrowed > 8500) {
+            // Two point equation between (8500,10000) and (10000,4000)
+            if (percentageBorrowed > 11000) {
+                return 0;
+            }
+            return (44000 - 4 * percentageBorrowed);
         } else {
-            return percentageBorrowed.wadDiv(85 ether);
+            return (percentageBorrowed * 1000) / uint256(8500);
         }
     }
 
@@ -99,30 +106,35 @@ library ReputationLogic {
         returns (uint256)
     {
         uint256 score = userReputation.lastScore;
+        uint256 timeDiff;
 
-        uint256 timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
+        if (userReputation.lastUpdateTimestamp == 0) {
+            timeDiff = 0;
+        } else {
+            timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
+        }
         uint256 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
         uint256 reputationFactor = userReputation.getReputationFactor();
 
         if (nMonths == 0) {
-            score += getBorrowPercentFactor(
-                userReputation.lastPercentageBorrowed
-            ).wadMul((timeDiff * 1e7).wadDiv(reputationFactor * 1e7));
+            score += timeDiff.wadDiv(reputationFactor).percentMul(
+                getBorrowPercentFactor(userReputation.lastPercentageBorrowed)
+            );
         } else {
             uint256 remainder = timeDiff - nMonths * MILLISECONDS_PER_MONTH;
             for (uint16 i = 0; i < nMonths; i++) {
-                score += getBorrowPercentFactor(
-                    userReputation.lastPercentageBorrowed
-                ).wadMul(
-                        (MILLISECONDS_PER_MONTH * 1e7).wadDiv(
-                            reputationFactor * 1e7
+                score += MILLISECONDS_PER_MONTH
+                    .wadDiv(reputationFactor)
+                    .percentMul(
+                        getBorrowPercentFactor(
+                            userReputation.lastPercentageBorrowed
                         )
                     );
                 reputationFactor = userReputation.getReputationFactor();
             }
-            score += getBorrowPercentFactor(
-                userReputation.lastPercentageBorrowed
-            ).wadMul((remainder * 1e7).wadDiv(reputationFactor * 1e7));
+            score += remainder.wadDiv(reputationFactor).percentMul(
+                getBorrowPercentFactor(userReputation.lastPercentageBorrowed)
+            );
         }
 
         // Upper limit for reputation score is 900
@@ -144,6 +156,7 @@ library ReputationLogic {
             userReputation.lastScore = 300 ether;
         }
         userReputation.lastScore = userReputation.cumulateReputation();
+        userReputation.lastUpdateTimestamp = block.timestamp;
 
         // console.log(userReputation.lastScore);
         // console.log(userReputation.lastScore / uint256(1e18));
@@ -170,6 +183,7 @@ library ReputationLogic {
         if (userReputation.lastScore < 300 ether) {
             userReputation.lastScore = 300 ether;
         }
+        userReputation.lastUpdateTimestamp = block.timestamp;
         // console.log(userReputation.lastScore);
         // console.log(userReputation.lastScore / uint256(1e18));
     }
