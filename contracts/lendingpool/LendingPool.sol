@@ -92,7 +92,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         ValidationLogic.validateDeposit(amount, reserve);
 
         // Cumulate accured reputation
-        _userReputationMap[onBehalfOf].addReputation();
+        _userReputationMap[onBehalfOf].addReputation(_classesData);
 
         address aToken = reserve.aTokenAddress;
 
@@ -166,7 +166,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
 
         // Cumulate accured reputation
-        _userReputationMap[onBehalfOf].addReputation();
+        _userReputationMap[onBehalfOf].addReputation(_classesData);
 
         reserve.updateState();
 
@@ -223,7 +223,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         ValidationLogic.validateRepay(amount, onBehalfOf, variableDebt);
 
         // Cumulate accured reputation
-        _userReputationMap[onBehalfOf].addReputation();
+        _userReputationMap[onBehalfOf].addReputation(_classesData);
 
         uint256 paybackAmount = variableDebt;
 
@@ -265,7 +265,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         address user
     ) external override {
         // Cumulate accured reputation
-        _userReputationMap[user].addReputation();
+        _userReputationMap[user].addReputation(_classesData);
 
         withdraw(asset, amount, to);
 
@@ -314,7 +314,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
 
         if (msg.sender != _addressesProvider.getWETHGateway()) {
             // Cumulate accured reputation
-            _userReputationMap[msg.sender].addReputation();
+            _userReputationMap[msg.sender].addReputation(_classesData);
         }
 
         reserve.updateState();
@@ -366,7 +366,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
 
         // Cumulate accured reputation
-        _userReputationMap[msg.sender].addReputation();
+        _userReputationMap[msg.sender].addReputation(_classesData);
 
         _usersConfig[msg.sender].setUsingAsCollateral(
             reserve.id,
@@ -450,7 +450,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
 
         // Cumulate accured reputation
-        _userReputationMap[user].addReputation();
+        _userReputationMap[user].addReputation(_classesData);
 
         vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
 
@@ -572,7 +572,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         }
 
         // Drop reputation
-        _userReputationMap[user].dropReputation();
+        _userReputationMap[user].dropReputation(_classesData);
 
         // Set lastPercentageBorrowed
         setUserBorrowPercent(user);
@@ -976,11 +976,10 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         override
         returns (DataTypes.UserClass userClass, uint256 score)
     {
-        ( userClass, score) = _userReputationMap[user].getReputationClass();
-        return (
-            userClass,
-            score
+        (userClass, score) = _userReputationMap[user].getReputationClass(
+            _classesData
         );
+        return (userClass, score);
     }
 
     function setUserBorrowPercent(address user) internal {
@@ -1003,6 +1002,24 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             userCollateralBalance,
             userVariableDebt,
             7500
+        );
+    }
+
+    function setClassData(
+        uint256 class,
+        uint256 idealTimeSpan,
+        uint256 scoreRange,
+        uint256 dropFactor
+    ) external {
+        require(
+            msg.sender == address(_addressesProvider),
+            "Caller not AddressesProvider"
+        );
+
+        _classesData[class] = DataTypes.ClassData(
+            idealTimeSpan,
+            scoreRange,
+            dropFactor
         );
     }
 }

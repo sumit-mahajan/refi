@@ -22,18 +22,18 @@ library ReputationLogic {
     using ReputationLogic for DataTypes.UserReputation;
 
     uint256 constant MILLISECONDS_PER_MONTH = 2629800000;
+    uint256 constant OPTIMAL_CREDIT_UTILIZATION_PERCENT = 8500;
 
     /**
      * @dev Returns real time reputation class of a user
      * @param userReputation The user reputation object
      * @return UserClass
      **/
-    function getReputationClass(DataTypes.UserReputation storage userReputation)
-        external
-        view
-        returns (DataTypes.UserClass, uint256 score)
-    {
-        score = userReputation.cumulateReputation();
+    function getReputationClass(
+        DataTypes.UserReputation storage userReputation,
+        mapping(uint256 => DataTypes.ClassData) storage classesData
+    ) external view returns (DataTypes.UserClass, uint256 score) {
+        score = userReputation.cumulateReputation(classesData);
 
         if (score <= 600 ether) {
             return (DataTypes.UserClass.Bronze, score);
@@ -42,37 +42,49 @@ library ReputationLogic {
         } else if (score <= 800 ether) {
             return (DataTypes.UserClass.Gold, score);
         } else {
-            return (DataTypes.UserClass.Diamond, score);
+            return (DataTypes.UserClass.Platinum, score);
         }
     }
 
     /**
-     * Returns the time in milliseconds needed for a perfect borrower to move through the given class bottom up
-     * @dev Gets the reputationFactor for given user class
-     * @param userReputation The user reputation object
-     * @return reputationFactor
+     * Returns constant parameters associated with a user class
+     * @dev Gets the classIdealTimeSpan for given user class
+     * @param classesData mapping(Class=>ClassData)
+     * @param score user's current score
+     * @return ClassData
      **/
-    function getReputationFactor(
-        DataTypes.UserReputation storage userReputation
-    ) internal view returns (uint256) {
-        if (userReputation.lastScore <= 600 ether) {
-            // 3 months to millisconds
-            // return 7889238000;
-            return 120000;
-        } else if (userReputation.lastScore <= 700 ether) {
-            // 9 months to millisconds
-            // return 23667714000;
-            return 60000;
-        } else if (userReputation.lastScore <= 800 ether) {
-            // 1 year to millisconds
-            // return 31556952000;
-            return 60000;
+    function getClassData(
+        mapping(uint256 => DataTypes.ClassData) storage classesData,
+        uint256 score
+    ) public view returns (DataTypes.ClassData memory) {
+        if (score <= 600 ether) {
+            return classesData[3];
+        } else if (score <= 700 ether) {
+            return classesData[2];
+        } else if (score <= 800 ether) {
+            return classesData[1];
         } else {
-            // 10 years to millisconds
-            // return 315569520000;
-            return 60000;
+            return classesData[0];
         }
     }
+
+    // if (userReputation.lastScore <= 600 ether) {
+    //     // 3 months to millisconds
+    //     // return 7889238000;
+    //     return 120000;
+    // } else if (userReputation.lastScore <= 700 ether) {
+    //     // 9 months to millisconds
+    //     // return 23667714000;
+    //     return 60000;
+    // } else if (userReputation.lastScore <= 800 ether) {
+    //     // 1 year to millisconds
+    //     // return 31556952000;
+    //     return 60000;
+    // } else {
+    //     // 10 years to millisconds
+    //     // return 315569520000;
+    //     return 60000;
+    // }
 
     /**
      * If a user borrows 85% of its allowed borrowing capacity, it is considered optimal and results in highest score increment
@@ -85,14 +97,18 @@ library ReputationLogic {
         pure
         returns (uint256)
     {
-        if (percentageBorrowed > 8500) {
-            // Two point equation between (8500,10000) and (10000,4000)
+        // OPTIMAL_CREDIT_UTILIZATION_PERCENT == 8500
+        if (percentageBorrowed > OPTIMAL_CREDIT_UTILIZATION_PERCENT) {
+            // Two point equation between (OPTIMAL_CREDIT_UTILIZATION_PERCENT,10000) and (10000,4000)
             if (percentageBorrowed > 11000) {
-                return 0;
+                return 4000;
             }
             return (44000 - 4 * percentageBorrowed);
         } else {
-            return (percentageBorrowed * 1000) / uint256(8500);
+            // Two point equation between (OPTIMAL_CREDIT_UTILIZATION_PERCENT,10000) and (0,0)
+            return
+                (percentageBorrowed * 10000) /
+                uint256(OPTIMAL_CREDIT_UTILIZATION_PERCENT);
         }
     }
 
@@ -100,13 +116,13 @@ library ReputationLogic {
      * @dev Logic for adding the accured reputation to score
      * @param userReputation The user reputation object
      **/
-    function cumulateReputation(DataTypes.UserReputation storage userReputation)
-        internal
-        view
-        returns (uint256)
-    {
+    function cumulateReputation(
+        DataTypes.UserReputation storage userReputation,
+        mapping(uint256 => DataTypes.ClassData) storage classesData
+    ) internal view returns (uint256) {
         uint256 score = userReputation.lastScore;
         uint256 timeDiff;
+        DataTypes.ClassData memory userClassData;
 
         if (userReputation.lastUpdateTimestamp == 0) {
             timeDiff = 0;
@@ -114,27 +130,45 @@ library ReputationLogic {
             timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
         }
         uint256 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
-        uint256 reputationFactor = userReputation.getReputationFactor();
+        userClassData = getClassData(classesData, score);
+        uint256 classIdealTimeSpan = userClassData.idealTimeSpan;
+        uint256 classScoreRange = userClassData.scoreRange;
 
         if (nMonths == 0) {
-            score += timeDiff.wadDiv(reputationFactor).percentMul(
-                getBorrowPercentFactor(userReputation.lastPercentageBorrowed)
-            );
+            score +=
+                timeDiff.wadDiv(classIdealTimeSpan).percentMul(
+                    getBorrowPercentFactor(
+                        userReputation.lastPercentageBorrowed
+                    )
+                ) *
+                classScoreRange *
+                1000;
         } else {
             uint256 remainder = timeDiff - nMonths * MILLISECONDS_PER_MONTH;
             for (uint16 i = 0; i < nMonths; i++) {
-                score += MILLISECONDS_PER_MONTH
-                    .wadDiv(reputationFactor)
-                    .percentMul(
-                        getBorrowPercentFactor(
-                            userReputation.lastPercentageBorrowed
-                        )
-                    );
-                reputationFactor = userReputation.getReputationFactor();
+                score +=
+                    MILLISECONDS_PER_MONTH
+                        .wadDiv(classIdealTimeSpan)
+                        .percentMul(
+                            getBorrowPercentFactor(
+                                userReputation.lastPercentageBorrowed
+                            )
+                        ) *
+                    classScoreRange *
+                    1000;
+
+                userClassData = getClassData(classesData, score);
+                classIdealTimeSpan = userClassData.idealTimeSpan;
+                classScoreRange = userClassData.scoreRange;
             }
-            score += remainder.wadDiv(reputationFactor).percentMul(
-                getBorrowPercentFactor(userReputation.lastPercentageBorrowed)
-            );
+            score +=
+                remainder.wadDiv(classIdealTimeSpan).percentMul(
+                    getBorrowPercentFactor(
+                        userReputation.lastPercentageBorrowed
+                    )
+                ) *
+                classScoreRange *
+                1000;
         }
 
         // Upper limit for reputation score is 900
@@ -149,43 +183,40 @@ library ReputationLogic {
      * @dev Adds the accured reputation to score before every transaction
      * @param userReputation The user reputation object
      **/
-    function addReputation(DataTypes.UserReputation storage userReputation)
-        internal
-    {
+    function addReputation(
+        DataTypes.UserReputation storage userReputation,
+        mapping(uint256 => DataTypes.ClassData) storage classesData
+    ) internal {
         if (userReputation.lastScore == 0) {
             userReputation.lastScore = 300 ether;
         }
-        userReputation.lastScore = userReputation.cumulateReputation();
-        userReputation.lastUpdateTimestamp = block.timestamp;
 
-        // console.log(userReputation.lastScore);
-        // console.log(userReputation.lastScore / uint256(1e18));
+        userReputation.lastScore = userReputation.cumulateReputation(
+            classesData
+        );
+        userReputation.lastUpdateTimestamp = block.timestamp;
     }
 
     /**
      * @dev Drops the reputation score in case of liquidation
      * @param userReputation The user reputation object
      **/
-    function dropReputation(DataTypes.UserReputation storage userReputation)
-        internal
-    {
-        if (userReputation.lastScore <= 600 ether) {
-            userReputation.lastScore.sub(50 ether);
-        } else if (userReputation.lastScore <= 700 ether) {
-            userReputation.lastScore.sub(100 ether);
-        } else if (userReputation.lastScore <= 800 ether) {
-            userReputation.lastScore.sub(150 ether);
-        } else {
-            userReputation.lastScore.sub(200 ether);
-        }
+    function dropReputation(
+        DataTypes.UserReputation storage userReputation,
+        mapping(uint256 => DataTypes.ClassData) storage classesData
+    ) internal {
+        DataTypes.ClassData memory userClassData = getClassData(
+            classesData,
+            userReputation.lastScore
+        );
+
+        userReputation.lastScore.sub(userClassData.dropFactor);
+        userReputation.lastUpdateTimestamp = block.timestamp;
 
         // Lower limit for reputation score is 300
         if (userReputation.lastScore < 300 ether) {
             userReputation.lastScore = 300 ether;
         }
-        userReputation.lastUpdateTimestamp = block.timestamp;
-        // console.log(userReputation.lastScore);
-        // console.log(userReputation.lastScore / uint256(1e18));
     }
 
     /**

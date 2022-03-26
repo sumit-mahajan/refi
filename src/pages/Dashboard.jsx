@@ -11,7 +11,7 @@ import { createAndUploadImages } from "../utils/createAndUploadImages";
 import Loading from "../components/loading/Loading";
 
 const UserClass = [
-    "Diamond",
+    "Platinum",
     "Gold",
     "Silver",
     "Bronze"
@@ -40,7 +40,7 @@ const Dashboard = () => {
             // Show some message like "Generating Your Card..."
             setLoadingStatus({
                 isLoading: true,
-                message: "Generating your card"
+                message: "Generating your card. Please wait about a minute"
             })
             const imageCIDs = await createAndUploadImages(address);
             // Stop showing the message
@@ -48,14 +48,6 @@ const Dashboard = () => {
                 isLoading: false,
                 message: ""
             })
-
-            // const imageCIDs = {
-            //     bronze: 'bafybeigk2qyu46v2luh53scgbdcvodjjarl5ajv3oj2dmmcobsay5aorby',
-            //     silver: 'bafybeiawkjuctml4szyenyi7igmux7x232onowvvagwbwtrjczlljrwhsa',
-            //     gold: 'bafybeiabfixl6v5dwnzitjowz2fsq42iuixbwl6dyskknoc23lj262ini4',
-            //     diamond: 'bafkreid43mzna4mzfmokdc56jvy4qcjonzvri2e67rzg4ck4dkzspaqrli'
-            // }
-            // console.log(imageCIDs);
 
             setLoadingStatus({
                 isLoading: true,
@@ -67,7 +59,7 @@ const Dashboard = () => {
                 imageCIDs.bronze,
                 imageCIDs.silver,
                 imageCIDs.gold,
-                imageCIDs.diamond
+                imageCIDs.platinum
             )
             await mintTx.wait()
 
@@ -82,6 +74,13 @@ const Dashboard = () => {
     }
 
     const fetchDetails = async () => {
+        if (!refiCollectionContract || !lendingPoolContract || accounts.length === 0)
+            return;
+
+        setLoadingStatus({
+            isLoading: true,
+            message: "Fetching credit data"
+        })
         // Get class and score from lending Pool
         const userClass = await lendingPoolContract.getUserClass(accounts[0]);
 
@@ -105,17 +104,22 @@ const Dashboard = () => {
             tokenURI = tokenURI.split(',')[1]
 
             const metadata = await Buffer.from(tokenURI, 'base64').toString('ascii');
+
             rep.cardImage = JSON.parse(metadata).image;
             rep.tokenId = tokenId.toNumber()
         }
 
         setReputation(rep);
-        console.log(reputation)
+
+        setLoadingStatus({
+            isLoading: false,
+            message: ""
+        })
     }
 
     useEffect(() => {
         fetchDetails()
-    }, [accounts])
+    }, [accounts, lendingPoolContract, refiCollectionContract])
 
 
     if (loadingStatus.isLoading) {
@@ -138,7 +142,9 @@ const Dashboard = () => {
                     <p>You are {reputation.class} user. You belong to the most elite users on the protocol</p>
                 </div>
                 <div className="opensea-btn">
-                    <a href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}>View on OpenSea</a>
+                    {refiCollectionContract && reputation &&
+                        <a href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}>View on OpenSea</a>
+                    }
                 </div>
             </section>
             <Box height={40} />

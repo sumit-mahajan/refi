@@ -1,5 +1,5 @@
-import {uploadImage} from "../services/ipfs_service";
-import {createCanvas, loadImage} from "canvas";
+import { uploadImage } from "../services/ipfs_service";
+import { createCanvas, loadImage } from "canvas";
 
 const cards = {
     bronze: {
@@ -14,7 +14,7 @@ const cards = {
         cid: "",
         baseImageName: "Gold.png"
     },
-    diamond: {
+    platinum: {
         cid: "",
         baseImageName: "Platinum.png"
     }
@@ -29,7 +29,7 @@ const createAndUploadImages = async (address) => {
         const ctx = canvas.getContext('2d')
 
         // Load Image 
-        await loadImage(`${basePath}${cards[cardType].baseImageName}`).then(async(image) => {
+        await loadImage(`${basePath}${cards[cardType].baseImageName}`).then(async (image) => {
             ctx.drawImage(image, 0, 0, 900, 558)
             ctx.globalAlpha = 0.55;
             ctx.font = '32px Outfit'
@@ -43,7 +43,7 @@ const createAndUploadImages = async (address) => {
             );
 
             let imageCID = await uploadImage(blob)
-            
+
             cards[cardType].cid = imageCID;
             console.log(cardType, imageCID);
         })
@@ -53,7 +53,7 @@ const createAndUploadImages = async (address) => {
         bronze: cards.bronze.cid,
         silver: cards.silver.cid,
         gold: cards.gold.cid,
-        diamond: cards.diamond.cid,
+        platinum: cards.platinum.cid,
     };
 }
 

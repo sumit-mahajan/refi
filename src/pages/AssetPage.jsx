@@ -301,7 +301,7 @@ function AssetPage() {
         window.open(
           "https://ethereum.stackexchange.com/questions/72388/does-rinkeby-have-a-faucet-where-i-can-fill-a-wallet-with-dai", "_blank");
       } else {
-        await daiContract.mint(accounts[0], toWei(100));
+        await daiContract.mint(accounts[0], toWei(10));
       }
     }
     else if (asset.symbol === "LINK") {
@@ -309,7 +309,7 @@ function AssetPage() {
         window.open(
           "https://faucets.chain.link/rinkeby", "_blank");
       } else {
-        await linkContract.mint(accounts[0], toWei(100));
+        await linkContract.mint(accounts[0], toWei(10));
       }
     }
   }

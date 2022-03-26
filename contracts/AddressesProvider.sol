@@ -108,6 +108,13 @@ contract AddressesProvider is IAddressesProvider {
         // Initialize LINK Reserve
         initializeLINKReserve(lendingPool);
 
+        // Set user reputation class data
+        // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
+        lendingPool.setClassData(3, 120000, 300, 50 ether);
+        lendingPool.setClassData(2, 60000, 100, 100 ether);
+        lendingPool.setClassData(1, 60000, 100, 150 ether);
+        lendingPool.setClassData(0, 600000, 100, 200 ether);
+
         // Deploy data providers for frontend
         protocolDataProvider = address(new ProtocolDataProvider(this));
 
