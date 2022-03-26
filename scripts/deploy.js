@@ -198,7 +198,11 @@ const setupEnvironment = async () => {
 const setupData = async () => {
   const { deployer, users, dai, link, aWeth, lendingPool, wethGateway } =
     testEnv;
-  // deployer == users[0]
+  // deployer != users[0]
+
+  console.log("Deployer -> ", deployer.address )
+  console.log("User 0 -> ", users[0].address )
+  console.log("User 1 -> ", users[1].address )
 
   // Load 3 user accounts with mock DAI and LINK
   await dai.mint(deployer.address, toWei(1000));
@@ -213,7 +217,7 @@ const setupData = async () => {
   const approveDaiTx = await dai.approve(lendingPool.address, MAX_UINT);
   await approveDaiTx.wait();
 
-  console.log("User 0 infinite approves the lendingPool for DAI reserve");
+  console.log("Deployer infinite approves the lendingPool for DAI reserve");
 
   const depositDaiTx = await lendingPool.deposit(
     dai.address,
@@ -222,7 +226,7 @@ const setupData = async () => {
   );
   await depositDaiTx.wait();
 
-  console.log("User 0 deposits 100 DAI");
+  console.log("Deployer deposits 100 DAI");
 
   // One time infinite approve
   const approveLinkTx = await link
@@ -230,14 +234,14 @@ const setupData = async () => {
     .approve(lendingPool.address, MAX_UINT);
   await approveLinkTx.wait();
 
-  console.log("User 1 infinite approves the lendingPool for LINK reserve");
+  console.log("User 0 infinite approves the lendingPool for LINK reserve");
 
   const linkTx = await lendingPool
     .connect(users[0].signer)
     .deposit(link.address, toWei(100), users[0].address);
   await linkTx.wait();
 
-  console.log("User 1 deposits 100 LINK");
+  console.log("User 0 deposits 100 LINK");
 
   const borrowLinkTx = await lendingPool.borrow(
     link.address,
@@ -246,7 +250,7 @@ const setupData = async () => {
   );
   await borrowLinkTx.wait();
 
-  console.log("User 0 borrows 65 LINK against DAI as collateral");
+  console.log("Deployer borrows 65 LINK against DAI as collateral");
 
   // One time infinite approve aWeth
   // Required at withdrawal time. i.e. do this before ETH deposit
@@ -255,12 +259,12 @@ const setupData = async () => {
     .approve(wethGateway.address, MAX_UINT);
   await approveAWethTx.wait();
 
-  console.log("User 1 infinite approves the wEthGateway for aWeth tokens");
+  console.log("User 0 infinite approves the wEthGateway for aWeth tokens");
 
   const Tx = await wethGateway
     .connect(users[0].signer)
     .depositETH({ value: toWei(10) });
   await Tx.wait();
 
-  console.log("User 1 deposits 10 ETH");
+  console.log("User 0 deposits 10 ETH");
 };
