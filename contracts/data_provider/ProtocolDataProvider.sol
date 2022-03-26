@@ -6,6 +6,7 @@ import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {IPriceOracle} from "../interfaces/IPriceOracle.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {IVariableDebtToken} from "../interfaces/IVariableDebtToken.sol";
+import {IAToken} from "../interfaces/IAToken.sol";
 import {ReserveConfiguration} from "../libraries/configuration/ReserveConfiguration.sol";
 import {UserConfiguration} from "../libraries/configuration/UserConfiguration.sol";
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
@@ -24,6 +25,15 @@ contract ProtocolDataProvider {
     struct TokenData {
         string symbol;
         address tokenAddress;
+    }
+
+    struct UserReserveData {
+        address underlyingAsset;
+        string symbol;
+        uint256 scaledATokenBalance;
+        uint256 currentATokenBalance;
+        uint256 scaledVariableDebt;
+        uint256 currentVariableDebt;
     }
 
     IAddressesProvider public immutable ADDRESSES_PROVIDER;
@@ -185,6 +195,48 @@ contract ProtocolDataProvider {
 
         usageAsCollateralEnabled = userConfig.isUsingAsCollateral(reserve.id);
         isBorrowed = userConfig.isBorrowing(reserve.id);
+    }
+
+    function getUserReservesData(address user)
+        external
+        view
+        returns (UserReserveData[] memory)
+    {
+        ILendingPool pool = ILendingPool(ADDRESSES_PROVIDER.getLendingPool());
+        address[] memory reserves = pool.getReservesList();
+        DataTypes.UserConfigurationMap memory userConfig = pool
+            .getUserConfiguration(user);
+
+        UserReserveData[] memory userReservesData = new UserReserveData[](
+            user != address(0) ? reserves.length : 0
+        );
+
+        for (uint256 i = 0; i < reserves.length; i++) {
+            DataTypes.ReserveData memory reserve = pool.getReserveData(
+                reserves[i]
+            );
+
+            // user reserve data
+            userReservesData[i].underlyingAsset = reserves[i];
+            userReservesData[i].symbol = IERC20Detailed(reserves[i]).symbol();
+            userReservesData[i].scaledATokenBalance = IAToken(
+                reserve.aTokenAddress
+            ).scaledBalanceOf(user);
+            userReservesData[i].currentATokenBalance = IERC20Detailed(
+                reserve.aTokenAddress
+            ).balanceOf(user);
+
+            if (userConfig.isBorrowing(i)) {
+                userReservesData[i].scaledVariableDebt = IVariableDebtToken(
+                    reserve.variableDebtTokenAddress
+                ).scaledBalanceOf(user);
+                userReservesData[i].currentVariableDebt = IERC20Detailed(
+                    reserve.variableDebtTokenAddress
+                ).balanceOf(user);
+            }
+        }
+
+        return (userReservesData);
     }
 
     function getReserveTokensAddresses(address asset)

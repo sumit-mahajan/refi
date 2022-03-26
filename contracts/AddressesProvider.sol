@@ -75,12 +75,18 @@ contract AddressesProvider is IAddressesProvider {
             DAI = address(new MockERC20("DAI Token", "DAI"));
             LINK = address(new MockERC20("LINK Token", "LINK"));
 
+            // DAI_TO_ETH = address(new MockAggregatorV3(0.5 ether)); // 1 DAI = 0.5 ether
+            // LINK_TO_ETH = address(new MockAggregatorV3(0.5 ether));
+            // ETH_TO_USD = address(new MockAggregatorV3(300000000000)); // 3000 USD + 8 decimals
+            // DAI_TO_USD = address(new MockAggregatorV3(99000000)); // 0.99 USD
+            // LINK_TO_USD = address(new MockAggregatorV3(2000000000)); // 20 USD
+
             DAI_TO_ETH = address(new MockAggregatorV3(0.5 ether)); // 1 DAI = 0.5 ether
             LINK_TO_ETH = address(new MockAggregatorV3(0.5 ether));
-
-            ETH_TO_USD = address(new MockAggregatorV3(300000000000)); // 3000 USD + 8 decimals
-            DAI_TO_USD = address(new MockAggregatorV3(99000000)); // 0.99 USD
-            LINK_TO_USD = address(new MockAggregatorV3(2000000000)); // 20 USD
+        
+            ETH_TO_USD = address(new MockAggregatorV3(3000000000)); // 30 USD + 8 decimals
+            DAI_TO_USD = address(new MockAggregatorV3(1500000000)); // 15 USD
+            LINK_TO_USD = address(new MockAggregatorV3(1500000000)); // 15 USD
         }
 
         // Deploy WETHGateway
