@@ -186,6 +186,11 @@ function AssetPage() {
 
   const borrowAsset = async (amount) => {
     try {
+      if (amount * asset.priceInUsd > asset.availableLiquidityUsd) {
+        setError({ borrow: "Protocol doesn't have enough liquidity" });
+        return;
+      }
+
       setError({});
       setLoading(true);
 
@@ -245,6 +250,30 @@ function AssetPage() {
         await lendingPoolContract.withdraw(
           asset.tokenAddress,
           toWei(amount),
+          accounts[0]
+        );
+      }
+
+      refresh();
+      setLoading(false);
+    } catch (error) {
+      setError({ withdraw: 'Oops! The transaction failed' })
+      setLoading(false);
+      console.log(error);
+    }
+  };
+
+  const withdrawAll = async () => {
+    try {
+      setError({});
+      setLoading(true);
+
+      if (asset.symbol === "ETH") {
+        await wETHGatewayContract.withdrawETH(MAX_UINT);
+      } else {
+        await lendingPoolContract.withdraw(
+          asset.tokenAddress,
+          MAX_UINT,
           accounts[0]
         );
       }
@@ -393,6 +422,7 @@ function AssetPage() {
                 symbol={asset.symbol}
                 currentDeposited={positions.currentDeposited}
                 withdrawAsset={withdrawAsset}
+                withdrawAll={withdrawAll}
                 error={localError.withdraw}
               />
             </> : <></>

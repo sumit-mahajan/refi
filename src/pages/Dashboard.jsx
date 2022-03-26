@@ -68,16 +68,17 @@ const Dashboard = () => {
 
             setLoadingStatus({
                 isLoading: true,
-                message: "Minting your card"
+                message: "Minting your card. Please wait while we confirm your transaction"
             })
-            const mintTx = await refiCollectionContract.mint(
-                "Refi Card",
-                "This is your card is your key to unlimited possiblities",
-                imageCIDs.bronze,
-                imageCIDs.silver,
-                imageCIDs.gold,
-                imageCIDs.platinum
-            )
+            const mintTx =
+                await refiCollectionContract.mint(
+                    "Refi Card",
+                    "This is your card is your key to unlimited possiblities",
+                    imageCIDs.bronze,
+                    imageCIDs.silver,
+                    imageCIDs.gold,
+                    imageCIDs.platinum
+                )
             await mintTx.wait()
 
             fetchDetails()
@@ -96,7 +97,7 @@ const Dashboard = () => {
 
         setLoadingStatus({
             isLoading: true,
-            message: "Fetching credit data"
+            message: "Fetching your data"
         })
         // Get class and score from lending Pool
         const userClass = await lendingPoolContract.getUserClass(accounts[0]);
@@ -127,6 +128,7 @@ const Dashboard = () => {
         }
 
         setReputation(rep);
+
         // console.log(reputation)
     }
 
@@ -214,26 +216,46 @@ const Dashboard = () => {
                 borrowedAssets: data.borrowedAssets,
                 suppliedAssets: data.suppliedAssets
             })
+
+            setLoadingStatus({
+                isLoading: false,
+                message: "Fetching your data"
+            })
         } catch (error) {
             console.log(error);
         }
     }
 
+    const getStatement = (str) => {
+        switch (str) {
+            case "Platinum":
+                return "You are a Platinum class user, one of the most elite users of Refi, who have unlocked all the benefits";
+            case "Gold":
+                return "You are a Gold class user, who avails most of the benefits. Maintain this good record to unlock all the benefits";
+            case "Silver":
+                return "You are a Silver class user. Maintain a good credit record to unlock more benefits";
+            case "Bronze":
+                return "You are a Bronze class user. Increase your credit score to enjoy more benefits";
+        }
+    }
+
     useEffect(() => {
         fetchDetails()
-    }, [accounts, lendingPoolContract, refiCollectionContract])
+        fetchUserAccountData()
+        fetchUserAssests()
+    }, [accounts, lendingPoolContract, refiCollectionContract, protocolDataProvider, walletBalanceProvider])
 
 
     const renderAsset = (asset, index) => {
         return (<>
-            <div className="dnb-asset-tile">
+            <div key={index} className="dnb-asset-tile">
                 <img
                     className="mr-2"
                     src={getImageFromSymbol(asset.symbol)}
                     alt="Crypto Icon"
                 />
-                <p>{`${(asset.scaled).toFixed(2)} ${asset.symbol}`}</p>
-                <strong><p>$ {(asset.scaledInUsd).toFixed(2)}</p></strong>
+                <p>{`${(asset.current.toFixed(2))} ${asset.symbol}`}</p>
+                <strong><p>$ {(asset.currentInUsd.toFixed(2))}</p></strong>
             </div>
             <hr />
         </>)
@@ -256,7 +278,7 @@ const Dashboard = () => {
                 <div>
                     <h3>Your Credit Score</h3>
                     <h1>{reputation.score.toFixed(0)}</h1>
-                    <p>You are {reputation.class} user. You belong to the most elite users on the protocol</p>
+                    <p>{getStatement(reputation.class)}</p>
                 </div>
                 {
                     (supportedNetworks[chainId].name === "Rinkeby" && reputation.tokenId > 0) &&
@@ -273,7 +295,7 @@ const Dashboard = () => {
             <section className="data-flex">
                 <div>
                     <h4>Total Supply</h4>
-                    <h2>$ {(userAccountData.totalSupply).toFixed(2)}</h2>
+                    <h2>$ {(userAccountData.totalSupply).toFixed(0)}</h2>
                 </div>
                 <div className="vr"></div>
                 <div>
@@ -283,12 +305,12 @@ const Dashboard = () => {
                 <div className="vr"></div>
                 <div>
                     <h4>Credit Utilization</h4>
-                    <h2>{Math.round(userAccountData.creditUtilization)}%</h2>
+                    <h2>{userAccountData.creditUtilization.toFixed(2)}%</h2>
                 </div>
                 <div className="vr"></div>
                 <div>
                     <h4>Total Borrowed</h4>
-                    <h2>$ {(userAccountData.totalBorrowed).toFixed(2)}</h2>
+                    <h2>$ {(userAccountData.totalBorrowed).toFixed(0)}</h2>
                 </div>
             </section>
 

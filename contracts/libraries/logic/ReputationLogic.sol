@@ -68,24 +68,6 @@ library ReputationLogic {
         }
     }
 
-    // if (userReputation.lastScore <= 600 ether) {
-    //     // 3 months to millisconds
-    //     // return 7889238000;
-    //     return 120000;
-    // } else if (userReputation.lastScore <= 700 ether) {
-    //     // 9 months to millisconds
-    //     // return 23667714000;
-    //     return 60000;
-    // } else if (userReputation.lastScore <= 800 ether) {
-    //     // 1 year to millisconds
-    //     // return 31556952000;
-    //     return 60000;
-    // } else {
-    //     // 10 years to millisconds
-    //     // return 315569520000;
-    //     return 60000;
-    // }
-
     /**
      * If a user borrows 85% of its allowed borrowing capacity, it is considered optimal and results in highest score increment
      * @dev Calculates the BorrowPercentFactor from given user's current loan

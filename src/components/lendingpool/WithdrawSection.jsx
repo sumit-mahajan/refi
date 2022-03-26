@@ -8,6 +8,7 @@ const WithdrawSection = ({
     symbol,
     currentDeposited,
     withdrawAsset,
+    withdrawAll,
     error
 }) => {
     const [input, setInput] = useState();
@@ -45,7 +46,7 @@ const WithdrawSection = ({
             <p className="or">OR</p>
             <Box height={10} />
 
-            <div className="ul-btn ul-btn-w" onClick={() => { withdrawAsset(MAX_UINT); }}>Withdraw All</div>
+            <div className="ul-btn ul-btn-w" onClick={() => { withdrawAll(); }}>Withdraw All</div>
 
         </div>
     );

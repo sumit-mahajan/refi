@@ -29,12 +29,6 @@ module.exports = {
     },
   },
   networks: {
-    hardhat: {
-      // mining: {
-      //   auto: false,
-      //   interval: 1000
-      // }
-    },
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [config.mumbaiPrivateKey],

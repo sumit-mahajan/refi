@@ -55,8 +55,8 @@ describe("Price Oracle", function () {
         const ethToUsd = await walletBalanceProvider.getPriceInUsd(ethers.utils.formatBytes32String("ETH"))
         const linkToUsd = await walletBalanceProvider.getPriceInUsd(ethers.utils.formatBytes32String("LINK"))
 
-        expect(ethToUsd).to.equal(300000000000, "Wrong Price for WETH")
-        expect(daiToUsd).to.equal(99000000, "Wrong Price for DAI")
-        expect(linkToUsd).to.equal(2000000000, "Wrong Price for LINK")
+        expect(ethToUsd).to.equal(3000000000, "Wrong Price for WETH")
+        expect(daiToUsd).to.equal(1500000000, "Wrong Price for DAI")
+        expect(linkToUsd).to.equal(1500000000, "Wrong Price for LINK")
     });
 });
