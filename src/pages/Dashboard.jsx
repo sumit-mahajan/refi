@@ -11,6 +11,7 @@ import { getImageFromSymbol, toEther } from "../utils/helpers";
 import { createAndUploadImages } from "../utils/createAndUploadImages";
 
 import Loading from "../components/loading/Loading";
+import { Link } from "react-router-dom";
 
 const UserClass = [
     "Platinum",
@@ -73,7 +74,7 @@ const Dashboard = () => {
             const mintTx =
                 await refiCollectionContract.mint(
                     "Refi Card",
-                    "This is your card is your key to unlimited possiblities",
+                    "This card is your key to unlimited possiblities.",
                     imageCIDs.bronze,
                     imageCIDs.silver,
                     imageCIDs.gold,
@@ -211,7 +212,9 @@ const Dashboard = () => {
                 }
             }
 
-            // console.log("Data", data);
+            data.borrowedAssets.sort((a, b) => (b.currentInUsd - a.currentInUsd));
+            data.suppliedAssets.sort((a, b) => (b.currentInUsd - a.currentInUsd));
+
             setUserReserves({
                 borrowedAssets: data.borrowedAssets,
                 suppliedAssets: data.suppliedAssets
@@ -229,13 +232,13 @@ const Dashboard = () => {
     const getStatement = (str) => {
         switch (str) {
             case "Platinum":
-                return "You are a Platinum class user, one of the most elite users of Refi, who have unlocked all the benefits";
+                return "You are a Platinum class user, one of the most elite users of Refi, who have unlocked all the benefits.";
             case "Gold":
-                return "You are a Gold class user, who avails most of the benefits. Maintain this good record to unlock all the benefits";
+                return "You are a Gold class user, who avails most of the benefits. Maintain this good record to unlock all the benefits.";
             case "Silver":
-                return "You are a Silver class user. Maintain a good credit record to unlock more benefits";
+                return "You are a Silver class user. Maintain a good credit record to unlock more benefits.";
             case "Bronze":
-                return "You are a Bronze class user. Increase your credit score to enjoy more benefits";
+                return "You are a Bronze class user. Increase your credit score to enjoy more benefits.";
         }
     }
 
@@ -247,8 +250,8 @@ const Dashboard = () => {
 
 
     const renderAsset = (asset, index) => {
-        return (<>
-            <div key={index} className="dnb-asset-tile">
+        return (<div key={index} >
+            <div className="dnb-asset-tile">
                 <img
                     className="mr-2"
                     src={getImageFromSymbol(asset.symbol)}
@@ -258,7 +261,7 @@ const Dashboard = () => {
                 <strong><p>$ {(asset.currentInUsd.toFixed(2))}</p></strong>
             </div>
             <hr />
-        </>)
+        </div>)
     }
 
     if (loadingStatus.isLoading) {
@@ -278,12 +281,12 @@ const Dashboard = () => {
                 <div>
                     <h3>Your Credit Score</h3>
                     <h1>{reputation.score.toFixed(0)}</h1>
-                    <p>{getStatement(reputation.class)}</p>
+                    <p>{getStatement(reputation.class)} <span><a href="/docs#benefits">Know more</a></span></p>
                 </div>
                 {
                     (supportedNetworks[chainId].name === "Rinkeby" && reputation.tokenId > 0) &&
                     <div className="opensea-btn">
-                        <a href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}>View on OpenSea</a>
+                        <a target="_blank" href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}>View on OpenSea</a>
                     </div>
                 }
             </section>

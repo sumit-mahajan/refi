@@ -444,6 +444,8 @@ function AssetPage() {
               <RepaySection
                 symbol={asset.symbol}
                 currentBorrowed={positions.currentBorrowed}
+                isApproved={positions.isApproved}
+                approveToken={approveToken}
                 repayAsset={repayAsset}
                 error={localError.repay}
               />

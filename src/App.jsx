@@ -9,6 +9,7 @@ import HomePage from "./pages/HomePage";
 import AssetPage from "./pages/AssetPage";
 import Liquidation from "./pages/Liquidation";
 import Dashboard from "./pages/Dashboard.jsx";
+import DocsPage from "./pages/DocsPage.jsx";
 
 function App() {
   const { error } = useConnection();
@@ -29,6 +30,7 @@ function App() {
           <Route path="/assets/:id" element={<AssetPage />} />
           <Route path="/liquidation" element={<Liquidation />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/docs" element={<DocsPage />} />
         </Routes>
       </BrowserRouter>
     </ApolloProvider>

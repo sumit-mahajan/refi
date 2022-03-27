@@ -1,18 +1,40 @@
-import React from "react";
+import { useEffect } from "react";
 import "./navbar.scss";
 
 import { useNavigate } from "react-router";
 import { useConnection } from "../../utils/connection_provider/connection_provider";
 import { supportedNetworks } from "../../utils/connection_provider/network_config";
-import { Link } from "react-router-dom";
 import { displayAddress } from "../../utils/helpers";
+import Box from "../Box";
 
 function Navbar() {
   const { chainId, accounts, connectWallet } = useConnection();
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const isConnected = accounts.length > 0;
+
+  useEffect(() => {
+    // Select proper nav-option on load
+    const route = window.location.href.split("/").at(-1);
+    if (route === "" || route === "#") {
+      document.getElementById('h').setAttribute('class', 'nav-option nav-option-c');
+    } else if (route === "dashboard") {
+      document.getElementById('d').setAttribute('class', 'nav-option nav-option-c');
+    } else if (route === "liquidation") {
+      document.getElementById('l').setAttribute('class', 'nav-option nav-option-c');
+    } else if (route === "docs" || route.split("#").at(0) === "docs") {
+      document.getElementById('docs').setAttribute('class', 'nav-option nav-option-c');
+    }
+
+    // On nav - option click
+    Array.from(document.getElementsByClassName('nav-option')).forEach(element => {
+      element.addEventListener('click', () => {
+        document.getElementsByClassName('nav-option-c')[0].setAttribute('class', 'nav-option')
+        element.setAttribute('class', 'nav-option nav-option-c')
+      })
+    });
+  }, []);
 
   return (
     <nav className="navbar mt-4">
@@ -21,9 +43,23 @@ function Navbar() {
       </a>
       <div className="nav-options">
         <div className="tabs">
+          <div id="h" onClick={() => { navigate('/') }} className="nav-option">Home</div>
+
+          <Box width="20" />
+
+          <div id="d" onClick={() => { navigate('/dashboard') }} className="nav-option">Dashboard</div>
+          <Box width="20" />
+
+          <div id="l" onClick={() => { navigate('/liquidation') }} className="nav-option">Liquidation</div>
+          <Box width="20" />
+
+          <div id="docs" onClick={() => { navigate('/docs') }} className="nav-option">Docs</div>
+        </div>
+        {/* <div className="tabs">
           <Link to="/dashboard">Dashboard</Link>
           <Link to="/liquidation">Liquidation</Link>
-        </div>
+          <Link to="/docs">Docs</Link>
+        </div> */}
         <h6 className="info-box">{supportedNetworks[chainId].name}</h6>
         <h6
           className="info-box"

@@ -13,6 +13,11 @@ const toEther = (num) => {
   return parseFloat(ethers.utils.formatEther(num.toString()));
 };
 
+function toFixed(num, fixed) {
+  var re = new RegExp('^-?\\d+(?:\.\\d{0,' + (fixed || -1) + '})?');
+  return num.toString().match(re)[0];
+}
+
 const calculateAPY = (aprInWei) => {
   // const apr = toEther(aprInWei);
   const apr = (aprInWei * 100) / 1e27;
@@ -77,6 +82,7 @@ const getBlockExplorerLink = (chainId, address) => {
 export {
   toWei,
   toEther,
+  toFixed,
   customPrint,
   query,
   calculateAPY,

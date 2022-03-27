@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import SimpleTile from "../SimpleTile";
 import { InputField } from "../InputField";
 import Box from "../Box";
-import { MAX_UINT } from "../../utils/helpers";
+import { MAX_UINT, toFixed } from "../../utils/helpers";
 
 const WithdrawSection = ({
     symbol,
@@ -13,6 +13,8 @@ const WithdrawSection = ({
 }) => {
     const [input, setInput] = useState();
 
+    const decimalsToShow = symbol === "ETH" ? 5 : 2;
+
     return (
         <div className="deposit">
             <h4>Withdraw</h4>
@@ -21,7 +23,7 @@ const WithdrawSection = ({
             <div className="mb-5">
                 <SimpleTile
                     name="Currently Deposited"
-                    value={currentDeposited.toFixed(2) + " " + symbol}
+                    value={toFixed(currentDeposited, decimalsToShow) + " " + symbol}
                 />
             </div>
 

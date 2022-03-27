@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toFixed } from "../../utils/helpers";
 import Box from "../Box";
 import { InputField } from "../InputField";
 import SimpleTile from "../SimpleTile";
@@ -13,6 +14,7 @@ const BorrowSection = ({
 }) => {
   const [input, setInput] = useState();
 
+  const decimalsToShow = symbol === "ETH" ? 5 : 2;
   return (
     <div className="borrow">
       <h4>Borrow</h4>
@@ -21,9 +23,8 @@ const BorrowSection = ({
       <div className="mb-5">
         <SimpleTile
           name="Available To Borrow"
-          value={availableToBorrow.toFixed(2) + " " + symbol}
+          value={toFixed(availableToBorrow, decimalsToShow) + " " + symbol}
         />
-        {/* <SimpleTile name="Health Factor" value={healthFactor.toFixed(2)} /> */}
       </div>
 
       <InputField
