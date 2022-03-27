@@ -200,9 +200,9 @@ const setupData = async () => {
     testEnv;
   // deployer != users[0]
 
-  console.log("Deployer -> ", deployer.address )
-  console.log("User 0 -> ", users[0].address )
-  console.log("User 1 -> ", users[1].address )
+  console.log("Deployer -> ", deployer.address)
+  console.log("User 0 -> ", users[0].address)
+  console.log("User 1 -> ", users[1].address)
 
   // Load 3 user accounts with mock DAI and LINK
   await dai.mint(deployer.address, toWei(1000));
@@ -245,12 +245,12 @@ const setupData = async () => {
 
   const borrowLinkTx = await lendingPool.borrow(
     link.address,
-    toWei(65),
+    toWei(60),
     deployer.address
   );
   await borrowLinkTx.wait();
 
-  console.log("Deployer borrows 65 LINK against DAI as collateral");
+  console.log("Deployer borrows 60 LINK against DAI as collateral");
 
   // One time infinite approve aWeth
   // Required at withdrawal time. i.e. do this before ETH deposit

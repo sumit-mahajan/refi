@@ -21,7 +21,7 @@ library ReputationLogic {
     using PercentageMath for uint256;
     using ReputationLogic for DataTypes.UserReputation;
 
-    uint256 constant MILLISECONDS_PER_MONTH = 2629800000;
+    uint256 constant MILLISECONDS_IN_A_WEEK = 86400000;
     uint256 constant OPTIMAL_CREDIT_UTILIZATION_PERCENT = 8500;
 
     /**
@@ -102,6 +102,10 @@ library ReputationLogic {
         DataTypes.UserReputation storage userReputation,
         mapping(uint256 => DataTypes.ClassData) storage classesData
     ) internal view returns (uint256) {
+        if (block.timestamp == userReputation.lastUpdateTimestamp) {
+            return userReputation.lastScore;
+        }
+
         uint256 score = userReputation.lastScore;
         uint256 timeDiff;
         DataTypes.ClassData memory userClassData;
@@ -111,12 +115,12 @@ library ReputationLogic {
         } else {
             timeDiff = block.timestamp - userReputation.lastUpdateTimestamp;
         }
-        uint256 nMonths = timeDiff / uint256(MILLISECONDS_PER_MONTH);
+        uint256 nWeeks = timeDiff / uint256(MILLISECONDS_IN_A_WEEK);
         userClassData = getClassData(classesData, score);
         uint256 classIdealTimeSpan = userClassData.idealTimeSpan;
         uint256 classScoreRange = userClassData.scoreRange;
 
-        if (nMonths == 0) {
+        if (nWeeks == 0) {
             score +=
                 timeDiff.wadDiv(classIdealTimeSpan).percentMul(
                     getBorrowPercentFactor(
@@ -126,10 +130,10 @@ library ReputationLogic {
                 classScoreRange *
                 1000;
         } else {
-            uint256 remainder = timeDiff - nMonths * MILLISECONDS_PER_MONTH;
-            for (uint16 i = 0; i < nMonths; i++) {
+            uint256 remainder = timeDiff - nWeeks * MILLISECONDS_IN_A_WEEK;
+            for (uint16 i = 0; i < nWeeks; i++) {
                 score +=
-                    MILLISECONDS_PER_MONTH
+                    MILLISECONDS_IN_A_WEEK
                         .wadDiv(classIdealTimeSpan)
                         .percentMul(
                             getBorrowPercentFactor(

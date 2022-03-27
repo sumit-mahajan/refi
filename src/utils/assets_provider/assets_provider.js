@@ -7,7 +7,7 @@ const AssetContext = React.createContext();
 
 const AssetsProvider = ({ children }) => {
   const [state, setState] = useState([]);
-  const { protocolDataProvider, walletBalanceProvider } = useConnection();
+  const { accounts, protocolDataProvider, walletBalanceProvider } = useConnection();
 
   const refresh = useCallback(async () => {
     if (!protocolDataProvider) return;
@@ -18,6 +18,10 @@ const AssetsProvider = ({ children }) => {
     //Get Asset Info for each Asset
     const promises = assets.map(async (asset) => {
       const assetInfo = await protocolDataProvider.getReserveData(
+        asset.tokenAddress
+      );
+
+      const assetConfiguration = await protocolDataProvider.getReserveConfigurationData(
         asset.tokenAddress
       );
 
@@ -39,6 +43,30 @@ const AssetsProvider = ({ children }) => {
         utilizationRate,
       } = assetInfo;
 
+      let {
+        decimals,
+        ltv,
+        liquidationThreshold,
+        liquidationBonus
+      } = assetConfiguration;
+
+      if (accounts.length === 0) {
+        ltv -= 500;
+        liquidationThreshold -= 500;
+      }
+      else {
+        const userData = await protocolDataProvider.getUserReserveLtvAndLt(
+          accounts[0], asset.tokenAddress
+        );
+        ltv = userData.ltv;
+        liquidationThreshold = userData.liquidationThreshold
+      }
+
+      ltv /= 100;
+      liquidationThreshold /= 100;
+      liquidationBonus /= 100;
+      liquidationBonus -= 100;
+
       const data = {
         symbol: isWETH ? "ETH" : asset.symbol,
         tokenAddress: asset.tokenAddress,
@@ -50,7 +78,10 @@ const AssetsProvider = ({ children }) => {
         totalBorrowedUsd: priceInUsd * toEther(totalVariableDebt),
         utilizationRatio: utilizationRate / 1e27,
         isERC20: isWETH,
-        priceInUsd
+        priceInUsd,
+        ltv,
+        liquidationThreshold,
+        liquidationBonus
       };
 
       return data;

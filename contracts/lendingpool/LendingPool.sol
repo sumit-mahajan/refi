@@ -1031,6 +1031,34 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
     }
 
+    // function getUserLtvAndLt(
+    //     address user,
+    //     uint256 ltv,
+    //     uint256 liquidationThreshold
+    // )
+    //     public
+    //     view
+    //     override
+    //     returns (uint256 userLtv, uint256 userLiquidationThreshold)
+    // {
+    //     DataTypes.ClassData memory classData = ReputationLogic.getClassData(
+    //         _classesData,
+    //         _userReputationMap[user].lastScore
+    //     );
+
+    //     if (classData.class == 3) {
+    //         userLtv = ltv.sub(classData.adjustLtvBy);
+    //         userLiquidationThreshold = liquidationThreshold.sub(
+    //             classData.adjustLtvBy
+    //         );
+    //     } else {
+    //         userLtv = ltv.add(classData.adjustLtvBy);
+    //         userLiquidationThreshold = liquidationThreshold.add(
+    //             classData.adjustLtvBy
+    //         );
+    //     }
+    // }
+
     function getUserLtvAndLt(
         address user,
         uint256 ltv,
@@ -1041,9 +1069,13 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         override
         returns (uint256 userLtv, uint256 userLiquidationThreshold)
     {
+        uint256 score = _userReputationMap[user].cumulateReputation(
+            _classesData
+        );
+
         DataTypes.ClassData memory classData = ReputationLogic.getClassData(
             _classesData,
-            _userReputationMap[user].lastScore
+            score
         );
 
         if (classData.class == 3) {

@@ -25,6 +25,8 @@ function Navbar() {
       document.getElementById('l').setAttribute('class', 'nav-option nav-option-c');
     } else if (route === "docs" || route.split("#").at(0) === "docs") {
       document.getElementById('docs').setAttribute('class', 'nav-option nav-option-c');
+    } else {
+      document.getElementById('h').setAttribute('class', 'nav-option nav-option-c');
     }
 
     // On nav - option click

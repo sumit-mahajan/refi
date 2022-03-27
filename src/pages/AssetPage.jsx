@@ -399,9 +399,9 @@ function AssetPage() {
             name="Percentage Utilization"
             value={(asset.utilizationRatio * 100).toFixed(2) + "%"}
           />
-          <AssetInfo name="Max LTV" value="75%" />
-          <AssetInfo name="Liquidation Threshold" value="80%" />
-          <AssetInfo name="Liquidation Penalty" value="10%" />
+          <AssetInfo name="Max LTV" value={asset.ltv + "%"} />
+          <AssetInfo name="Liquidation Threshold" value={asset.liquidationThreshold + "%"} />
+          <AssetInfo name="Liquidation Penalty" value={asset.liquidationBonus + "%"} />
         </div>
       </section>
 
