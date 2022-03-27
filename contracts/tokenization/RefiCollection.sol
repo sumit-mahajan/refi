@@ -132,4 +132,6 @@ contract RefiCollection is ERC721 {
     function getTokenId(address owner) public view returns (uint256 token) {
         return userToTokenId[owner];
     }
+
+    function refresh() external {}
 }

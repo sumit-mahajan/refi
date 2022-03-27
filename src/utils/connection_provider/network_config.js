@@ -8,7 +8,7 @@ const supportedNetworks = {
     name: "Hardhat",
     tokenSymbol: "ETH",
     rpcURL: "http://localhost:8545",
-    address: "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
+    address: "0xc5a5C42992dECbae36851359345FE25997F5C42d",
   },
   // npx hardhat run scripts/deploy.js --network mumbai
   // Returned address is wrong. https://github.com/nomiclabs/hardhat/issues/2162.

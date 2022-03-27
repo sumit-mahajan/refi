@@ -98,10 +98,10 @@ contract AddressesProvider is IAddressesProvider {
         // Set user reputation class data
         // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
         if (!isProduction) {
-            // For hardhat, ideal timespan is 1-2 minutes
-            lendingPool.setClassData(3, 120000, 300, 50 ether);
-            lendingPool.setClassData(2, 60000, 100, 100 ether);
-            lendingPool.setClassData(1, 60000, 100, 150 ether);
+            // For hardhat, ideal timespan is 3 minutes
+            lendingPool.setClassData(3, 180000, 300, 50 ether);
+            lendingPool.setClassData(2, 180000, 100, 100 ether);
+            lendingPool.setClassData(1, 180000, 100, 150 ether);
             lendingPool.setClassData(0, 600000, 100, 200 ether);
         } else {
             // For rinkeby testnet, ideal timespan is few months to years for different classes

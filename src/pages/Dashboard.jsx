@@ -242,6 +242,10 @@ const Dashboard = () => {
         }
     }
 
+    const refreshReputation = async () => {
+        await refiCollectionContract.refresh();
+    }
+
     useEffect(() => {
         fetchDetails()
         fetchUserAccountData()
@@ -287,6 +291,12 @@ const Dashboard = () => {
                     (supportedNetworks[chainId].name === "Rinkeby" && reputation.tokenId > 0) &&
                     <div className="opensea-btn">
                         <a target="_blank" href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}>View on OpenSea</a>
+                    </div>
+                }
+                {
+                    supportedNetworks[chainId].name === "Hardhat" &&
+                    <div className="opensea-btn">
+                        <div onClick={refreshReputation}>Refresh</div>
                     </div>
                 }
             </section>
