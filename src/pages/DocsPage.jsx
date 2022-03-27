@@ -8,7 +8,8 @@ const DocsPage = () => {
             <h1>Documentation</h1>
             <Box height={40} />
             <h2>Introduction</h2>
-            <Box height={20} />
+            <hr></hr>
+            {/* <Box height={20} /> */}
             <p>Refi, (Reputation + Finance) is a variable rate lending and borrowing protocol that
                 maintains a credit score for its users and provides benefits to them accordingly. It takes its
                 core functionality from AAVE v2.
@@ -16,7 +17,8 @@ const DocsPage = () => {
 
             <Box height={30} />
             <h2>Terminologies</h2>
-            <Box height={20} />
+            <hr></hr>
+            {/* <Box height={20} /> */}
             <p>Few of the core Terminologies used in Refi are explained below</p>
             <Box height={20} />
             <ul>
@@ -65,7 +67,8 @@ const DocsPage = () => {
             <Box height={30} />
 
             <h2>Credit Scores</h2>
-            <Box height={20} />
+            <hr></hr>
+            {/* <Box height={20} /> */}
             <p>Your credit score is a number between 300–900 that represents your creditworthiness.
                 The higher the score, the higher you can borrow against the deposited collateral. </p>
             <Box height={20} />
@@ -97,7 +100,8 @@ const DocsPage = () => {
                 <Box height={30} />
 
                 <h2>User Classes and their Features</h2>
-                <Box height={20} />
+                <hr></hr>
+                {/* <Box height={20} /> */}
                 <p>Users are divided into following 4 classes based on their current credit score.</p>
                 <Box height={5} />
                 <p>Features of these classes are designed with respect to an "Ideal user"</p>
@@ -141,9 +145,72 @@ const DocsPage = () => {
                     <li>It takes about 10 years for an ideal user to reach from a score of 800 to 900.</li>
                     <li>Any liquidation in this class would result in decrease of credit score by 200.</li>
                 </ul>
-
+                <Box height={30} />
+                <h2>Benefits</h2>
+                <table>
+                    <tr>
+                        <th rowSpan={2} colSpan={2} className="large">User Class</th>
+                        <th colSpan={2} className="large">ETH</th>
+                        <th colSpan={2} className="large">DAI</th>
+                        <th colSpan={2} className="large">LINK</th>
+                    </tr>
+                    <tr>
+                        <th>LTV</th>
+                        <th>Liqudation Thershold</th>
+                        <th>LTV</th>
+                        <th>Liqudation Thershold</th>
+                        <th>LTV</th>
+                        <th>Liqudation Thershold</th>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>Bronze</td>
+                        <td>70%</td>
+                        <td>75%</td>
+                        <td>70%</td>
+                        <td>75%</td>
+                        <td>70%</td>
+                        <td>75%</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>Silver</td>
+                        <td>75%</td>
+                        <td>80%</td>
+                        <td>75%</td>
+                        <td>80%</td>
+                        <td>75%</td>
+                        <td>80%</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>Gold</td>
+                        <td>80%</td>
+                        <td>85%</td>
+                        <td>80%</td>
+                        <td>85%</td>
+                        <td>80%</td>
+                        <td>85%</td>
+                    </tr>
+                    <tr>
+                        <td colSpan={2}>Platinum</td>
+                        <td>85%</td>
+                        <td>90%</td>
+                        <td>85%</td>
+                        <td>90%</td>
+                        <td>85%</td>
+                        <td>90%</td>
+                    </tr>
+                </table>
             </section>
             <Box height={50} />
+            <h2>Credit Card</h2>
+            <hr></hr>
+            {/* <Box height={20} /> */}
+            <p>Users can get their credit card by minting it as an NFT from their Dashboard page. There are four types of cards
+                Bronze, Silver, Gold and Platinum. Based on the users current class, respective type of card is provided with users address printed on it. As the users class changes the type of card also changes dynamic without having to re-mint. 
+                <Box height={10} />
+                The reason for providing a credit card is that in future we plan on providing a feature wherein this credit card could be used as a real credit card. This would allow the user to pay on other DAPPs using their card. This would be achieved by creating a borrow position of equivalent amount on user's behalf on the Refi protocol.
+            </p>
+
+            <Box height={100} />
         </main>
     );
 }

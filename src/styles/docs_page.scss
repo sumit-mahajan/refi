@@ -14,4 +14,21 @@
     p, li, strong {
         font-size: 2rem;
     }
+    
+    table {
+        border-spacing: 0;
+    }
+
+    th, td {
+        line-height: 2;
+        width: 25rem;
+        font-size: 2rem;
+        text-align: center;
+        border-right: 1px solid;
+    }
+
+    th.large {
+        font-size: 2.5rem;
+        border-bottom: 1px solid;
+    }
 }
