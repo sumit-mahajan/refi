@@ -5,7 +5,9 @@ pragma solidity ^0.8.0;
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import {IAddressesProvider} from "../../interfaces/IAddressesProvider.sol";
 import {IPriceOracle} from "../../interfaces/IPriceOracle.sol";
+import {ILendingPool} from "../../interfaces/ILendingPool.sol";
 import {ReserveLogic} from "./ReserveLogic.sol";
 import {ReserveConfiguration} from "../configuration/ReserveConfiguration.sol";
 import {UserConfiguration} from "../configuration/UserConfiguration.sol";
@@ -52,7 +54,7 @@ library GenericLogic {
      * @param reservesData The data of all the reserves
      * @param userConfig The user configuration
      * @param reserves The list of all the active reserves
-     * @param oracle The address of the oracle contract
+     * @param addressesProvider The address of the oracle contract
      * @return true if the decrease of the balance is allowed
      **/
     function balanceDecreaseAllowed(
@@ -63,7 +65,7 @@ library GenericLogic {
         DataTypes.UserConfigurationMap calldata userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        IAddressesProvider addressesProvider
     ) external view returns (bool) {
         if (
             !userConfig.isBorrowingAny() ||
@@ -77,6 +79,11 @@ library GenericLogic {
         (, vars.liquidationThreshold, , vars.decimals) = reservesData[asset]
             .configuration
             .getParams();
+
+        // Get user class LTV and Liquidation Threshold
+        (, vars.liquidationThreshold) = ILendingPool(
+            addressesProvider.getLendingPool()
+        ).getUserLtvAndLt(user, 10000, vars.liquidationThreshold);
 
         if (vars.liquidationThreshold == 0) {
             return true;
@@ -94,17 +101,17 @@ library GenericLogic {
             userConfig,
             reserves,
             reservesCount,
-            oracle
+            addressesProvider.getPriceOracle(),
+            addressesProvider.getLendingPool()
         );
 
         if (vars.totalDebtInETH == 0) {
             return true;
         }
 
-        vars.amountToDecreaseInETH = IPriceOracle(oracle)
-            .getAssetPrice(asset)
-            .mul(amount)
-            .div(10**vars.decimals);
+        vars.amountToDecreaseInETH = IPriceOracle(
+            addressesProvider.getPriceOracle()
+        ).getAssetPrice(asset).mul(amount).div(10**vars.decimals);
 
         vars.collateralBalanceAfterDecrease = vars.totalCollateralInETH.sub(
             vars.amountToDecreaseInETH
@@ -170,7 +177,8 @@ library GenericLogic {
         DataTypes.UserConfigurationMap memory userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        address oracle,
+        address lendingPool
     )
         internal
         view
@@ -203,6 +211,10 @@ library GenericLogic {
                 ,
                 vars.decimals
             ) = currentReserve.configuration.getParams();
+
+            // Get user class LTV and Liquidation Threshold
+            (vars.ltv, vars.liquidationThreshold) = ILendingPool(lendingPool)
+                .getUserLtvAndLt(user, vars.ltv, vars.liquidationThreshold);
 
             vars.tokenUnit = 10**vars.decimals;
             vars.reserveUnitPrice = IPriceOracle(oracle).getAssetPrice(

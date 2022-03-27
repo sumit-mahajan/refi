@@ -42,12 +42,12 @@ describe("Lending Pool : Liquidation", function () {
 
         const borrowLinkTx = await lendingPool.borrow(
             link.address,
-            toWei(75),
+            toWei(70),
             deployer.address
         )
         await borrowLinkTx.wait()
 
-        customPrint("User 0 borrows max available i.e. 75 LINK");
+        customPrint("User 0 borrows max available i.e. 70 LINK");
 
         const sourceAddress = await priceOracle.getSourceOfAsset(link.address);
         const linkSource = await ethers.getContractAt("MockAggregatorV3", sourceAddress);
@@ -72,7 +72,7 @@ describe("Lending Pool : Liquidation", function () {
         const userReserveData = await protocolDataProvider.getUserReserveData(link.address, deployer.address)
 
         expect(toEther(userReserveData.currentATokenBalance)).to.equal(0, "Invalid currentATokenBalance");
-        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(75, "Invalid currentVariableDebt");
+        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(70, "Invalid currentVariableDebt");
         expect(toEther(userReserveData.healthFactor)).to.be.below(1, "Health factor not set");
     });
 
@@ -142,8 +142,8 @@ describe("Lending Pool : Liquidation", function () {
         expect(aDaiBalanceAfter).to.be.below(aDaiBalanceBefore, "ATokens tokens not burnt");
 
         // Check asset transfer
-        expect(liquidatorLinkBalanceAfter).to.be.below(liquidatorLinkBalanceBefore - 37.5, "Invalid liquidator LINK balance")
-        expect(liquidatorDaiBalanceAfter).to.be.above(liquidatorDaiBalanceBefore + 44, "Invalid liquidator DAI balance")
+        expect(liquidatorLinkBalanceAfter).to.be.below(liquidatorLinkBalanceBefore - 35, "Invalid liquidator LINK balance")
+        expect(liquidatorDaiBalanceAfter).to.be.above(liquidatorDaiBalanceBefore, "Invalid liquidator DAI balance")
         expect(daiPoolLiquidityAfter).to.be.below(daiPoolLiquidityBefore, "Invalid DAI liquidity")
         expect(linkPoolLiquidityAfter).to.be.above(linkPoolLiquidityBefore, "Invalid LINK liquidity")
     });
@@ -203,7 +203,7 @@ describe("Lending Pool : Liquidation", function () {
             .to.equal(daiReserveAfter.lastUpdateTimestamp, "Timestamp updated for Collateral Reserve")
 
         // Check AToken transfer
-        expect(liquidatorADaiBalanceAfter).to.be.above(liquidatorADaiBalanceBefore + 41, "ATokens tokens not transferred");
+        expect(liquidatorADaiBalanceAfter).to.be.above(liquidatorADaiBalanceBefore, "ATokens tokens not transferred");
 
         // Check Debt tokens burned
         expect(dLinkBalanceAfter).to.be.below(dLinkBalanceBefore, "Debt tokens not burnt");

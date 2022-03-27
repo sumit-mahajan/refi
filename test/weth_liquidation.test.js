@@ -40,12 +40,12 @@ describe("WethGateway : Liquidation", function () {
         const approveDelegationTx = await dWeth.connect(users[1].signer).approveDelegation(wethGateway.address, toWei(75));
         await approveDelegationTx.wait()
 
-        customPrint("User 1 approves WethGateway contract to borrow 75 ETH on behalf of itself");
+        customPrint("User 1 approves WethGateway contract to borrow 70 ETH on behalf of itself");
 
-        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(75))
+        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(70))
         await borrowEthTx.wait()
 
-        customPrint("User 1 borrows max available i.e. 75 ETH");
+        customPrint("User 1 borrows max available i.e. 70 ETH");
     })
 
     it("Sets borrowed ETH position liquidable", async function () {
@@ -66,7 +66,7 @@ describe("WethGateway : Liquidation", function () {
         const userLinkReserveData = await protocolDataProvider.getUserReserveData(link.address, users[1].address)
 
         expect(toEther(userReserveData.currentATokenBalance)).to.equal(0, "Invalid currentATokenBalance");
-        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(75, "Invalid currentVariableDebt");
+        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(70, "Invalid currentVariableDebt");
         expect(toEther(userReserveData.healthFactor)).to.be.below(1, "Health factor not set");
     })
 
@@ -142,13 +142,13 @@ describe("WethGateway : Liquidation", function () {
         expect(aLinkBalanceAfter).to.be.below(aLinkBalanceBefore, "ATokens tokens not burnt");
 
         // Check asset transfer
-        expect(liquidatorLinkBalanceAfter).to.be.above(liquidatorLinkBalanceBefore + 89.6, "Invalid liquidator Collateral balance")
-        expect(liquidatorWethBalanceAfter).to.be.below(liquidatorWethBalanceBefore - 37.5, "Invalid liquidator Debt balance")
+        expect(liquidatorLinkBalanceAfter).to.be.above(liquidatorLinkBalanceBefore, "Invalid liquidator Collateral balance")
+        expect(liquidatorWethBalanceAfter).to.be.below(liquidatorWethBalanceBefore, "Invalid liquidator Debt balance")
         expect(linkPoolLiquidityAfter).to.be.below(linkPoolLiquidityBefore, "Invalid Collateral reserve liquidity")
         expect(wethPoolLiquidityAfter).to.be.above(wethPoolLiquidityBefore, "Invalid Debt reserve liquidity")
     });
 
-    it("Sets position with ETH as collateral liquidable", async function () {
+    it("Sets position with ETH collateral as liquidable", async function () {
         const { deployer, users, priceOracle, lendingPool, wethGateway, link, aLink, aWeth, dWeth, protocolDataProvider } = testEnv;
 
         // Repay any amount more than borrowed for a full repay
@@ -188,12 +188,12 @@ describe("WethGateway : Liquidation", function () {
 
         const borrowLinkTx = await lendingPool.borrow(
             link.address,
-            toWei(75),
+            toWei(70),
             deployer.address
         )
         await borrowLinkTx.wait()
 
-        customPrint("User 0 borrows max available i.e. 75 LINK");
+        customPrint("User 0 borrows max available i.e. 70 LINK");
 
         // Simulated increase in LINK price by 8% which should take the health factor below 1
         const Tx = await linkSource.setPrice(toWei(1.08));
@@ -204,7 +204,7 @@ describe("WethGateway : Liquidation", function () {
         const userReserveData = await protocolDataProvider.getUserReserveData(link.address, deployer.address)
 
         expect(toEther(userReserveData.currentATokenBalance)).to.equal(0, "Invalid currentATokenBalance");
-        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(75, "Invalid currentVariableDebt");
+        expect(toEther(userReserveData.currentVariableDebt)).to.be.above(70, "Invalid currentVariableDebt");
         expect(toEther(userReserveData.healthFactor)).to.be.below(1, "Health factor not set");
     })
 

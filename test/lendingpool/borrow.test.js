@@ -57,8 +57,8 @@ describe("Lending Pool :: Borrow", function () {
             deployer.address
         )
 
-        // LTV is 75% and mock LINK and DAI price is same
-        expect(toEther(userReserveData.availableToBorrow)).to.equal(75, "Invalid max available borrow");
+        // LTV is 70% for bronze user and mock LINK and DAI price is same
+        expect(toEther(userReserveData.availableToBorrow)).to.equal(70, "Invalid max available borrow");
     });
 
     it("Tries to borrow more than LTV", async function () {

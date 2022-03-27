@@ -6,6 +6,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+import {IAddressesProvider} from "../../interfaces/IAddressesProvider.sol";
 import {IReserveInterestRateStrategy} from "../../interfaces/IReserveInterestRateStrategy.sol";
 import {ReserveLogic} from "./ReserveLogic.sol";
 import {GenericLogic} from "./GenericLogic.sol";
@@ -56,7 +57,7 @@ library ValidationLogic {
      * @param userConfig The user configuration
      * @param reserves The addresses of the reserves
      * @param reservesCount The number of reserves
-     * @param oracle The price oracle
+     * @param addressesProvider The addressesProvider contract
      */
     function validateWithdraw(
         address reserveAddress,
@@ -66,7 +67,7 @@ library ValidationLogic {
         DataTypes.UserConfigurationMap storage userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        IAddressesProvider addressesProvider
     ) external view {
         require(
             reservesData[reserveAddress].aTokenAddress != address(0),
@@ -87,7 +88,7 @@ library ValidationLogic {
                 userConfig,
                 reserves,
                 reservesCount,
-                oracle
+                addressesProvider
             ),
             Errors.VL_TRANSFER_NOT_ALLOWED
         );
@@ -112,6 +113,7 @@ library ValidationLogic {
      * @param userConfig The state of the user for the specific reserve
      * @param reserves The addresses of all the active reserves
      * @param oracle The price oracle
+     * @param lendingPool The price lendingPool
      */
 
     function validateBorrow(
@@ -122,7 +124,8 @@ library ValidationLogic {
         DataTypes.UserConfigurationMap storage userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        address oracle,
+        address lendingPool
     ) external view {
         ValidateBorrowLocalVars memory vars;
 
@@ -140,7 +143,8 @@ library ValidationLogic {
             userConfig,
             reserves,
             reservesCount,
-            oracle
+            oracle,
+            lendingPool
         );
 
         require(
@@ -194,7 +198,7 @@ library ValidationLogic {
      * @param reservesData The data of all the reserves
      * @param userConfig The state of the user for the specific reserve
      * @param reserves The addresses of all the active reserves
-     * @param oracle The price oracle
+     * @param addressesProvider The price oracle
      */
     function validateSetUseReserveAsCollateral(
         DataTypes.ReserveData storage reserve,
@@ -204,7 +208,7 @@ library ValidationLogic {
         DataTypes.UserConfigurationMap storage userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        IAddressesProvider addressesProvider
     ) external view {
         uint256 underlyingBalance = IERC20(reserve.aTokenAddress).balanceOf(
             msg.sender
@@ -225,7 +229,7 @@ library ValidationLogic {
                     userConfig,
                     reserves,
                     reservesCount,
-                    oracle
+                    addressesProvider
                 ),
             Errors.VL_DEPOSIT_ALREADY_IN_USE
         );
@@ -269,6 +273,7 @@ library ValidationLogic {
      * @param userConfig The state of the user for the specific reserve
      * @param reserves The addresses of all the active reserves
      * @param oracle The price oracle
+     * @param lendingPool The price lendingPool
      */
     function validateTransfer(
         address from,
@@ -276,7 +281,8 @@ library ValidationLogic {
         DataTypes.UserConfigurationMap storage userConfig,
         mapping(uint256 => address) storage reserves,
         uint256 reservesCount,
-        address oracle
+        address oracle,
+        address lendingPool
     ) internal view {
         (, , , , uint256 healthFactor) = GenericLogic.calculateUserAccountData(
             from,
@@ -284,7 +290,8 @@ library ValidationLogic {
             userConfig,
             reserves,
             reservesCount,
-            oracle
+            oracle,
+            lendingPool
         );
 
         require(

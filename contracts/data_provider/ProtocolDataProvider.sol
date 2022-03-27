@@ -103,6 +103,22 @@ contract ProtocolDataProvider {
             .getParamsMemory();
     }
 
+    function getUserReserveLtvAndLt(address user, address asset)
+        external
+        view
+        returns (uint256 ltv, uint256 liquidationThreshold)
+    {
+        DataTypes.ReserveConfigurationMap memory configuration = ILendingPool(
+            ADDRESSES_PROVIDER.getLendingPool()
+        ).getConfiguration(asset);
+
+        (ltv, liquidationThreshold, , ) = configuration.getParamsMemory();
+
+        (ltv, liquidationThreshold) = ILendingPool(
+            ADDRESSES_PROVIDER.getLendingPool()
+        ).getUserLtvAndLt(user, ltv, liquidationThreshold);
+    }
+
     function getReserveData(address asset)
         external
         view

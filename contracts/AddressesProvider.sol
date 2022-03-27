@@ -99,20 +99,20 @@ contract AddressesProvider is IAddressesProvider {
         // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
         if (!isProduction) {
             // For hardhat, ideal timespan is 3 minutes
-            lendingPool.setClassData(3, 180000, 300, 50 ether);
-            lendingPool.setClassData(2, 180000, 100, 100 ether);
-            lendingPool.setClassData(1, 180000, 100, 150 ether);
-            lendingPool.setClassData(0, 600000, 100, 200 ether);
+            lendingPool.setClassData(3, 180000, 300, 50 ether, 500);
+            lendingPool.setClassData(2, 180000, 100, 100 ether, 0);
+            lendingPool.setClassData(1, 180000, 100, 150 ether, 500);
+            lendingPool.setClassData(0, 600000, 100, 200 ether, 1000);
         } else {
             // For rinkeby testnet, ideal timespan is few months to years for different classes
             // 3 months to millisconds for bronze
-            lendingPool.setClassData(3, 7889238000, 300, 50 ether);
+            lendingPool.setClassData(3, 7889238000, 300, 50 ether, 500);
             // 9 months to millisconds for silver
-            lendingPool.setClassData(2, 23667714000, 100, 100 ether);
+            lendingPool.setClassData(2, 23667714000, 100, 100 ether, 0);
             // 1 year to millisconds for gold
-            lendingPool.setClassData(1, 31556952000, 100, 150 ether);
+            lendingPool.setClassData(1, 31556952000, 100, 150 ether, 500);
             // 10 years to millisconds for platinum
-            lendingPool.setClassData(0, 315569520000, 100, 200 ether);
+            lendingPool.setClassData(0, 315569520000, 100, 200 ether, 1000);
         }
 
         // Deploy data providers for frontend

@@ -162,7 +162,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             userConfig,
             _reservesList,
             _reservesCount,
-            oracle
+            oracle,
+            address(this)
         );
 
         // Cumulate accured reputation
@@ -309,7 +310,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _usersConfig[msg.sender],
             _reservesList,
             _reservesCount,
-            _addressesProvider.getPriceOracle()
+            _addressesProvider
         );
 
         if (msg.sender != _addressesProvider.getWETHGateway()) {
@@ -362,7 +363,7 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _usersConfig[msg.sender],
             _reservesList,
             _reservesCount,
-            _addressesProvider.getPriceOracle()
+            _addressesProvider
         );
 
         // Cumulate accured reputation
@@ -436,7 +437,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             userConfig,
             _reservesList,
             _reservesCount,
-            _addressesProvider.getPriceOracle()
+            _addressesProvider.getPriceOracle(),
+            address(this)
         );
 
         vars.userVariableDebt = IERC20(debtReserve.variableDebtTokenAddress)
@@ -708,7 +710,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _usersConfig[user],
             _reservesList,
             _reservesCount,
-            _addressesProvider.getPriceOracle()
+            _addressesProvider.getPriceOracle(),
+            address(this)
         );
 
         availableBorrowsETH = GenericLogic.calculateAvailableBorrowsETH(
@@ -863,7 +866,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
             _usersConfig[from],
             _reservesList,
             _reservesCount,
-            _addressesProvider.getPriceOracle()
+            _addressesProvider.getPriceOracle(),
+            address(this)
         );
 
         uint256 reserveId = _reserves[asset].id;
@@ -995,7 +999,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
                 _usersConfig[user],
                 _reservesList,
                 _reservesCount,
-                _addressesProvider.getPriceOracle()
+                _addressesProvider.getPriceOracle(),
+                address(this)
             );
 
         _userReputationMap[user].setCurrentBorrowPercent(
@@ -1009,7 +1014,8 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         uint256 class,
         uint256 idealTimeSpan,
         uint256 scoreRange,
-        uint256 dropFactor
+        uint256 dropFactor,
+        uint256 adjustLtvBy
     ) external {
         require(
             msg.sender == address(_addressesProvider),
@@ -1017,9 +1023,39 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
 
         _classesData[class] = DataTypes.ClassData(
+            class,
             idealTimeSpan,
             scoreRange,
-            dropFactor
+            dropFactor,
+            adjustLtvBy
         );
+    }
+
+    function getUserLtvAndLt(
+        address user,
+        uint256 ltv,
+        uint256 liquidationThreshold
+    )
+        public
+        view
+        override
+        returns (uint256 userLtv, uint256 userLiquidationThreshold)
+    {
+        DataTypes.ClassData memory classData = ReputationLogic.getClassData(
+            _classesData,
+            _userReputationMap[user].lastScore
+        );
+
+        if (classData.class == 3) {
+            userLtv = ltv.sub(classData.adjustLtvBy);
+            userLiquidationThreshold = liquidationThreshold.sub(
+                classData.adjustLtvBy
+            );
+        } else {
+            userLtv = ltv.add(classData.adjustLtvBy);
+            userLiquidationThreshold = liquidationThreshold.add(
+                classData.adjustLtvBy
+            );
+        }
     }
 }

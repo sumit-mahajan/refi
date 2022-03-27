@@ -46,12 +46,16 @@ library DataTypes {
     }
 
     struct ClassData {
+        // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
+        uint256 class;
         // The time it takes for a borrower to pass bottom-up through current class with OPTIMAL_CREDIT_UTILIZATION and no liquidations
         uint256 idealTimeSpan;
         // score range for current class
         uint256 scoreRange;
         // The amount of score that is reduced in case of a liquidation
         uint256 dropFactor;
+        // The percent by which ltv and liquidation threshold is adjusted for the users of this class
+        uint256 adjustLtvBy;
     }
 
     enum UserClass {

@@ -346,4 +346,10 @@ interface ILendingPool {
     function getReservesList() external view returns (address[] memory);
 
     function getAddressesProvider() external view returns (IAddressesProvider);
+
+    function getUserLtvAndLt(
+        address user,
+        uint256 ltv,
+        uint256 liquidationThreshold
+    ) external view returns (uint256 userLtv, uint256 userLiquidationThreshold);
 }

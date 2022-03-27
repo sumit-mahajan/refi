@@ -630,6 +630,40 @@
           "type": "address"
         },
         {
+          "internalType": "uint256",
+          "name": "ltv",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "liquidationThreshold",
+          "type": "uint256"
+        }
+      ],
+      "name": "getUserLtvAndLt",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "userLtv",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "userLiquidationThreshold",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
           "internalType": "address",
           "name": "asset",
           "type": "address"
