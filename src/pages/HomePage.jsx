@@ -7,6 +7,7 @@ import { getImageFromSymbol } from "../utils/helpers";
 import ListTile from "../components/list_tile/ListTile";
 
 import "../styles/home_page.scss";
+import PayWithRefi from "../components/PayWithRefi";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function HomePage() {
       <section className="stats mt-7 mb-4"></section>
 
       <hr />
+      <PayWithRefi />
       <section className="assets ">
         <div className="asset-labels pt-1 pb-1 ">
           <p className="spread">Assets</p>

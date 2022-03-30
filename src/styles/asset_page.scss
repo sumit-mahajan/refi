@@ -38,7 +38,8 @@
       border-radius: 100px;
     }
 
-    a, .t-link {
+    a,
+    .t-link {
       color: #8b8b8b;
       text-decoration: underline;
       cursor: pointer;
@@ -65,7 +66,8 @@
   gap: 5rem;
   justify-content: space-between;
 
-  .earn-section, .borrow-section {
+  .earn-section,
+  .borrow-section {
     flex: 1;
   }
 
@@ -88,7 +90,8 @@
     @include surfaceContainer(3rem, 1.2rem);
   }
 
-  .deposit, .borrow {
+  .deposit,
+  .borrow {
     .or {
       font-size: 1.8rem;
       text-align: center;
