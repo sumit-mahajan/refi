@@ -14,7 +14,6 @@ function HomePage() {
   const navigate = useNavigate();
 
   const { state: assets } = useAssetProvider();
-  const { provider } = useConnection();
 
   console.log("Rendered Home page");
 

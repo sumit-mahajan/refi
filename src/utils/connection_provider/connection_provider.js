@@ -30,6 +30,13 @@ export function ConnectionProvider(props) {
         throw new Error("Use Correct Network");
       }
 
+      setState({
+        ...state,
+        accounts,
+        chainId,
+        provider,
+      });
+
       const contracts = await fetchContracts(signer, chainId);
 
       setState({
@@ -61,6 +68,11 @@ export function ConnectionProvider(props) {
       if (isMetamaskConnected) {
         await connectWallet();
       } else {
+        setState({
+          ...state,
+          provider,
+        });
+
         const contracts = await fetchContracts(provider, defaultChainId);
 
         setState({ ...state, ...contracts, provider });

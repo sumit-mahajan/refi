@@ -61,9 +61,9 @@ async function main() {
   console.log("AddressesProvider deployed to:", addressesProvider.address);
 
   // For UI testing
-  testEnv.addressesProvider = addressesProvider;
-  await setupEnvironment();
-  await setupData();
+  // testEnv.addressesProvider = addressesProvider;
+  // await setupEnvironment();
+  // await setupData();
 }
 
 // We recommend this pattern to be able to use async/await everywhere

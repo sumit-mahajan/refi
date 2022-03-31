@@ -76,7 +76,7 @@ const Dashboard = () => {
       });
       const mintTx = await refiCollectionContract.mint(
         "Refi Card",
-        "This card is your key to unlimited possiblities.",
+        "This is a REFI credit card belonging to " + accounts[0] + ".",
         imageCIDs.bronze,
         imageCIDs.silver,
         imageCIDs.gold,
@@ -317,18 +317,20 @@ const Dashboard = () => {
         </div>
         {supportedNetworks[chainId].name === "Rinkeby" &&
           reputation.tokenId > 0 && (
-            <div className="opensea-btn">
-              <a
-                target="_blank"
-                href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}
-              >
+            <a
+              target="_blank"
+              href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}
+            >
+              <div className="opensea-btn">
+
                 View on OpenSea
-              </a>
-            </div>
+              </div>
+            </a>
+
           )}
         {supportedNetworks[chainId].name === "Hardhat" && (
-          <div className="opensea-btn">
-            <div onClick={refreshReputation}>Refresh</div>
+          <div onClick={refreshReputation} className="opensea-btn">
+            <div>Refresh</div>
           </div>
         )}
       </section>
@@ -356,7 +358,7 @@ const Dashboard = () => {
         <div className="vr"></div>
         <div>
           <h4>Credit Utilization</h4>
-          <h2>{userAccountData.creditUtilization.toFixed(2)}%</h2>
+          <h2>{userAccountData.creditUtilization ? userAccountData.creditUtilization.toFixed(2) : 0}%</h2>
         </div>
         <div className="vr"></div>
         <div>
