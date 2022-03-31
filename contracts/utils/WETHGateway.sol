@@ -54,7 +54,7 @@ contract WETHGateway is IWETHGateway, Ownable {
         require(msg.sender == onBehalfOf || msg.sender == refiCollection);
         ILendingPool(lendingPool).borrow(address(WETH), amount, onBehalfOf);
         WETH.withdraw(amount);
-        _safeTransferETH(onBehalfOf, amount);
+        _safeTransferETH(msg.sender, amount);
     }
 
     /**

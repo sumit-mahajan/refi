@@ -3,7 +3,7 @@ const { testEnv } = require('./test_suite_setup/setup');
 const { toWei, toEther, customPrint } = require("./test_suite_setup/helpers");
 const { MAX_UINT } = require("./test_suite_setup/constants");
 // Run after lendingpool/withdraw
-require('./lendingpool/withdraw.test')
+require('./lendingpool/liquidation.test')
 
 describe("WETH Gateway", function () {
 

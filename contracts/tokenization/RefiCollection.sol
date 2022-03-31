@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {IWETHGateway} from "../interfaces/IWETHGateway.sol";
 
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
 import {Base64} from "../libraries/utils/Base64.sol";
+import "hardhat/console.sol";
 
 contract RefiCollection is ERC721 {
     // Maintaining a counter of number of nfts in collection
@@ -23,7 +25,7 @@ contract RefiCollection is ERC721 {
     mapping(address => uint256) private userToTokenId;
 
     address private immutable LENDING_POOL;
-    address private immutable WETH_GATEWAY;
+    address private immutable ADDRESSES_PROVIDER;
 
     struct Metadata {
         string name;
@@ -34,11 +36,11 @@ contract RefiCollection is ERC721 {
         string platinumCardCID;
     }
 
-    constructor(address lendingPoolAddr, address wethGatewayAddr)
+    constructor(address lendingPoolAddr, address addressesProviderAddr)
         ERC721("Refi Protocol", "REFI")
     {
         LENDING_POOL = lendingPoolAddr;
-        WETH_GATEWAY = wethGatewayAddr;
+        ADDRESSES_PROVIDER = addressesProviderAddr;
     }
 
     function _beforeTokenTransfer(
@@ -156,12 +158,13 @@ contract RefiCollection is ERC721 {
      */
     function _safeTransferETH(address to, uint256 value) internal {
         (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, "ETH_TRANSFER_FAILED");
+        require(success, "CARD_ETH_TRANSFER_FAILED");
     }
 
     function payETHUsingCard(uint256 amount, address toRecieve) external {
         require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
-        IWETHGateway(WETH_GATEWAY).borrowETH(amount, msg.sender);
+        IWETHGateway(IAddressesProvider(ADDRESSES_PROVIDER).getWETHGateway())
+            .borrowETH(amount, msg.sender);
         _safeTransferETH(toRecieve, amount);
     }
 
@@ -174,6 +177,8 @@ contract RefiCollection is ERC721 {
         ILendingPool(LENDING_POOL).borrow(asset, amount, msg.sender);
         IERC20(asset).transfer(toRecieve, amount);
     }
+
+    receive() external payable {}
 
     // Only for test use
     function refresh() external {}

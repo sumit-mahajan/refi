@@ -7,6 +7,7 @@ const testEnv = {
     lendingPool: {},
     wethGateway: {},
     priceOracle: {},
+    refiCollection: {},
     protocolDataProvider: {},
     walletBalanceProvider: {},
     weth: {},
@@ -87,6 +88,7 @@ async function initializeSuite() {
     testEnv.lendingPool = await ethers.getContractAt("LendingPool", await addressesProvider.getLendingPool());
     testEnv.wethGateway = await ethers.getContractAt("WETHGateway", await addressesProvider.getWETHGateway());
     testEnv.priceOracle = await ethers.getContractAt("PriceOracle", await addressesProvider.getPriceOracle());
+    testEnv.refiCollection = await ethers.getContractAt("RefiCollection", await addressesProvider.getRefiCollection());
 
     testEnv.protocolDataProvider = await ethers.getContractAt("ProtocolDataProvider", await addressesProvider.protocolDataProvider());
     testEnv.walletBalanceProvider = await ethers.getContractAt("WalletBalanceProvider", await addressesProvider.walletBalanceProvider());

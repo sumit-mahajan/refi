@@ -52,7 +52,8 @@ contract AddressesProvider is IAddressesProvider {
         LENDING_POOL = address(lendingPool);
 
         RefiCollection refiCollection = new RefiCollection(
-            address(lendingPool)
+            address(lendingPool),
+            address(this)
         );
         REFI_COLLECTION = address(refiCollection);
 
@@ -72,7 +73,7 @@ contract AddressesProvider is IAddressesProvider {
 
         // Deploy WETHGateway
         address wethGateway = address(
-            new WETHGateway(WETH, address(lendingPool), REFI_COLLECTION)
+            new WETHGateway(WETH, address(lendingPool), address(refiCollection))
         );
         WETH_GATEWAY = wethGateway;
 
