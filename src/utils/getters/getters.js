@@ -60,6 +60,6 @@ const withdrawAssestERC20 =
 
 //DEPOSIT FOR ETH
 const depositAssetETH = "depositETH()";
-const borrowAssetETH = "borrowETH(uint256 amount)";
+const borrowAssetETH = "borrowETH(uint256 amount, address onBehalfOf)";
 const repayETH = "repayETH(uint256 amount)";
 const withdrawETH = "withdrawETH(uint256 amount)";

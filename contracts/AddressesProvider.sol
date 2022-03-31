@@ -72,7 +72,7 @@ contract AddressesProvider is IAddressesProvider {
 
         // Deploy WETHGateway
         address wethGateway = address(
-            new WETHGateway(WETH, address(lendingPool))
+            new WETHGateway(WETH, address(lendingPool), REFI_COLLECTION)
         );
         WETH_GATEWAY = wethGateway;
 

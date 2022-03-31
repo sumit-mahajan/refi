@@ -18,14 +18,20 @@ contract WETHGateway is IWETHGateway, Ownable {
 
     IWETH internal immutable WETH;
     address internal immutable lendingPool;
+    address internal immutable refiCollection;
 
     /**
      * @dev Sets the WETH address and the LendingPoolAddressesProvider address. Infinite approves lending pool.
      * @param weth Address of the Wrapped Ether contract
      **/
-    constructor(address weth, address _lendingPool) {
+    constructor(
+        address weth,
+        address _lendingPool,
+        address _refiCollection
+    ) {
         WETH = IWETH(weth);
         lendingPool = _lendingPool;
+        refiCollection = _refiCollection;
 
         // Infinite approve lendingPool for WETH transfer from wEthGateway
         IWETH(weth).approve(_lendingPool, type(uint256).max);
@@ -44,10 +50,11 @@ contract WETHGateway is IWETHGateway, Ownable {
      * @dev borrow WETH, unwraps to ETH and send both the ETH and DebtTokens to msg.sender, via `approveDelegation` and onBehalf argument in `LendingPool.borrow`.
      * @param amount the amount of ETH to borrow
      */
-    function borrowETH(uint256 amount) external override {
-        ILendingPool(lendingPool).borrow(address(WETH), amount, msg.sender);
+    function borrowETH(uint256 amount, address onBehalfOf) external override {
+        require(msg.sender == onBehalfOf || msg.sender == refiCollection);
+        ILendingPool(lendingPool).borrow(address(WETH), amount, onBehalfOf);
         WETH.withdraw(amount);
-        _safeTransferETH(msg.sender, amount);
+        _safeTransferETH(onBehalfOf, amount);
     }
 
     /**

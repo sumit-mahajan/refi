@@ -42,7 +42,7 @@ describe("WethGateway : Liquidation", function () {
 
         customPrint("User 1 approves WethGateway contract to borrow 70 ETH on behalf of itself");
 
-        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(70))
+        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(70), users[1].address)
         await borrowEthTx.wait()
 
         customPrint("User 1 borrows max available i.e. 70 ETH");

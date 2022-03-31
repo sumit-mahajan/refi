@@ -93,7 +93,7 @@ describe("WETH Gateway", function () {
 
         customPrint("User 1 approves WethGateway contract to borrow 10 ETH on behalf of itself");
 
-        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(10))
+        const borrowEthTx = await wethGateway.connect(users[1].signer).borrowETH(toWei(10), users[1].address)
         await borrowEthTx.wait()
 
         const user1Config = await protocolDataProvider.getUserReserveData(weth.address, users[1].address);

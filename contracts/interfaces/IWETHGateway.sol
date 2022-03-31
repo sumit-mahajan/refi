@@ -8,5 +8,5 @@ interface IWETHGateway {
 
     function repayETH(uint256 amount) external payable;
 
-    function borrowETH(uint256 amount) external;
+    function borrowETH(uint256 amount, address onBehalfOf) external;
 }

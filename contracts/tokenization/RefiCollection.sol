@@ -3,8 +3,10 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
+import {IWETHGateway} from "../interfaces/IWETHGateway.sol";
 
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
 import {Base64} from "../libraries/utils/Base64.sol";
@@ -21,6 +23,7 @@ contract RefiCollection is ERC721 {
     mapping(address => uint256) private userToTokenId;
 
     address private immutable LENDING_POOL;
+    address private immutable WETH_GATEWAY;
 
     struct Metadata {
         string name;
@@ -31,8 +34,11 @@ contract RefiCollection is ERC721 {
         string platinumCardCID;
     }
 
-    constructor(address lendingPoolAddr) ERC721("Refi Protocol", "REFI") {
+    constructor(address lendingPoolAddr, address wethGatewayAddr)
+        ERC721("Refi Protocol", "REFI")
+    {
         LENDING_POOL = lendingPoolAddr;
+        WETH_GATEWAY = wethGatewayAddr;
     }
 
     function _beforeTokenTransfer(
@@ -49,7 +55,6 @@ contract RefiCollection is ERC721 {
     }
 
     function mint(
-        string memory _name,
         string memory _description,
         string memory _bronzeCardCID,
         string memory _silverCardCID,
@@ -62,7 +67,7 @@ contract RefiCollection is ERC721 {
         _safeMint(msg.sender, tokenId);
 
         metadatas[tokenId] = Metadata({
-            name: _name,
+            name: string(abi.encodePacked("Refi Card #", tokenId)),
             description: _description,
             bronzeCardCID: _bronzeCardCID,
             silverCardCID: _silverCardCID,
@@ -133,5 +138,43 @@ contract RefiCollection is ERC721 {
         return userToTokenId[owner];
     }
 
+    function getBorrowLimit(address user)
+        public
+        view
+        returns (uint256 availableBorrowsETH)
+    {
+        (, , availableBorrowsETH, , , ) = ILendingPool(LENDING_POOL)
+            .getUserAccountData(user);
+
+        return availableBorrowsETH;
+    }
+
+    /**
+     * @dev transfer ETH to an address, revert if it fails.
+     * @param to recipient of the transfer
+     * @param value the amount to send
+     */
+    function _safeTransferETH(address to, uint256 value) internal {
+        (bool success, ) = to.call{value: value}(new bytes(0));
+        require(success, "ETH_TRANSFER_FAILED");
+    }
+
+    function payETHUsingCard(uint256 amount, address toRecieve) external {
+        require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
+        IWETHGateway(WETH_GATEWAY).borrowETH(amount, msg.sender);
+        _safeTransferETH(toRecieve, amount);
+    }
+
+    function payUsingCard(
+        address asset,
+        uint256 amount,
+        address toRecieve
+    ) external {
+        require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
+        ILendingPool(LENDING_POOL).borrow(asset, amount, msg.sender);
+        IERC20(asset).transfer(toRecieve, amount);
+    }
+
+    // Only for test use
     function refresh() external {}
 }
