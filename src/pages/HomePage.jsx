@@ -7,11 +7,14 @@ import { getImageFromSymbol } from "../utils/helpers";
 import ListTile from "../components/list_tile/ListTile";
 
 import "../styles/home_page.scss";
+import PayWithRefi from "../components/PayWithRefi";
+import { useConnection } from "../utils/connection_provider/connection_provider";
 
 function HomePage() {
   const navigate = useNavigate();
 
   const { state: assets } = useAssetProvider();
+  const { provider } = useConnection();
 
   console.log("Rendered Home page");
 

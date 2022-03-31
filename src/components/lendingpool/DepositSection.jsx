@@ -10,7 +10,7 @@ const DepositSection = ({
   isApproved,
   approveToken,
   depositAsset,
-  error
+  error,
 }) => {
   const [input, setInput] = useState();
 
@@ -28,30 +28,31 @@ const DepositSection = ({
         />
       </div>
 
-      <InputField
-        input={input}
-        setInput={setInput}
-        symbol={symbol}
-      />
+      <InputField input={input} setInput={setInput} symbol={symbol} />
 
-      {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
+      {error ? (
+        <div className="error-field">
+          <p>{error}</p>
+        </div>
+      ) : (
+        <Box height={30} />
+      )}
 
       <div className="buttons">
         {isApproved ? (
           <button
             onClick={() => {
-              depositAsset(input);
+              depositAsset(input, isApproved);
               setInput("");
             }}
           >
             Deposit
           </button>
         ) : (
-          <button onClick={approveToken}>
-            Approve
+          <button onClick={() => depositAsset(input, isApproved)}>
+            Approve & Deposit
           </button>
         )}
-
       </div>
     </div>
   );

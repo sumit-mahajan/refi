@@ -41,19 +41,24 @@ async function main() {
   await validationLogic.deployed();
 
   // Deploy ReputationLogic Library for linking purpose
-  const ReputationLogic = await hre.ethers.getContractFactory("ReputationLogic");
+  const ReputationLogic = await hre.ethers.getContractFactory(
+    "ReputationLogic"
+  );
   const reputationLogic = await ReputationLogic.deploy();
   await reputationLogic.deployed();
 
   // Deploy AddressesProvider contract
-  const AddressesProvider = await hre.ethers.getContractFactory("AddressesProvider", {
-    libraries: {
-      ReserveLogic: reserveLogic.address,
-      ValidationLogic: validationLogic.address,
-      WadRayMath: wadRayMath.address,
-      ReputationLogic: reputationLogic.address,
+  const AddressesProvider = await hre.ethers.getContractFactory(
+    "AddressesProvider",
+    {
+      libraries: {
+        ReserveLogic: reserveLogic.address,
+        ValidationLogic: validationLogic.address,
+        WadRayMath: wadRayMath.address,
+        ReputationLogic: reputationLogic.address,
+      },
     }
-  });
+  );
 
   const addressesProvider = await AddressesProvider.deploy();
   await addressesProvider.deployed();
@@ -200,9 +205,9 @@ const setupData = async () => {
     testEnv;
   // deployer != users[0]
 
-  console.log("Deployer -> ", deployer.address)
-  console.log("User 0 -> ", users[0].address)
-  console.log("User 1 -> ", users[1].address)
+  console.log("Deployer -> ", deployer.address);
+  console.log("User 0 -> ", users[0].address);
+  console.log("User 1 -> ", users[1].address);
 
   // Load 3 user accounts with mock DAI and LINK
   await dai.mint(deployer.address, toWei(1000));
