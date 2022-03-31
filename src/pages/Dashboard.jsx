@@ -12,6 +12,7 @@ import { createAndUploadImages } from "../utils/createAndUploadImages";
 
 import Loading from "../components/loading/Loading";
 import { Link } from "react-router-dom";
+import PayWithRefi from "../components/PayWithRefi";
 
 const UserClass = ["Platinum", "Gold", "Silver", "Bronze"];
 
@@ -294,6 +295,7 @@ const Dashboard = () => {
   return (
     <>
       <Box height={80} />
+      <PayWithRefi />
 
       <section className="credit-flex">
         {reputation.cardImage === "" ? (

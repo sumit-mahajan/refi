@@ -10,7 +10,7 @@ const BorrowSection = ({
   isApproved,
   approveDWETH,
   borrowAsset,
-  error
+  error,
 }) => {
   const [input, setInput] = useState();
 
@@ -27,13 +27,15 @@ const BorrowSection = ({
         />
       </div>
 
-      <InputField
-        input={input}
-        setInput={setInput}
-        symbol={symbol}
-      />
+      <InputField input={input} setInput={setInput} symbol={symbol} />
 
-      {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
+      {error ? (
+        <div className="error-field">
+          <p>{error}</p>
+        </div>
+      ) : (
+        <Box height={30} />
+      )}
 
       <div className="buttons">
         {symbol === "ETH" ? (
@@ -41,14 +43,14 @@ const BorrowSection = ({
             <button
               onClick={() => {
                 setInput("");
-                borrowAsset(input);
+                borrowAsset(input, isApproved);
               }}
             >
               Borrow
             </button>
           ) : (
-            <button onClick={approveDWETH}>
-              Approve
+            <button onClick={() => borrowAsset(input, isApproved)}>
+              Approve & Borrow
             </button>
           )
         ) : (

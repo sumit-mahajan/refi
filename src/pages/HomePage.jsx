@@ -8,11 +8,13 @@ import ListTile from "../components/list_tile/ListTile";
 
 import "../styles/home_page.scss";
 import PayWithRefi from "../components/PayWithRefi";
+import { useConnection } from "../utils/connection_provider/connection_provider";
 
 function HomePage() {
   const navigate = useNavigate();
 
   const { state: assets } = useAssetProvider();
+  const { provider } = useConnection();
 
   console.log("Rendered Home page");
 
@@ -21,7 +23,6 @@ function HomePage() {
       <section className="stats mt-7 mb-4"></section>
 
       <hr />
-      <PayWithRefi />
       <section className="assets ">
         <div className="asset-labels pt-1 pb-1 ">
           <p className="spread">Assets</p>

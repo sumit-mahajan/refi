@@ -3,7 +3,14 @@ import { useParams } from "react-router-dom";
 
 import { useConnection } from "../utils/connection_provider/connection_provider";
 import { useAssetProvider } from "../utils/assets_provider/assets_provider";
-import { displayAddress, getBlockExplorerLink, getImageFromSymbol, MAX_UINT, toEther, toWei } from "../utils/helpers";
+import {
+  displayAddress,
+  getBlockExplorerLink,
+  getImageFromSymbol,
+  MAX_UINT,
+  toEther,
+  toWei,
+} from "../utils/helpers";
 
 import DepositSection from "../components/lendingpool/DepositSection";
 import BorrowSection from "../components/lendingpool/BorrowSection";
@@ -35,7 +42,15 @@ function AssetPage() {
 
   const [asset, setAsset] = useState();
   const [isLoading, setLoading] = useState(false);
-  const [localError, setError] = useState({ deposit: null, withdraw: null, borrow: null, repay: null });
+  const [loadingMsg, setLoadingMsg] = useState(
+    "Please confirm the transaction from Browser Wallet"
+  );
+  const [localError, setError] = useState({
+    deposit: null,
+    withdraw: null,
+    borrow: null,
+    repay: null,
+  });
 
   const [positions, setPositions] = useState({
     healthFactor: 0,
@@ -128,23 +143,38 @@ function AssetPage() {
     fetchPositons();
   }, [asset, accounts, fetchPositons]);
 
-  const approveToken = async () => {
+  const approveToken = async (isApproved) => {
+    if (isApproved) return;
+
     try {
       setError({});
       setLoading(true);
+      setLoadingMsg("Approving Token");
 
       switch (asset.symbol) {
         case "DAI":
-          await daiContract.approve(lendingPoolContract.address, MAX_UINT);
+          const daiTx = await daiContract.approve(
+            lendingPoolContract.address,
+            MAX_UINT
+          );
+          await daiTx.wait();
           break;
 
         case "LINK":
-          await linkContract.approve(lendingPoolContract.address, MAX_UINT);
+          const linkTx = await linkContract.approve(
+            lendingPoolContract.address,
+            MAX_UINT
+          );
+          await linkTx.wait();
           break;
 
         case "ETH":
           console.log("Here");
-          await awethContract.approve(wETHGatewayContract.address, MAX_UINT);
+          const awethTx = await awethContract.approve(
+            wETHGatewayContract.address,
+            MAX_UINT
+          );
+          await awethTx.wait();
           break;
         default:
           break;
@@ -152,16 +182,19 @@ function AssetPage() {
 
       setLoading(false);
     } catch (error) {
-      setError({ deposit: 'Oops! The transaction failed' })
+      setError({ deposit: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
   };
 
-  const depositAsset = async (amount) => {
+  const depositAsset = async (amount, isApproved) => {
+    await approveToken(isApproved);
+
     try {
       setError({});
       setLoading(true);
+      setLoadingMsg("Depositing Asset");
 
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.depositETH({
@@ -178,13 +211,26 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ deposit: 'Oops! The transaction failed' })
+      setError({ deposit: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
   };
 
-  const borrowAsset = async (amount) => {
+  const approveAndBorrow = async (amount, isApproved) => {
+    if (isApproved) return;
+    const tx = await dwethContract.approveDelegation(
+      wETHGatewayContract.address,
+      MAX_UINT
+    );
+    await tx.wait();
+
+    return;
+  };
+
+  const borrowAsset = async (amount, isApproved) => {
+    await approveAndBorrow(amount, isApproved);
+
     try {
       if (amount * asset.priceInUsd > asset.availableLiquidityUsd) {
         setError({ borrow: "Protocol doesn't have enough liquidity" });
@@ -207,16 +253,19 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ borrow: 'Oops! The transaction failed' })
+      setError({ borrow: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
   };
 
-  const repayAsset = async (amount) => {
+  const repayAsset = async (amount, isApproved) => {
+    await approveToken(isApproved);
+
     try {
       setError({});
       setLoading(true);
+      setLoadingMsg("Repaying Debt");
 
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.repayETH(toWei(amount), {
@@ -233,7 +282,7 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ repay: 'Oops! The transaction failed' })
+      setError({ repay: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
@@ -257,7 +306,7 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ withdraw: 'Oops! The transaction failed' })
+      setError({ withdraw: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
@@ -281,7 +330,7 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ withdraw: 'Oops! The transaction failed' })
+      setError({ withdraw: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
@@ -308,7 +357,7 @@ function AssetPage() {
       refresh();
       setLoading(false);
     } catch (error) {
-      setError({ borrow: 'Oops! The transaction failed' })
+      setError({ borrow: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
@@ -317,36 +366,32 @@ function AssetPage() {
   const getTokenFaucet = async () => {
     if (asset.symbol === "ETH") {
       if (chainId === 4) {
-        window.open(
-          "https://faucet.rinkeby.io/", "_blank");
+        window.open("https://faucet.rinkeby.io/", "_blank");
       }
-    }
-    else if (asset.symbol === "MATIC") {
-      window.open(
-        "https://faucet.polygon.technology/", "_blank");
-    }
-    else if (asset.symbol === "DAI") {
+    } else if (asset.symbol === "MATIC") {
+      window.open("https://faucet.polygon.technology/", "_blank");
+    } else if (asset.symbol === "DAI") {
       if (chainId === 4) {
         window.open(
-          "https://ethereum.stackexchange.com/questions/72388/does-rinkeby-have-a-faucet-where-i-can-fill-a-wallet-with-dai", "_blank");
+          "https://ethereum.stackexchange.com/questions/72388/does-rinkeby-have-a-faucet-where-i-can-fill-a-wallet-with-dai",
+          "_blank"
+        );
       } else {
         await daiContract.mint(accounts[0], toWei(10));
       }
-    }
-    else if (asset.symbol === "LINK") {
+    } else if (asset.symbol === "LINK") {
       if (chainId === 4) {
-        window.open(
-          "https://faucets.chain.link/rinkeby", "_blank");
+        window.open("https://faucets.chain.link/rinkeby", "_blank");
       } else {
         await linkContract.mint(accounts[0], toWei(10));
       }
     }
-  }
+  };
 
   if (asset === undefined) {
     return <Loading message={"Loading Asset Data"} />;
   } else if (isLoading) {
-    return <Loading message={"Please confirm the transaction from Browser Wallet"} />;
+    return <Loading message={loadingMsg} />;
   }
 
   return (
@@ -361,7 +406,10 @@ function AssetPage() {
           <h4>{asset.symbol}</h4>
           <Box width={40} />
           <div>
-            <a target="_blank" href={getBlockExplorerLink(chainId, asset.tokenAddress)}>
+            <a
+              target="_blank"
+              href={getBlockExplorerLink(chainId, asset.tokenAddress)}
+            >
               {displayAddress(asset.tokenAddress)}
             </a>
             <Box height={5} />
@@ -374,7 +422,12 @@ function AssetPage() {
         <div className="asset-stats mb-5">
           <div>
             <p>Market Size</p>
-            <h4>$ {(asset.availableLiquidityUsd + asset.totalBorrowedUsd).toFixed(2)}</h4>
+            <h4>
+              ${" "}
+              {(asset.availableLiquidityUsd + asset.totalBorrowedUsd).toFixed(
+                2
+              )}
+            </h4>
           </div>
           <div>
             <p>Available Liquidity</p>
@@ -400,8 +453,14 @@ function AssetPage() {
             value={(asset.utilizationRatio * 100).toFixed(2) + "%"}
           />
           <AssetInfo name="Max LTV" value={asset.ltv + "%"} />
-          <AssetInfo name="Liquidation Threshold" value={asset.liquidationThreshold + "%"} />
-          <AssetInfo name="Liquidation Penalty" value={asset.liquidationBonus + "%"} />
+          <AssetInfo
+            name="Liquidation Threshold"
+            value={asset.liquidationThreshold + "%"}
+          />
+          <AssetInfo
+            name="Liquidation Penalty"
+            value={asset.liquidationBonus + "%"}
+          />
         </div>
       </section>
 
@@ -415,7 +474,7 @@ function AssetPage() {
             depositAsset={depositAsset}
             error={localError.deposit}
           />
-          {positions.currentDeposited > 0 ?
+          {positions.currentDeposited > 0 ? (
             <>
               <Box height={50} />
               <WithdrawSection
@@ -425,9 +484,10 @@ function AssetPage() {
                 withdrawAll={withdrawAll}
                 error={localError.withdraw}
               />
-            </> : <></>
-          }
-
+            </>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="borrow-section">
           <BorrowSection
@@ -438,7 +498,7 @@ function AssetPage() {
             borrowAsset={borrowAsset}
             error={localError.borrow}
           />
-          {positions.currentBorrowed > 0 ?
+          {positions.currentBorrowed > 0 ? (
             <>
               <Box height={50} />
               <RepaySection
@@ -449,8 +509,10 @@ function AssetPage() {
                 repayAsset={repayAsset}
                 error={localError.repay}
               />
-            </> : <></>
-          }
+            </>
+          ) : (
+            <></>
+          )}
         </div>
       </section>
     </main>

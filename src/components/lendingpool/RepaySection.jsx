@@ -41,13 +41,15 @@ const RepaySection = ({
         <button
           onClick={() => {
             setInput("");
-            repayAsset(input);
+            repayAsset(input, isApproved);
           }}
         >
           Repay
         </button>
       ) : (
-        <button onClick={approveToken}>Approve</button>
+        <button onClick={() => repayAsset(input, isApproved)}>
+          Approve & Repay
+        </button>
       )}
       {isApproved && (
         <>
