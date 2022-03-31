@@ -295,7 +295,6 @@ const Dashboard = () => {
   return (
     <>
       <Box height={80} />
-      <PayWithRefi />
 
       <section className="credit-flex">
         {reputation.cardImage === "" ? (
@@ -392,6 +391,8 @@ const Dashboard = () => {
         </div>
       </section>
 
+      <Box height={40} />
+      <PayWithRefi />
       <Box height={40} />
     </>
   );
