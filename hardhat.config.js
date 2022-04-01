@@ -1,5 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
-require("hardhat-gas-reporter");
+// require("hardhat-gas-reporter");
 
 const config = require("./config.json");
 
@@ -48,8 +48,8 @@ module.exports = {
   paths: {
     artifacts: "./src/artifacts",
   },
-  gasReporter: {
-    currency: 'USD',
-    gasPrice: 50
-  }
+  // gasReporter: {
+  //   currency: 'USD',
+  //   gasPrice: 50
+  // }
 };

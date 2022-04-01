@@ -44,9 +44,6 @@
     "@openzeppelin/contracts": "^4.4.2",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
-    "hardhat": "^2.8.3",
-    "hardhat-gas-reporter": "^1.0.8",
-    "install": "^0.13.0",
-    "npm": "^8.5.5"
+    "hardhat": "^2.9.2"
   }
 }
