@@ -8,11 +8,11 @@ const DepositSection = ({
   symbol,
   walletBalance,
   isApproved,
-  approveToken,
   depositAsset,
   error,
+  onInputChange,
 }) => {
-  const [input, setInput] = useState();
+  const [input, setInput] = useState("");
 
   const decimalsToShow = symbol === "ETH" ? 5 : 2;
 
@@ -28,7 +28,7 @@ const DepositSection = ({
         />
       </div>
 
-      <InputField input={input} setInput={setInput} symbol={symbol} />
+      <InputField input={input} setInput={setInput} symbol={symbol} onInputChange={onInputChange} />
 
       {error ? (
         <div className="error-field">
@@ -41,15 +41,21 @@ const DepositSection = ({
       <div className="buttons">
         {isApproved ? (
           <button
-            onClick={() => {
-              depositAsset(input, isApproved);
+            disabled={input === "" || input === undefined}
+            onClick={async () => {
+              await depositAsset(input, isApproved);
               setInput("");
             }}
           >
             Deposit
           </button>
         ) : (
-          <button onClick={() => depositAsset(input, isApproved)}>
+          <button
+            disabled={input === "" || input === undefined}
+            onClick={async () => {
+              await depositAsset(input, isApproved);
+              setInput("");
+            }}>
             Approve & Deposit
           </button>
         )}

@@ -8,11 +8,11 @@ const BorrowSection = ({
   symbol,
   availableToBorrow,
   isApproved,
-  approveDWETH,
   borrowAsset,
   error,
+  onInputChange,
 }) => {
-  const [input, setInput] = useState();
+  const [input, setInput] = useState("");
 
   const decimalsToShow = symbol === "ETH" ? 5 : 2;
   return (
@@ -27,7 +27,7 @@ const BorrowSection = ({
         />
       </div>
 
-      <InputField input={input} setInput={setInput} symbol={symbol} />
+      <InputField input={input} setInput={setInput} symbol={symbol} onInputChange={onInputChange} />
 
       {error ? (
         <div className="error-field">
@@ -41,23 +41,30 @@ const BorrowSection = ({
         {symbol === "ETH" ? (
           isApproved ? (
             <button
-              onClick={() => {
+              disabled={input === "" || input === undefined}
+              onClick={async () => {
+                await borrowAsset(input, isApproved);
                 setInput("");
-                borrowAsset(input, isApproved);
               }}
             >
               Borrow
             </button>
           ) : (
-            <button onClick={() => borrowAsset(input, isApproved)}>
+            <button
+              disabled={input === "" || input === undefined}
+              onClick={async () => {
+                await borrowAsset(input, isApproved);
+                setInput("");
+              }}>
               Approve & Borrow
             </button>
           )
         ) : (
           <button
-            onClick={() => {
+            disabled={input === "" || input === undefined}
+            onClick={async () => {
+              await borrowAsset(input);
               setInput("");
-              borrowAsset(input);
             }}
           >
             Borrow

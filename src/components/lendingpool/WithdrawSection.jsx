@@ -9,9 +9,10 @@ const WithdrawSection = ({
     currentDeposited,
     withdrawAsset,
     withdrawAll,
-    error
+    error,
+    onInputChange,
 }) => {
-    const [input, setInput] = useState();
+    const [input, setInput] = useState("");
 
     const decimalsToShow = symbol === "ETH" ? 5 : 2;
 
@@ -31,11 +32,13 @@ const WithdrawSection = ({
                 input={input}
                 setInput={setInput}
                 symbol={symbol}
+                onInputChange={onInputChange}
             />
 
             {error ? <div className="error-field"><p>{error}</p></div> : <Box height={30} />}
 
             <button
+                disabled={input === "" || input === undefined}
                 onClick={() => {
                     withdrawAsset(input);
                     setInput("");

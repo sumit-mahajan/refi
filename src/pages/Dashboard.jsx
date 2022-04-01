@@ -75,7 +75,6 @@ const Dashboard = () => {
           "Minting your card. Please wait while we confirm your transaction",
       });
       const mintTx = await refiCollectionContract.mint(
-        "Refi Card",
         "This is a REFI credit card belonging to " + accounts[0] + ".",
         imageCIDs.bronze,
         imageCIDs.silver,
@@ -109,9 +108,6 @@ const Dashboard = () => {
     // Get class and score from lending Pool
     const userClass = await lendingPoolContract.getUserClass(accounts[0]);
 
-    console.log("UserClass", userClass);
-    // console.log(UserClass[userClass[0]], toEther(userClass[1]));
-
     let rep = {
       score: toEther(userClass[1]),
       class: UserClass[userClass[0]],
@@ -122,10 +118,8 @@ const Dashboard = () => {
     // Get Metadata from refiCollection
     const tokenId = await refiCollectionContract.getTokenId(accounts[0]);
 
-    // console.log("TokenId", tokenId.toNumber())
     if (tokenId.toNumber() !== 0) {
       let tokenURI = await refiCollectionContract.tokenURI(tokenId);
-      // console.log("Token URI", tokenURI)
       tokenURI = tokenURI.split(",")[1];
 
       const metadata = await Buffer.from(tokenURI, "base64").toString("ascii");
@@ -135,8 +129,6 @@ const Dashboard = () => {
     }
 
     setReputation(rep);
-
-    // console.log(reputation)
   };
 
   const fetchUserAccountData = async () => {
@@ -269,8 +261,8 @@ const Dashboard = () => {
 
   const renderAsset = (asset, index) => {
     return (
-      <Link to={"/assets/" + asset.symbol}>
-        <div key={index}>
+      <Link key={index} to={"/assets/" + asset.symbol}>
+        <div>
           <div className="dnb-asset-tile">
             <img
               className="mr-2"
@@ -394,8 +386,8 @@ const Dashboard = () => {
       </section>
 
       <Box height={40} />
-      <PayWithRefi />
-      <Box height={40} />
+      {/* <PayWithRefi /> */}
+      {/* <Box height={40} /> */}
     </>
   );
 };

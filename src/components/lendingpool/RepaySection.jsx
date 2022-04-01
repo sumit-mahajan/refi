@@ -8,11 +8,11 @@ const RepaySection = ({
   symbol,
   currentBorrowed,
   isApproved,
-  approveToken,
   repayAsset,
   error,
+  onInputChange,
 }) => {
-  const [input, setInput] = useState();
+  const [input, setInput] = useState("");
 
   const decimalsToShow = symbol === "ETH" ? 5 : 2;
 
@@ -28,7 +28,7 @@ const RepaySection = ({
         />
       </div>
 
-      <InputField input={input} setInput={setInput} symbol={symbol} />
+      <InputField input={input} setInput={setInput} symbol={symbol} onInputChange={onInputChange} />
 
       {error ? (
         <div className="error-field">
@@ -39,6 +39,7 @@ const RepaySection = ({
       )}
       {isApproved ? (
         <button
+          disabled={input === "" || input === undefined}
           onClick={() => {
             setInput("");
             repayAsset(input, isApproved);
@@ -47,26 +48,34 @@ const RepaySection = ({
           Repay
         </button>
       ) : (
-        <button onClick={() => repayAsset(input, isApproved)}>
+        <button
+          disabled={input === "" || input === undefined}
+          onClick={() => repayAsset(input, isApproved)}>
           Approve & Repay
         </button>
       )}
-      {isApproved && (
-        <>
-          <Box height={20} />
-          <p className="or">OR</p>
-          <Box height={10} />
 
-          <div
-            className="ul-btn"
-            onClick={() => {
-              repayAsset(currentBorrowed + 0.00001);
-            }}
-          >
-            Repay All
-          </div>
-        </>
-      )}
+      <Box height={20} />
+      <p className="or">OR</p>
+      <Box height={10} />
+      {isApproved ?
+        <div
+          className="ul-btn"
+          onClick={() => {
+            repayAsset(currentBorrowed + 0.00001, isApproved);
+          }}
+        >
+          Repay All
+        </div> :
+        <div
+          className="ul-btn"
+          onClick={() => {
+            repayAsset(currentBorrowed + 0.00001, isApproved);
+          }}
+        >
+          Approve & Repay All
+        </div>
+      }
     </div>
   );
 };

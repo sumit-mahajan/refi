@@ -1,4 +1,4 @@
-const defaultChainId = 31337;
+const defaultChainId = 4;
 
 const supportedNetworks = {
   // npx hardhat node
@@ -8,11 +8,11 @@ const supportedNetworks = {
     name: "Hardhat",
     tokenSymbol: "ETH",
     rpcURL: "http://localhost:8545",
-    address: "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    address: "0x59b670e9fA9D0A427751Af201D676719a970857b",
   },
   // npx hardhat run scripts/deploy.js --network mumbai
   // Returned address is wrong. https://github.com/nomiclabs/hardhat/issues/2162.
-  // Copy address from polygonscan
+  // Search your deployer address on polygonscan. Get contract from there
   80001: {
     name: "Mumbai",
     tokenSymbol: "MATIC",
@@ -25,7 +25,7 @@ const supportedNetworks = {
     name: "Rinkeby",
     tokenSymbol: "ETH",
     rpcURL: "https://rinkeby-light.eth.linkpool.io/",
-    address: "0x8DaFB181A28924F4bF8936BD732802ef0FF7982C",
+    address: "0xcFB216f8bEdB51Fa6d05B662b7500A17552D1FfA",
   },
 };
 

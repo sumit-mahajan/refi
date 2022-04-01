@@ -143,11 +143,11 @@ function AssetPage() {
     fetchPositons();
   }, [asset, accounts, fetchPositons]);
 
-  const approveToken = async (isApproved) => {
+  const approveToken = async (isApproved, isRepay) => {
+    setError({});
     if (isApproved) return;
 
     try {
-      setError({});
       setLoading(true);
       setLoadingMsg("Approving Token");
 
@@ -182,7 +182,9 @@ function AssetPage() {
 
       setLoading(false);
     } catch (error) {
-      setError({ deposit: "Oops! The transaction failed" });
+      isRepay ?
+        setError({ repay: "Oops! The transaction failed" }) :
+        setError({ deposit: "Oops! The transaction failed" });
       setLoading(false);
       console.log(error);
     }
@@ -190,6 +192,8 @@ function AssetPage() {
 
   const depositAsset = async (amount, isApproved) => {
     await approveToken(isApproved);
+
+    if (localError.deposit !== null && localError.deposit !== undefined) return;
 
     try {
       setError({});
@@ -217,19 +221,32 @@ function AssetPage() {
     }
   };
 
-  const approveAndBorrow = async (amount, isApproved) => {
-    if (isApproved) return;
-    const tx = await dwethContract.approveDelegation(
-      wETHGatewayContract.address,
-      MAX_UINT
-    );
-    await tx.wait();
+  const approveETHBorrow = async (isApproved) => {
+    setError({});
+    if (isApproved || asset.symbol !== "ETH") return;
 
-    return;
+    try {
+      setLoading(true);
+      setLoadingMsg("Approving Token");
+
+      const tx = await dwethContract.approveDelegation(
+        wETHGatewayContract.address,
+        MAX_UINT
+      );
+      await tx.wait();
+
+      setLoading(false);
+    } catch (error) {
+      setError({ borrow: "Oops! The transaction failed" });
+      setLoading(false);
+      console.log(error);
+    }
   };
 
   const borrowAsset = async (amount, isApproved) => {
-    await approveAndBorrow(amount, isApproved);
+    await approveETHBorrow(isApproved);
+
+    if (localError.borrow !== null && localError.borrow !== undefined) return;
 
     try {
       if (amount * asset.priceInUsd > asset.availableLiquidityUsd) {
@@ -239,9 +256,10 @@ function AssetPage() {
 
       setError({});
       setLoading(true);
+      setLoadingMsg("Borrowing Asset");
 
       if (asset.symbol === "ETH") {
-        await wETHGatewayContract.borrowETH(toWei(amount));
+        await wETHGatewayContract.borrowETH(toWei(amount), accounts[0]);
       } else {
         await lendingPoolContract.borrow(
           asset.tokenAddress,
@@ -260,7 +278,9 @@ function AssetPage() {
   };
 
   const repayAsset = async (amount, isApproved) => {
-    await approveToken(isApproved);
+    await approveToken(isApproved, true);
+
+    if (localError.repay !== null && localError.repay !== undefined) return;
 
     try {
       setError({});
@@ -292,6 +312,7 @@ function AssetPage() {
     try {
       setError({});
       setLoading(true);
+      setLoadingMsg("Witdrawing Asset");
 
       if (asset.symbol === "ETH") {
         await wETHGatewayContract.withdrawETH(toWei(amount));
@@ -342,25 +363,6 @@ function AssetPage() {
       wETHGatewayContract.address
     );
     return toEther(value) !== 0;
-  };
-
-  const approveDWETH = async () => {
-    try {
-      setError({});
-      setLoading(true);
-
-      await dwethContract.approveDelegation(
-        wETHGatewayContract.address,
-        MAX_UINT
-      );
-
-      refresh();
-      setLoading(false);
-    } catch (error) {
-      setError({ borrow: "Oops! The transaction failed" });
-      setLoading(false);
-      console.log(error);
-    }
   };
 
   const getTokenFaucet = async () => {
@@ -470,9 +472,11 @@ function AssetPage() {
             symbol={asset.symbol}
             walletBalance={positions.walletBalance}
             isApproved={positions.isApproved}
-            approveToken={approveToken}
             depositAsset={depositAsset}
             error={localError.deposit}
+            onInputChange={(value) => {
+              setError({})
+            }}
           />
           {positions.currentDeposited > 0 ? (
             <>
@@ -483,6 +487,9 @@ function AssetPage() {
                 withdrawAsset={withdrawAsset}
                 withdrawAll={withdrawAll}
                 error={localError.withdraw}
+                onInputChange={(value) => {
+                  setError({})
+                }}
               />
             </>
           ) : (
@@ -494,9 +501,11 @@ function AssetPage() {
             symbol={asset.symbol}
             availableToBorrow={positions.availableToBorrow}
             isApproved={positions.isDwethApproved}
-            approveDWETH={approveDWETH}
             borrowAsset={borrowAsset}
             error={localError.borrow}
+            onInputChange={(value) => {
+              setError({})
+            }}
           />
           {positions.currentBorrowed > 0 ? (
             <>
@@ -505,9 +514,11 @@ function AssetPage() {
                 symbol={asset.symbol}
                 currentBorrowed={positions.currentBorrowed}
                 isApproved={positions.isApproved}
-                approveToken={approveToken}
                 repayAsset={repayAsset}
                 error={localError.repay}
+                onInputChange={(value) => {
+                  setError({})
+                }}
               />
             </>
           ) : (

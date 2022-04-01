@@ -1,8 +1,6 @@
 ## Introduction
 
-Refi, (Reputation + Finance) is a variable rate lending and borrowing protocol that
-maintains a credit score for its users and provides benefits to them accordingly. It takes its
-core functionality from AAVE v2.
+Refi, (Reputation + Finance) is a variable interest rate lending and borrowing protocol that maintains a credit score for its users and provides benefits to them accordingly. It also issues on-chain credit cards to users for easy external payments. Refi takes its core functionality from [AAVE v2](https://github.com/aave/protocol-v2).
 
 ## Documentation
 
@@ -10,7 +8,7 @@ core functionality from AAVE v2.
 
 1. master - This branch contains the frontend, subgraph and the smart contract code for Rinkeby testnet. This branch should also be used for testing the protocol locally on hardhat. For testing see [this](#installation)
 2. mumbai - This branch contains subgraph and smart contract code for Mumbai testnet.
-3. min-aave - This branch is a minimal implementation of AAVE v2 i.e. it only supports variable rate lending and borrowing. You can also test this implementation using below instructions.
+3. min-aave - This branch is a minimal implementation of AAVE v2 i.e. it only supports variable rate lending and borrowing. It is integrated with frontend and you can also test this implementation using below instructions.
 
 ### Installation
 
@@ -27,7 +25,6 @@ Create a config.json file in the root directory with the following content
     "rinkebyRPCUrl": "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
 }
 ```
-
 ### To run tests
 
 Run `npx hardhat test` in the root directory

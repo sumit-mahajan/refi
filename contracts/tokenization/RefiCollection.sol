@@ -3,7 +3,8 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 import {IERC20Detailed} from "../interfaces/base/IERC20Detailed.sol";
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
@@ -69,7 +70,9 @@ contract RefiCollection is ERC721 {
         _safeMint(msg.sender, tokenId);
 
         metadatas[tokenId] = Metadata({
-            name: string(abi.encodePacked("Refi Card #", tokenId)),
+            name: string(
+                abi.encodePacked("Refi Card #", Strings.toString(tokenId))
+            ),
             description: _description,
             bronzeCardCID: _bronzeCardCID,
             silverCardCID: _silverCardCID,

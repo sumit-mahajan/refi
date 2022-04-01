@@ -12,7 +12,7 @@ const DocsPage = () => {
             {/* <Box height={20} /> */}
             <p>Refi, (Reputation + Finance) is a variable interest rate lending and borrowing protocol that
                 maintains a credit score for its users and provides benefits to them accordingly. It also issues
-                on-chain Refi credit cards to users for easy external payments. Refi takes its core functionality
+                on-chain credit cards to users for easy external payments. Refi takes its core functionality
                 from AAVE v2.
             </p>
 
@@ -112,8 +112,8 @@ const DocsPage = () => {
 
             <Box height={20} />
             <h3>Bronze</h3>
+            <Box height={15} />
             <ul>
-                <Box height={15} />
                 <li>Credit score range - 300 to 600</li>
                 <li>It takes about 3 months for an ideal user to reach from a score of 300 to 600.</li>
                 <li>Any liquidation in this class would result in decrease in credit score by 50.</li>
@@ -121,8 +121,8 @@ const DocsPage = () => {
 
             <Box height={20} />
             <h3>Silver</h3>
+            <Box height={15} />
             <ul>
-                <Box height={15} />
                 <li>Credit score range - 600 to 700</li>
                 <li>It takes about 9 months for an ideal user to reach from a score of 600 to 700.</li>
                 <li>Any liquidation in this class would result in decrease in credit score by 100.</li>
@@ -130,8 +130,8 @@ const DocsPage = () => {
 
             <Box height={20} />
             <h3>Gold</h3>
+            <Box height={15} />
             <ul>
-                <Box height={15} />
                 <li>Credit score range - 700 to 800</li>
                 <li>It takes about 1 year for an ideal user to reach from a score of 700 to 800.</li>
                 <li>Any liquidation in this class would result in decrease in credit score by 150.</li>
@@ -139,8 +139,8 @@ const DocsPage = () => {
 
             <Box height={20} />
             <h3>Platinum</h3>
+            <Box height={15} />
             <ul>
-                <Box height={15} />
                 <li>Credit score range - 800 to 900</li>
                 <li>It takes about 10 years for an ideal user to reach from a score of 800 to 900.</li>
                 <li>Any liquidation in this class would result in decrease in credit score by 200.</li>
@@ -150,56 +150,60 @@ const DocsPage = () => {
                 <h2>Benefits</h2>
                 <Box height={20} />
                 <table>
-                    <tr>
-                        <th rowSpan={2} colSpan={2} className="large">User Class</th>
-                        <th colSpan={2} className="large">ETH</th>
-                        <th colSpan={2} className="large">DAI</th>
-                        <th colSpan={2} className="large">LINK</th>
-                    </tr>
-                    <tr>
-                        <th className="sub">LTV</th>
-                        <th className="sub">Threshold</th>
-                        <th className="sub">LTV</th>
-                        <th className="sub">Threshold</th>
-                        <th className="sub">LTV</th>
-                        <th className="sub">Threshold</th>
-                    </tr>
-                    <tr>
-                        <td colSpan={2}>Bronze</td>
-                        <td>70%</td>
-                        <td>75%</td>
-                        <td>70%</td>
-                        <td>75%</td>
-                        <td>70%</td>
-                        <td>75%</td>
-                    </tr>
-                    <tr>
-                        <td colSpan={2}>Silver</td>
-                        <td>75%</td>
-                        <td>80%</td>
-                        <td>75%</td>
-                        <td>80%</td>
-                        <td>75%</td>
-                        <td>80%</td>
-                    </tr>
-                    <tr>
-                        <td colSpan={2}>Gold</td>
-                        <td>80%</td>
-                        <td>85%</td>
-                        <td>80%</td>
-                        <td>85%</td>
-                        <td>80%</td>
-                        <td>85%</td>
-                    </tr>
-                    <tr>
-                        <td colSpan={2}>Platinum</td>
-                        <td>85%</td>
-                        <td>90%</td>
-                        <td>85%</td>
-                        <td>90%</td>
-                        <td>85%</td>
-                        <td>90%</td>
-                    </tr>
+                    <thead>
+                        <tr>
+                            <th rowSpan={2} colSpan={2} className="large">User Class</th>
+                            <th colSpan={2} className="large">ETH</th>
+                            <th colSpan={2} className="large">DAI</th>
+                            <th colSpan={2} className="large">LINK</th>
+                        </tr>
+                        <tr>
+                            <th className="sub">LTV</th>
+                            <th className="sub">Threshold</th>
+                            <th className="sub">LTV</th>
+                            <th className="sub">Threshold</th>
+                            <th className="sub">LTV</th>
+                            <th className="sub">Threshold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colSpan={2}>Bronze</td>
+                            <td>70%</td>
+                            <td>75%</td>
+                            <td>70%</td>
+                            <td>75%</td>
+                            <td>70%</td>
+                            <td>75%</td>
+                        </tr>
+                        <tr>
+                            <td colSpan={2}>Silver</td>
+                            <td>75%</td>
+                            <td>80%</td>
+                            <td>75%</td>
+                            <td>80%</td>
+                            <td>75%</td>
+                            <td>80%</td>
+                        </tr>
+                        <tr>
+                            <td colSpan={2}>Gold</td>
+                            <td>80%</td>
+                            <td>85%</td>
+                            <td>80%</td>
+                            <td>85%</td>
+                            <td>80%</td>
+                            <td>85%</td>
+                        </tr>
+                        <tr>
+                            <td colSpan={2}>Platinum</td>
+                            <td>85%</td>
+                            <td>90%</td>
+                            <td>85%</td>
+                            <td>90%</td>
+                            <td>85%</td>
+                            <td>90%</td>
+                        </tr>
+                    </tbody>
                 </table>
             </section>
             <Box height={30} />
@@ -208,14 +212,15 @@ const DocsPage = () => {
             {/* <Box height={20} /> */}
             <p>Users can get their Refi credit card by minting it as an NFT from their Dashboard. The card is a dynamic NFT i.e. it automatically changes its
                 color, metadata and benefits when a user's class is changed due to a change in their credit score. There are four versions of the credit card i.e.
-                Bronze, Silver, Gold and Platinum for the respective classes.
-                <Box height={10} />
+                Bronze, Silver, Gold and Platinum for the respective classes.</p>
+            <Box height={10} />
+            <p>
                 The Refi credit card can be used to pay on any Dapp supporting Refi payments or to send funds to any address.
                 This allows users to pay in any token without holding it or swapping existing ones for it.
                 This is achieved by creating a borrow position of equivalent amount on user's behalf on the Refi protocol.
                 Users can later repay their credit card debt on the protocol.
-
             </p>
+
             <Box height={10} />
             <p>Dapps can integrate Refi credit card payments using our "Pay with Refi" widget.
                 It supports payments in multiple tokens and also provides borrow limit for users.
