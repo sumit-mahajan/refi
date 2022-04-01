@@ -47,20 +47,6 @@ contract ProtocolDataProvider {
         address[] memory reserves = pool.getReservesList();
         TokenData[] memory reservesTokens = new TokenData[](reserves.length);
         for (uint256 i = 0; i < reserves.length; i++) {
-            // if (reserves[i] == MKR) {
-            //     reservesTokens[i] = TokenData({
-            //         symbol: "MKR",
-            //         tokenAddress: reserves[i]
-            //     });
-            //     continue;
-            // }
-            // if (reserves[i] == ETH) {
-            //     reservesTokens[i] = TokenData({
-            //         symbol: "ETH",
-            //         tokenAddress: reserves[i]
-            //     });
-            //     continue;
-            // }
             reservesTokens[i] = TokenData({
                 symbol: IERC20Detailed(reserves[i]).symbol(),
                 tokenAddress: reserves[i]

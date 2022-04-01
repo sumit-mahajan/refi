@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
+import {IERC20Detailed} from "../interfaces/base/IERC20Detailed.sol";
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {ILendingPool} from "../interfaces/ILendingPool.sol";
 import {IWETHGateway} from "../interfaces/IWETHGateway.sol";
@@ -24,7 +25,6 @@ contract RefiCollection is ERC721 {
     // Mapping to maintain user address to tokenId
     mapping(address => uint256) private userToTokenId;
 
-    address private immutable LENDING_POOL;
     address private immutable ADDRESSES_PROVIDER;
 
     struct Metadata {
@@ -36,10 +36,7 @@ contract RefiCollection is ERC721 {
         string platinumCardCID;
     }
 
-    constructor(address lendingPoolAddr, address addressesProviderAddr)
-        ERC721("Refi Protocol", "REFI")
-    {
-        LENDING_POOL = lendingPoolAddr;
+    constructor(address addressesProviderAddr) ERC721("Refi Protocol", "REFI") {
         ADDRESSES_PROVIDER = addressesProviderAddr;
     }
 
@@ -85,9 +82,9 @@ contract RefiCollection is ERC721 {
         view
         returns (string memory)
     {
-        (DataTypes.UserClass uc, ) = ILendingPool(LENDING_POOL).getUserClass(
-            owner
-        );
+        (DataTypes.UserClass uc, ) = ILendingPool(
+            IAddressesProvider(ADDRESSES_PROVIDER).getLendingPool()
+        ).getUserClass(owner);
 
         Metadata memory meta = metadatas[tokenId];
 
@@ -145,17 +142,24 @@ contract RefiCollection is ERC721 {
         view
         returns (uint256 availableBorrowsETH)
     {
-        (, , availableBorrowsETH, , , ) = ILendingPool(LENDING_POOL)
-            .getUserAccountData(user);
+        (, , availableBorrowsETH, , , ) = ILendingPool(
+            IAddressesProvider(ADDRESSES_PROVIDER).getLendingPool()
+        ).getUserAccountData(user);
 
         return availableBorrowsETH;
     }
 
-    /**
-     * @dev transfer ETH to an address, revert if it fails.
-     * @param to recipient of the transfer
-     * @param value the amount to send
-     */
+    function payUsingCard(
+        address asset,
+        uint256 amount,
+        address toRecieve
+    ) external {
+        require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
+        ILendingPool(IAddressesProvider(ADDRESSES_PROVIDER).getLendingPool())
+            .borrow(asset, amount, msg.sender);
+        IERC20(asset).transfer(toRecieve, amount);
+    }
+
     function _safeTransferETH(address to, uint256 value) internal {
         (bool success, ) = to.call{value: value}(new bytes(0));
         require(success, "CARD_ETH_TRANSFER_FAILED");
@@ -168,14 +172,49 @@ contract RefiCollection is ERC721 {
         _safeTransferETH(toRecieve, amount);
     }
 
-    function payUsingCard(
-        address asset,
-        uint256 amount,
-        address toRecieve
-    ) external {
-        require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
-        ILendingPool(LENDING_POOL).borrow(asset, amount, msg.sender);
-        IERC20(asset).transfer(toRecieve, amount);
+    struct TokenDetailedData {
+        string symbol;
+        address tokenAddress;
+        address aTokenAddress;
+        address dTokenAddress;
+    }
+
+    function getSupportedAssets()
+        external
+        view
+        returns (TokenDetailedData[] memory)
+    {
+        ILendingPool pool = ILendingPool(
+            IAddressesProvider(ADDRESSES_PROVIDER).getLendingPool()
+        );
+        address[] memory reserves = pool.getReservesList();
+        TokenDetailedData[] memory reservesTokens = new TokenDetailedData[](
+            reserves.length
+        );
+        for (uint256 i = 0; i < reserves.length; i++) {
+            DataTypes.ReserveData memory reserve = pool.getReserveData(
+                reserves[i]
+            );
+
+            string memory symbol = IERC20Detailed(reserves[i]).symbol();
+            // bytes32 symbolInBytes;
+            // assembly {
+            //     symbolInBytes := mload(add(symbol, 32))
+            // }
+
+            // int256 priceInUsd = IWalletBalanceProvider(
+            //     IAddressesProvider(ADDRESSES_PROVIDER).walletBalanceProvider()
+            // ).getPriceInUsd(symbolInBytes);
+
+            reservesTokens[i] = TokenDetailedData({
+                symbol: symbol,
+                tokenAddress: reserves[i],
+                aTokenAddress: reserve.aTokenAddress,
+                dTokenAddress: reserve.variableDebtTokenAddress
+                // priceInUsd: priceInUsd
+            });
+        }
+        return reservesTokens;
     }
 
     receive() external payable {}

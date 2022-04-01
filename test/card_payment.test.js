@@ -65,6 +65,19 @@ describe("Card", function () {
         customPrint("Deployer approves RefiCollection contract to borrow 15 ETH on behalf of itself");
     })
 
+    it('Checks supported assets', async () => {
+        const { refiCollection } = testEnv;
+
+        const tokenList = await refiCollection.getSupportedAssets();
+
+        for (let token in tokenList) {
+            expect(token.symbol).to.not.equal("");
+            expect(token.tokenAddress).to.not.equal("0x0000000000000000000000000000000000000000")
+            expect(token.aTokenAddress).to.not.equal("0x0000000000000000000000000000000000000000")
+            expect(token.dTokenAddress).to.not.equal("0x0000000000000000000000000000000000000000")
+        }
+    });
+
     it('Checks card limit', async () => {
         const { deployer, refiCollection } = testEnv;
 
