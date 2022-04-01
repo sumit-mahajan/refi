@@ -53,6 +53,9 @@ contract RefiCollection is ERC721 {
         require(balanceOf(to) == 0, "Only one card per user");
     }
 
+    /**
+    @dev Mints credit card of a user with 4 image CIDs, one for each class of card
+    **/
     function mint(
         string memory _description,
         string memory _bronzeCardCID,
@@ -77,6 +80,9 @@ contract RefiCollection is ERC721 {
         userToTokenId[msg.sender] = tokenId;
     }
 
+    /**
+    @dev Checks user's current class and returns the corresponding image
+    **/
     function getImageURL(uint256 tokenId, address owner)
         internal
         view
@@ -103,6 +109,9 @@ contract RefiCollection is ERC721 {
         return string(abi.encodePacked("https://ipfs.io/ipfs/", cid));
     }
 
+    /**
+    @dev The function that returns dynamic metadata
+    **/
     function tokenURI(uint256 tokenId)
         public
         view
@@ -137,6 +146,10 @@ contract RefiCollection is ERC721 {
         return userToTokenId[owner];
     }
 
+    /**
+    @dev Returns ETH equivalent borrow limit of a user
+    @param user The address of users whose borrow limit is to be checked
+    **/
     function getBorrowLimit(address user)
         public
         view
@@ -149,6 +162,12 @@ contract RefiCollection is ERC721 {
         return availableBorrowsETH;
     }
 
+    /**
+    @dev Lets user pay any asset except ETH to anyone. It first borrows the asset and then transfers it
+    @param asset The asset in which the payment is made
+    @param amount The amount of asset
+    @param toRecieve The address that will recieve the amount of asset
+    **/
     function payUsingCard(
         address asset,
         uint256 amount,
@@ -160,11 +179,11 @@ contract RefiCollection is ERC721 {
         IERC20(asset).transfer(toRecieve, amount);
     }
 
-    function _safeTransferETH(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
-        require(success, "CARD_ETH_TRANSFER_FAILED");
-    }
-
+    /**
+    @dev Lets user pay ETH to anyone. It first borrows ETH and then transfers it
+    @param amount The amount of asset
+    @param toRecieve The address that will recieve the amount of asset
+    **/
     function payETHUsingCard(uint256 amount, address toRecieve) external {
         require(getTokenId(msg.sender) != 0, "Caller doesn't have a card");
         IWETHGateway(IAddressesProvider(ADDRESSES_PROVIDER).getWETHGateway())
@@ -179,6 +198,9 @@ contract RefiCollection is ERC721 {
         address dTokenAddress;
     }
 
+    /** 
+    @dev Returns all token symbols and their related contract addresses that support REFI card payments
+    */
     function getSupportedAssets()
         external
         view
@@ -217,6 +239,19 @@ contract RefiCollection is ERC721 {
         return reservesTokens;
     }
 
+    /**
+     * @dev Internal transfer ETH to an address, revert if it fails.
+     * @param to recipient of the transfer
+     * @param value the amount to send
+     */
+    function _safeTransferETH(address to, uint256 value) internal {
+        (bool success, ) = to.call{value: value}(new bytes(0));
+        require(success, "CARD_ETH_TRANSFER_FAILED");
+    }
+
+    /**
+    @dev Function to reieve ETH
+    **/
     receive() external payable {}
 
     // Only for test use

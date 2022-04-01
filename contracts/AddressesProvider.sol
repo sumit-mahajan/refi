@@ -51,6 +51,7 @@ contract AddressesProvider is IAddressesProvider {
         LendingPool lendingPool = new LendingPool(this);
         LENDING_POOL = address(lendingPool);
 
+        // Deploy REFI credit card collection
         RefiCollection refiCollection = new RefiCollection(address(this));
         REFI_COLLECTION = address(refiCollection);
 
@@ -93,7 +94,7 @@ contract AddressesProvider is IAddressesProvider {
         // Initialize LINK Reserve
         initializeLINKReserve(lendingPool);
 
-        // Set user reputation class data
+        // Set user reputation class configuration
         // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
         if (!isProduction) {
             // For hardhat, ideal timespan is same for all classes i.e. a jump by 100 in a minute
@@ -113,12 +114,14 @@ contract AddressesProvider is IAddressesProvider {
             lendingPool.setClassData(0, 315569520000, 100, 200 ether, 1000);
         }
 
-        // Deploy data providers for frontend
+        // Deploy data provider for frontend
         protocolDataProvider = address(new ProtocolDataProvider(this));
 
         bytes32[] memory _assets = new bytes32[](3);
         address[] memory _sources = new address[](3);
         (_assets, _sources) = getAssetsAndUSDPriceSources();
+
+        // Deploy wallet balance provider for frontend
         walletBalanceProvider = address(
             new WalletBalanceProvider(_assets, _sources)
         );

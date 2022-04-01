@@ -974,6 +974,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         }
     }
 
+    /**
+    @dev Returns a user's real time credit score and class. Used by RefiCollection NFTs
+    */
     function getUserClass(address user)
         public
         view
@@ -986,6 +989,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         return (userClass, score);
     }
 
+    /**
+    @dev Sets the user's borrow percentage for ongoing loan after every transaction
+    */
     function setUserBorrowPercent(address user) internal {
         (
             uint256 userCollateralBalance,
@@ -1010,6 +1016,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
     }
 
+    /**
+    @dev Sets configuration parameters for each reputation class. Called initially from AddressesProvider
+    */
     function setClassData(
         uint256 class,
         uint256 idealTimeSpan,
@@ -1031,6 +1040,9 @@ contract LendingPool is ILendingPool, LendingPoolStorage {
         );
     }
 
+    /**
+    @dev Returns LTV and Liquidation Threshold for a user, depending on their current credit score
+    */
     function getUserLtvAndLt(
         address user,
         uint256 ltv,

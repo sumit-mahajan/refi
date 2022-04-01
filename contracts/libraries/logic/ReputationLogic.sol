@@ -11,9 +11,9 @@ import {DataTypes} from "../utils/DataTypes.sol";
 import "hardhat/console.sol";
 
 /**
- * @title ReserveLogic library
- * @author Aave
- * @notice Implements the logic to update the reserves state
+ * @title ReputationLogic library
+ * @author Sumit Mahajan
+ * @notice Implements the logic to calculate and maintain credit score
  */
 library ReputationLogic {
     using SafeMath for uint256;
@@ -25,9 +25,11 @@ library ReputationLogic {
     uint256 constant OPTIMAL_CREDIT_UTILIZATION_PERCENT = 8500;
 
     /**
-     * @dev Returns real time reputation class of a user
+     * @dev Returns real time reputation class and credit score of a user
      * @param userReputation The user reputation object
-     * @return UserClass
+     * @param classesData The configuration data for all classes
+     * @return UserClass Real time user class
+     * @return score Real time credit score
      **/
     function getReputationClass(
         DataTypes.UserReputation storage userReputation,
@@ -47,11 +49,10 @@ library ReputationLogic {
     }
 
     /**
-     * Returns constant parameters associated with a user class
-     * @dev Gets the classIdealTimeSpan for given user class
-     * @param classesData mapping(Class=>ClassData)
-     * @param score user's current score
-     * @return ClassData
+     * @dev Returns configuration parameters of a user class depending on the score
+     * @param classesData The configuration data for all classes
+     * @param score The credit score
+     * @return ClassData The configuration data for the class for score
      **/
     function getClassData(
         mapping(uint256 => DataTypes.ClassData) storage classesData,
@@ -72,7 +73,7 @@ library ReputationLogic {
      * If a user borrows 85% of its allowed borrowing capacity, it is considered optimal and results in highest score increment
      * @dev Calculates the BorrowPercentFactor from given user's current loan
      * @param percentageBorrowed The percentage of amount borrowed wrt max borrow capacity
-     * @return BorrowPercentFactor
+     * @return BorrowPercentFactor The BorrowPercentFactor is a percentage value. Range: 0 - 10000
      **/
     function getBorrowPercentFactor(uint256 percentageBorrowed)
         internal
@@ -97,6 +98,8 @@ library ReputationLogic {
     /**
      * @dev Logic for adding the accured reputation to score
      * @param userReputation The user reputation object
+     * @param classesData The configuration data for all classes
+     * @return score The current, real time credit score of user
      **/
     function cumulateReputation(
         DataTypes.UserReputation storage userReputation,
@@ -121,6 +124,8 @@ library ReputationLogic {
         uint256 classScoreRange = userClassData.scoreRange;
 
         if (nWeeks == 0) {
+        // If time difference from last tx is less than a week, calculate accured score by formula,
+        // Accured score = BorrowPercentFactor % of (timeDiff/classIdealTimeSpan) * classScoreRange
             score +=
                 timeDiff.wadDiv(classIdealTimeSpan).percentMul(
                     getBorrowPercentFactor(
@@ -130,6 +135,7 @@ library ReputationLogic {
                 classScoreRange *
                 1000;
         } else {
+            // Otherwise use the same formula on per week timeframe, to take into account class change in between
             uint256 remainder = timeDiff - nWeeks * MILLISECONDS_IN_A_WEEK;
             for (uint16 i = 0; i < nWeeks; i++) {
                 score +=
@@ -166,8 +172,9 @@ library ReputationLogic {
     }
 
     /**
-     * @dev Adds the accured reputation to score before every transaction
+     * @dev Adds the accured reputation to stored score before every transaction
      * @param userReputation The user reputation object
+     * @param classesData The configuration data for all classes
      **/
     function addReputation(
         DataTypes.UserReputation storage userReputation,
@@ -186,6 +193,7 @@ library ReputationLogic {
     /**
      * @dev Drops the reputation score in case of liquidation
      * @param userReputation The user reputation object
+     * @param classesData The configuration data for all classes
      **/
     function dropReputation(
         DataTypes.UserReputation storage userReputation,

@@ -6,11 +6,18 @@ core functionality from AAVE v2.
 
 ## Documentation
 
+### Branches
+
+1. master - This branch contains the frontend, subgraph and the smart contract code for Rinkeby testnet. This branch should also be used for testing the protocol locally on hardhat. For testing see [this](#installation)
+2. mumbai - This branch contains subgraph and smart contract code for Mumbai testnet.
+3. min-aave - This branch is a minimal implementation of AAVE v2 i.e. it only supports variable rate lending and borrowing. You can also test this implementation using below instructions.
+
 ### Installation
 
 `npm install` in root directory
 
 ### Initial Setup
+
 Create a config.json file in the root directory with the following content
 ```
 {   
@@ -20,15 +27,20 @@ Create a config.json file in the root directory with the following content
     "rinkebyRPCUrl": "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
 }
 ```
-You will need to add the following environment variable to your .env file 
+
+### To run tests
+
+Run `npx hardhat test` in the root directory
+
+### To run locally on Hardhat
+
+First, you will need to add the following environment variable to your .env file in the root folder
 
 `REACT_APP_IMAGE_KEY`
 
 This is the API token to access your NFT.Storage service. [Know more](https://nft.storage/docs/)   
 
-### To run locally on Hardhat
-
-Open three terminals in root directory
+Now, Open three terminals in root directory
 
 First run `npx hardhat node` in one terminal
 
@@ -46,5 +58,3 @@ Open the network_config.js file in **src/utils/connection_provider/network_confi
 
 Finally run `npm run start` in third terminal.
 
-### To run tests
-Run `npx hardhat test` in the root directory

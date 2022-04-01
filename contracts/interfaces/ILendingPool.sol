@@ -347,6 +347,14 @@ interface ILendingPool {
 
     function getAddressesProvider() external view returns (IAddressesProvider);
 
+    /**
+     * @dev Returns the state and configuration of the reserve
+     * @param user The address of the user
+     * @param ltv The ltv set from AddressesProvider
+     * @param liquidationThreshold The liquidationThreshold set from AddressesProvider
+     * @return userLtv User's ltv depending on their class
+     * @return userLiquidationThreshold User's liquidationThreshold depending on their class
+     **/
     function getUserLtvAndLt(
         address user,
         uint256 ltv,

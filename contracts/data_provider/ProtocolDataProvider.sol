@@ -42,6 +42,9 @@ contract ProtocolDataProvider {
         ADDRESSES_PROVIDER = addressesProvider;
     }
 
+    /** 
+    @dev Returns all supported token symbols and their contract addresses
+    */
     function getAllReservesTokens() external view returns (TokenData[] memory) {
         ILendingPool pool = ILendingPool(ADDRESSES_PROVIDER.getLendingPool());
         address[] memory reserves = pool.getReservesList();
@@ -55,6 +58,9 @@ contract ProtocolDataProvider {
         return reservesTokens;
     }
 
+    /** 
+    @dev Returns every supported token's interest bearing aToken symbol and their contract addresses
+    */
     function getAllATokens() external view returns (TokenData[] memory) {
         ILendingPool pool = ILendingPool(ADDRESSES_PROVIDER.getLendingPool());
         address[] memory reserves = pool.getReservesList();
@@ -71,6 +77,9 @@ contract ProtocolDataProvider {
         return aTokens;
     }
 
+    /** 
+    @dev Returns reserve parameters set from AddressesProvider
+    */
     function getReserveConfigurationData(address asset)
         external
         view
@@ -89,6 +98,9 @@ contract ProtocolDataProvider {
             .getParamsMemory();
     }
 
+    /** 
+    @dev Returns user's allowed LTV and Liquidation Threshold for a reserve
+    */
     function getUserReserveLtvAndLt(address user, address asset)
         external
         view
@@ -105,6 +117,9 @@ contract ProtocolDataProvider {
         ).getUserLtvAndLt(user, ltv, liquidationThreshold);
     }
 
+    /** 
+    @dev Returns current state of a reserve
+    */
     function getReserveData(address asset)
         external
         view
@@ -148,6 +163,9 @@ contract ProtocolDataProvider {
         );
     }
 
+    /** 
+    @dev Returns user's state in a reserve
+    */
     function getUserReserveData(address asset, address user)
         external
         view
@@ -199,6 +217,9 @@ contract ProtocolDataProvider {
         isBorrowed = userConfig.isBorrowing(reserve.id);
     }
 
+    /** 
+    @dev Returns user's state in all reserves
+    */
     function getUserReservesData(address user)
         external
         view
@@ -241,6 +262,9 @@ contract ProtocolDataProvider {
         return (userReservesData);
     }
 
+    /** 
+    @dev Returns a reserve's corresponding aToken and debtToken addresses
+    */
     function getReserveTokensAddresses(address asset)
         external
         view

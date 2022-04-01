@@ -51,6 +51,7 @@ contract WETHGateway is IWETHGateway, Ownable {
      * @param amount the amount of ETH to borrow
      */
     function borrowETH(uint256 amount, address onBehalfOf) external override {
+        // Only allow the user or their credit card to borrow on behalf of them
         require(msg.sender == onBehalfOf || msg.sender == refiCollection);
         ILendingPool(lendingPool).borrow(address(WETH), amount, onBehalfOf);
         WETH.withdraw(amount);

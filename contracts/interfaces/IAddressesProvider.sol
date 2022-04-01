@@ -7,6 +7,10 @@ pragma solidity ^0.8.0;
  * @author Aave
  **/
 interface IAddressesProvider {
+    /**
+     * @dev Returns the address of WETH contract the protocol uses
+     * @return The address of the WETH contract
+     **/
     function WETH() external view returns (address);
 
     /**

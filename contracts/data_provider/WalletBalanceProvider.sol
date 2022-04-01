@@ -118,6 +118,9 @@ contract WalletBalanceProvider {
         return (reservesWithEth, balances);
     }
 
+    /**
+    @dev provides price in usd of an asset using its symbol
+    */
     function getPriceInUsd(bytes32 symbol) public view returns (int256) {
         AggregatorV3Interface source = assetsSources[symbol];
 

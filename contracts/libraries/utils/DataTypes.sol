@@ -36,6 +36,7 @@ library DataTypes {
         uint256 data;
     }
 
+    // Credit score/Reputation related data for each user
     struct UserReputation {
         // Historical score till last calculation
         uint256 lastScore;
@@ -45,6 +46,7 @@ library DataTypes {
         uint256 lastUpdateTimestamp;
     }
 
+    // The configuration of each class. Done initially
     struct ClassData {
         // 0 -> Platinum; 1 -> Gold; 2 -> Silver; 3 -> Bronze
         uint256 class;

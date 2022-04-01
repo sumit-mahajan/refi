@@ -24,7 +24,9 @@ contract LendingPoolStorage {
 
     uint256 internal _maxNumberOfReserves;
 
+    // Every user's reputation/credit score related data
     mapping(address => DataTypes.UserReputation) internal _userReputationMap;
 
+    // Configuration for all 4 class
     mapping(uint256 => DataTypes.ClassData) internal _classesData;
 }
