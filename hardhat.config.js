@@ -49,7 +49,7 @@ module.exports = {
     artifacts: "./src/artifacts",
   },
   gasReporter: {
-    currency: 'INR',
-    gasPrice: 20
+    currency: 'USD',
+    gasPrice: 50
   }
 };
