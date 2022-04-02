@@ -25,6 +25,7 @@ import {WalletBalanceProvider} from "./data_provider/WalletBalanceProvider.sol";
  **/
 contract AddressesProvider is IAddressesProvider {
     bool public constant isProduction = false;
+    bool public constant isMumbai = false;
 
     address private immutable LENDING_POOL;
     address private immutable WETH_GATEWAY;
@@ -67,6 +68,18 @@ contract AddressesProvider is IAddressesProvider {
             ETH_TO_USD = address(new MockAggregatorV3(3000000000)); // 30 USD + 8 decimals
             DAI_TO_USD = address(new MockAggregatorV3(1500000000)); // 15 USD
             LINK_TO_USD = address(new MockAggregatorV3(1500000000)); // 15 USD
+        } else if (isMumbai) {
+            // Deploy mock tokens and sources for Mumbai testnet
+            WETH = address(new MockWETH());
+            DAI = address(new MockERC20("DAI Token", "DAI"));
+            LINK = address(new MockERC20("LINK Token", "LINK"));
+
+            DAI_TO_ETH = address(new MockAggregatorV3(0.6 ether)); // 1 DAI = 0.6 matic
+            LINK_TO_ETH = 0x12162c3E810393dEC01362aBf156D7ecf6159528;
+
+            ETH_TO_USD = 0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada;
+            DAI_TO_USD = 0x0FCAa9c899EC5A91eBc3D5Dd869De833b06fB046;
+            LINK_TO_USD = address(new MockAggregatorV3(1500000000)); // 1 LINK = 15 USD
         }
 
         // Deploy WETHGateway
@@ -103,7 +116,7 @@ contract AddressesProvider is IAddressesProvider {
             lendingPool.setClassData(1, 180000, 100, 150 ether, 500);
             lendingPool.setClassData(0, 180000, 100, 200 ether, 1000);
         } else {
-            // For rinkeby testnet, ideal timespan is few months to years for different classes
+            // In production, ideal timespan is few months to years for different classes
             // 3 months to millisconds for bronze
             lendingPool.setClassData(3, 7889238000, 300, 50 ether, 500);
             // 9 months to millisconds for silver

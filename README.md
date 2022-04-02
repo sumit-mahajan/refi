@@ -6,9 +6,8 @@ Refi, (Reputation + Finance) is a variable interest rate lending and borrowing p
 
 ### Branches
 
-1. master - This branch contains the frontend, subgraph and the smart contract code for Rinkeby testnet. This branch should also be used for testing the protocol locally on hardhat. For testing see [this](#installation)
-2. mumbai - This branch contains subgraph and smart contract code for Mumbai testnet.
-3. min-aave - This branch is a minimal implementation of AAVE v2 i.e. it only supports variable rate lending and borrowing. It is integrated with frontend and you can also test this implementation using below instructions.
+1. master - This branch contains the frontend, subgraph and smart contracts for the Refi protocol on multiple chains. To test the protocol locally on hardhat, see [this](#installation)
+2. min-aave - This branch is a minimal implementation of AAVE v2 i.e. it only supports variable rate lending and borrowing. It is integrated with frontend and you can also test this implementation using below instructions.
 
 ### Installation
 

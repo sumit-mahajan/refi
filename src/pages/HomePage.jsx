@@ -30,7 +30,7 @@ function HomePage() {
           <p>Borrow APY</p>
           <p>Utilization</p>
         </div>
-
+        {assets.length === 0 && <div className="backdrop content-size">Loading Protocol Assets ...</div>}
         {assets.map((asset, index) => (
           <div
             key={index}

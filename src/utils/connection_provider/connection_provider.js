@@ -27,7 +27,7 @@ export function ConnectionProvider(props) {
       const { chainId } = await provider.getNetwork();
 
       if (!supportedNetworks[chainId]) {
-        throw new Error("Use Correct Network");
+        throw new Error("Switch to Rinkeby or Mumbai network from your browser wallet");
       }
 
       setState({
@@ -47,8 +47,11 @@ export function ConnectionProvider(props) {
         provider,
       });
     } catch (e) {
-      setState({ ...state, error: e.message });
-
+      if (e.message !== "Switch to Rinkeby or Mumbai network from your browser wallet") {
+        setState({ ...state, error: "Switch to Rinkeby or Mumbai network from your browser wallet. Detailed Error: " + e.message });
+      } else {
+        setState({ ...state, error: e.message });
+      }
       console.log("useConnection : connectWallet failed -> " + e.message);
     }
   }, []);

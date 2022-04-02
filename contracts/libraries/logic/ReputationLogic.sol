@@ -8,7 +8,6 @@ import {WadRayMath} from "../math/WadRayMath.sol";
 import {PercentageMath} from "../math/PercentageMath.sol";
 import {Errors} from "../utils/Errors.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
-import "hardhat/console.sol";
 
 /**
  * @title ReputationLogic library
@@ -124,8 +123,8 @@ library ReputationLogic {
         uint256 classScoreRange = userClassData.scoreRange;
 
         if (nWeeks == 0) {
-        // If time difference from last tx is less than a week, calculate accured score by formula,
-        // Accured score = BorrowPercentFactor % of (timeDiff/classIdealTimeSpan) * classScoreRange
+            // If time difference from last tx is less than a week, calculate accured score by formula,
+            // Accured score = BorrowPercentFactor % of (timeDiff/classIdealTimeSpan) * classScoreRange
             score +=
                 timeDiff.wadDiv(classIdealTimeSpan).percentMul(
                     getBorrowPercentFactor(

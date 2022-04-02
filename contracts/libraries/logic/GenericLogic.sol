@@ -15,8 +15,6 @@ import {WadRayMath} from "../math/WadRayMath.sol";
 import {PercentageMath} from "../math/PercentageMath.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title GenericLogic library
  * @author Aave

@@ -33,6 +33,8 @@ module.exports = {
     mumbai: {
       url: "https://rpc-mumbai.maticvigil.com",
       accounts: [config.mumbaiPrivateKey],
+      gasPrice: 20e9,
+      gas: 15e6,
     },
     rinkeby: {
       url: config.rinkebyRPCUrl,

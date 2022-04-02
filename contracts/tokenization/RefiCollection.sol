@@ -13,7 +13,6 @@ import {IWETHGateway} from "../interfaces/IWETHGateway.sol";
 
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
 import {Base64} from "../libraries/utils/Base64.sol";
-import "hardhat/console.sol";
 
 contract RefiCollection is ERC721 {
     // Maintaining a counter of number of nfts in collection

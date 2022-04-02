@@ -26,7 +26,6 @@ import {UserConfiguration} from "../libraries/configuration/UserConfiguration.so
 import {DataTypes} from "../libraries/utils/DataTypes.sol";
 
 import {LendingPoolStorage} from "./LendingPoolStorage.sol";
-import "hardhat/console.sol";
 
 /**
  * @title LendingPool contract

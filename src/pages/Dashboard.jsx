@@ -90,6 +90,10 @@ const Dashboard = () => {
       });
     } catch (error) {
       console.log(error);
+      setLoadingStatus({
+        isLoading: false,
+        message: "",
+      });
     }
   };
 

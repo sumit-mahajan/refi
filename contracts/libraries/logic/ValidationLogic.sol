@@ -17,8 +17,6 @@ import {UserConfiguration} from "../configuration/UserConfiguration.sol";
 import {Errors} from "../utils/Errors.sol";
 import {DataTypes} from "../utils/DataTypes.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title ValidationLogic library
  * @author Aave

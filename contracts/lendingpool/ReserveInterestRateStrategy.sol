@@ -8,8 +8,6 @@ import {PercentageMath} from "../libraries/math/PercentageMath.sol";
 import {IAddressesProvider} from "../interfaces/IAddressesProvider.sol";
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-import "hardhat/console.sol";
-
 /**
  * @title DefaultReserveInterestRateStrategy contract
  * @notice Implements the calculation of the interest rates depending on the reserve state
