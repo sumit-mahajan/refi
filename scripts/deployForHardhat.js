@@ -248,28 +248,29 @@ const setupData = async () => {
 
   console.log("User 0 deposits 100 LINK");
 
-  const borrowLinkTx = await lendingPool.borrow(
-    link.address,
-    toWei(60),
-    deployer.address
-  );
+  const borrowLinkTx = await lendingPool
+    .connect(users[0].signer).borrow(
+      dai.address,
+      toWei(50),
+      users[0].address
+    );
   await borrowLinkTx.wait();
 
-  console.log("Deployer borrows 60 LINK against DAI as collateral");
+  // console.log("Deployer borrows 60 LINK against DAI as collateral");
 
-  // One time infinite approve aWeth
-  // Required at withdrawal time. i.e. do this before ETH deposit
-  const approveAWethTx = await aWeth
-    .connect(users[0].signer)
-    .approve(wethGateway.address, MAX_UINT);
-  await approveAWethTx.wait();
+  // // One time infinite approve aWeth
+  // // Required at withdrawal time. i.e. do this before ETH deposit
+  // const approveAWethTx = await aWeth
+  //   .connect(users[0].signer)
+  //   .approve(wethGateway.address, MAX_UINT);
+  // await approveAWethTx.wait();
 
-  console.log("User 0 infinite approves the wEthGateway for aWeth tokens");
+  // console.log("User 0 infinite approves the wEthGateway for aWeth tokens");
 
-  const Tx = await wethGateway
-    .connect(users[0].signer)
-    .depositETH({ value: toWei(10) });
-  await Tx.wait();
+  // const Tx = await wethGateway
+  //   .connect(users[0].signer)
+  //   .depositETH({ value: toWei(10) });
+  // await Tx.wait();
 
-  console.log("User 0 deposits 10 ETH");
+  // console.log("User 0 deposits 10 ETH");
 };

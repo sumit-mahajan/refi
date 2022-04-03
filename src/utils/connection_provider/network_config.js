@@ -8,7 +8,7 @@ const supportedNetworks = {
     name: "Hardhat",
     tokenSymbol: "ETH",
     rpcURL: "http://localhost:8545",
-    address: "0x59b670e9fA9D0A427751Af201D676719a970857b",
+    address: "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
   },
   // npx hardhat run scripts/deployForTestnet.js --network mumbai
   // Returned address is wrong. https://github.com/nomiclabs/hardhat/issues/2162.
@@ -25,7 +25,7 @@ const supportedNetworks = {
     name: "Rinkeby",
     tokenSymbol: "ETH",
     rpcURL: "https://rinkeby-light.eth.linkpool.io/",
-    address: "0xcFB216f8bEdB51Fa6d05B662b7500A17552D1FfA",
+    address: "0x5Afdb44435eaDBE92d860Cc3734e5C66b9CDa8C7",
   },
 };
 

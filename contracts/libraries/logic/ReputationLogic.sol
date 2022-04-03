@@ -13,6 +13,7 @@ import {DataTypes} from "../utils/DataTypes.sol";
  * @title ReputationLogic library
  * @author Sumit Mahajan
  * @notice Implements the logic to calculate and maintain credit score
+ * To understand the approach and algorithms, see https://docs.google.com/document/d/1NxCas4gfWV6V7uHOEGUTJPpEtPOJwV_AZUbYfWxpP_U/edit?usp=sharing
  */
 library ReputationLogic {
     using SafeMath for uint256;

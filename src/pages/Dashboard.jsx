@@ -112,6 +112,8 @@ const Dashboard = () => {
     // Get class and score from lending Pool
     const userClass = await lendingPoolContract.getUserClass(accounts[0]);
 
+    console.log(userClass[1]);
+
     let rep = {
       score: toEther(userClass[1]),
       class: UserClass[userClass[0]],
@@ -318,7 +320,6 @@ const Dashboard = () => {
               href={`https://testnets.opensea.io/assets/${refiCollectionContract.address}/${reputation.tokenId}`}
             >
               <div className="opensea-btn">
-
                 View on OpenSea
               </div>
             </a>
@@ -344,7 +345,7 @@ const Dashboard = () => {
         <div>
           <h4>Health Factor</h4>
           <h2>
-            {userAccountData.healthFactor === 0 ? (
+            {userAccountData.healthFactor === 0 || userAccountData.healthFactor > 100 ? (
               <>&#8734;</>
             ) : (
               userAccountData.healthFactor.toFixed(3)

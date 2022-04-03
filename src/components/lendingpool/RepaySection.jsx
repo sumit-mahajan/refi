@@ -62,7 +62,7 @@ const RepaySection = ({
         <div
           className="ul-btn"
           onClick={() => {
-            repayAsset(currentBorrowed + 0.00001, isApproved);
+            repayAsset(currentBorrowed + 0.1, isApproved);
           }}
         >
           Repay All
@@ -70,7 +70,7 @@ const RepaySection = ({
         <div
           className="ul-btn"
           onClick={() => {
-            repayAsset(currentBorrowed + 0.00001, isApproved);
+            repayAsset(currentBorrowed + 0.1, isApproved);
           }}
         >
           Approve & Repay All

@@ -1,5 +1,5 @@
 {
-  "name": "Refi",
+  "name": "refi-subgraph",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",

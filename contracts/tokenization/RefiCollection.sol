@@ -36,7 +36,7 @@ contract RefiCollection is ERC721 {
         string platinumCardCID;
     }
 
-    constructor(address addressesProviderAddr) ERC721("Refi Protocol", "REFI") {
+    constructor(address addressesProviderAddr) ERC721("Refi", "REFI") {
         ADDRESSES_PROVIDER = addressesProviderAddr;
     }
 

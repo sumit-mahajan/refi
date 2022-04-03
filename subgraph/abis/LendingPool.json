@@ -581,6 +581,30 @@
         "type": "address"
       }
     ],
+    "name": "getUserClass",
+    "outputs": [
+      {
+        "internalType": "enum DataTypes.UserClass",
+        "name": "userClass",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "score",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
     "name": "getUserConfiguration",
     "outputs": [
       {
@@ -613,6 +637,40 @@
         "internalType": "bool",
         "name": "isBorrowingAny",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "ltv",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "liquidationThreshold",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserLtvAndLt",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "userLtv",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "userLiquidationThreshold",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -760,6 +818,39 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "class",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "idealTimeSpan",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "scoreRange",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "dropFactor",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "adjustLtvBy",
+        "type": "uint256"
+      }
+    ],
+    "name": "setClassData",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "asset",
         "type": "address"
@@ -837,6 +928,34 @@
         "type": "uint256"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "asset",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawETH",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }
