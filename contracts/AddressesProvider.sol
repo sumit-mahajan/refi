@@ -24,7 +24,7 @@ import {WalletBalanceProvider} from "./data_provider/WalletBalanceProvider.sol";
  * @author Aave
  **/
 contract AddressesProvider is IAddressesProvider {
-    bool public constant isProduction = false;
+    bool public constant isProduction = true;
     bool public constant isMumbai = false;
 
     address private immutable LENDING_POOL;

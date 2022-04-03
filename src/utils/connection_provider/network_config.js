@@ -25,7 +25,7 @@ const supportedNetworks = {
     name: "Rinkeby",
     tokenSymbol: "ETH",
     rpcURL: "https://rinkeby-light.eth.linkpool.io/",
-    address: "0x5Afdb44435eaDBE92d860Cc3734e5C66b9CDa8C7",
+    address: "0xFaAcD658fe51552D7D64Ba530B60550F2Fd81a25",
   },
 };
 

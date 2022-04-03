@@ -6,9 +6,9 @@ dataSources:
     name: LendingPool
     network: rinkeby
     source:
-      address: "0xe5236B60161aE89F0B8d6732668DDcfe87484744"
+      address: "0xdb5759904849Dd6AE0f4ab808d6C371aCC628D90"
       abi: LendingPool
-      startBlock: 10441079
+      startBlock: 10441276
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.5
